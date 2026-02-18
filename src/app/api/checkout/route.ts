@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { stockManager } from '@/lib/stock-manager';
-import { timeGating } from '@/lib/time-gating';
+import { getTimeGatingRuntime } from '@/lib/time-gating';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -33,8 +33,9 @@ export async function POST(request: NextRequest) {
 
   try {
     // 1. Verificar time-gating
-    const gatingStatus = timeGating.getTimeUntilOpening();
-    if (!gatingStatus.isOpen) {
+    const { enabled, service } = await getTimeGatingRuntime();
+    const gatingStatus = service.getTimeUntilOpening();
+    if (enabled && !gatingStatus.isOpen) {
       return NextResponse.json(
         { error: 'El sitio está cerrado para pedidos' },
         { status: 403 }
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
     const data = checkoutSchema.parse(body);
 
     // 3. Verificar stock para todos los productos
-    const weekId = timeGating.getCurrentWeekId();
+    const weekId = service.getCurrentWeekId();
     const stockChecks = await Promise.all(
       data.items.map((item) =>
         stockManager.checkAvailability(item.productId, item.quantity, weekId)

@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { BarChart2, RefreshCw, Plus } from 'lucide-react'
+import { FormEvent, useEffect, useState } from 'react'
+import { BarChart2, RefreshCw, Plus, Pencil, Trash2, X, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ProductRow {
@@ -13,26 +13,101 @@ interface ProductRow {
   stockType: string
   weeklyStock: number
   isActive: boolean
-  category: { name: string }
+  description: string
+  ingredients: string
+  allergens: string[]
+  riskNote: string | null
+  imageAlt: string
+  weight: number | null
+  allowSlicing: boolean
+  category: { id: string; name: string }
   _count: { orderItems: number }
+}
+
+interface CategoryOption {
+  id: string
+  name: string
+}
+
+interface ProductFormState {
+  name: string
+  slug: string
+  description: string
+  price: string
+  weight: string
+  ingredients: string
+  allergens: string
+  riskNote: string
+  imageUrl: string
+  imageAlt: string
+  stockType: 'WEEKLY' | 'UNLIMITED'
+  weeklyStock: string
+  allowSlicing: boolean
+  isActive: boolean
+  categoryId: string
+}
+
+type ProductFormField = keyof ProductFormState
+type ProductFormErrors = Partial<Record<ProductFormField, string>>
+
+const EMPTY_FORM: ProductFormState = {
+  name: '',
+  slug: '',
+  description: '',
+  price: '',
+  weight: '',
+  ingredients: '',
+  allergens: '',
+  riskNote: '',
+  imageUrl: '',
+  imageAlt: '',
+  stockType: 'WEEKLY',
+  weeklyStock: '0',
+  allowSlicing: true,
+  isActive: true,
+  categoryId: '',
 }
 
 function formatCurrency(n: number) {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
+function slugify(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
 export default function AdminProductosPage() {
   const [products, setProducts] = useState<ProductRow[]>([])
+  const [categories, setCategories] = useState<CategoryOption[]>([])
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState<ProductFormState>(EMPTY_FORM)
+  const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<ProductFormErrors>({})
+  const [slugTouched, setSlugTouched] = useState(false)
 
   const fetchProducts = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/admin/productos')
       if (!res.ok) throw new Error()
-      setProducts(await res.json())
+      const data = await res.json()
+      setProducts(data.products ?? [])
+      setCategories(data.categories ?? [])
     } catch {
       setProducts([])
+      setCategories([])
+      setError('No se pudo cargar el catálogo')
     } finally {
       setLoading(false)
     }
@@ -41,6 +116,214 @@ export default function AdminProductosPage() {
   useEffect(() => {
     fetchProducts()
   }, [])
+
+  const resetForm = () => {
+    setForm(EMPTY_FORM)
+    setEditingId(null)
+    setFormOpen(false)
+    setError(null)
+    setFieldErrors({})
+    setSlugTouched(false)
+  }
+
+  const setFieldValue = <K extends ProductFormField>(field: K, value: ProductFormState[K]) => {
+    setForm((prev) => ({ ...prev, [field]: value }))
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev }
+        delete next[field]
+        return next
+      })
+    }
+  }
+
+  const validateForm = (values: ProductFormState): ProductFormErrors => {
+    const nextErrors: ProductFormErrors = {}
+
+    if (values.name.trim().length < 2) nextErrors.name = 'Mínimo 2 caracteres'
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(values.slug.trim())) {
+      nextErrors.slug = 'Usa minúsculas, números y guiones'
+    }
+    if (!values.categoryId) nextErrors.categoryId = 'Selecciona una categoría'
+
+    const price = Number(values.price)
+    if (!Number.isFinite(price) || price <= 0) nextErrors.price = 'Debe ser mayor a 0'
+
+    if (values.weight.trim() !== '') {
+      const weight = Number(values.weight)
+      if (!Number.isFinite(weight) || weight <= 0) nextErrors.weight = 'Debe ser mayor a 0'
+    }
+
+    const weeklyStock = Number(values.weeklyStock)
+    if (!Number.isFinite(weeklyStock) || weeklyStock < 0) {
+      nextErrors.weeklyStock = 'Debe ser 0 o mayor'
+    }
+
+    if (values.description.trim().length < 5) nextErrors.description = 'Mínimo 5 caracteres'
+    if (values.ingredients.trim().length < 2) nextErrors.ingredients = 'Mínimo 2 caracteres'
+    if (!values.imageUrl.trim()) nextErrors.imageUrl = 'La imagen es obligatoria'
+    if (!values.imageAlt.trim()) nextErrors.imageAlt = 'El texto alt es obligatorio'
+
+    return nextErrors
+  }
+
+  const inputClass = (field: ProductFormField) =>
+    cn(
+      'px-3 py-2 rounded-lg border text-sm',
+      fieldErrors[field]
+        ? 'border-red-300 bg-red-50 text-red-900 placeholder:text-red-400'
+        : 'border-gray-200'
+    )
+
+  const mapProductToForm = (product: ProductRow): ProductFormState => ({
+    name: product.name,
+    slug: product.slug,
+    description: product.description,
+    price: String(product.price),
+    weight: product.weight == null ? '' : String(product.weight),
+    ingredients: product.ingredients,
+    allergens: (product.allergens ?? []).join(', '),
+    riskNote: product.riskNote ?? '',
+    imageUrl: product.imageUrl,
+    imageAlt: product.imageAlt,
+    stockType: product.stockType === 'UNLIMITED' ? 'UNLIMITED' : 'WEEKLY',
+    weeklyStock: String(product.weeklyStock),
+    allowSlicing: product.allowSlicing,
+    isActive: product.isActive,
+    categoryId: product.category.id,
+  })
+
+  const handleCreate = () => {
+    setForm(EMPTY_FORM)
+    setEditingId(null)
+    setFormOpen(true)
+    setError(null)
+    setFieldErrors({})
+    setSlugTouched(false)
+  }
+
+  const handleEdit = (product: ProductRow) => {
+    setForm(mapProductToForm(product))
+    setEditingId(product.id)
+    setFormOpen(true)
+    setError(null)
+    setFieldErrors({})
+    setSlugTouched(true)
+  }
+
+  const handleNameChange = (value: string) => {
+    const nextSlug = slugify(value)
+    if (slugTouched) {
+      setFieldValue('name', value)
+      return
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      name: value,
+      slug: nextSlug,
+    }))
+
+    if (fieldErrors.name || fieldErrors.slug) {
+      setFieldErrors((prev) => {
+        const next = { ...prev }
+        delete next.name
+        delete next.slug
+        return next
+      })
+    }
+  }
+
+  const handleSlugChange = (value: string) => {
+    setSlugTouched(true)
+    setFieldValue('slug', slugify(value))
+  }
+
+  const buildPayload = () => ({
+    name: form.name.trim(),
+    slug: form.slug.trim(),
+    description: form.description.trim(),
+    price: Number(form.price),
+    weight: form.weight.trim() === '' ? null : Number(form.weight),
+    ingredients: form.ingredients.trim(),
+    allergens: form.allergens
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+    riskNote: form.riskNote.trim() === '' ? null : form.riskNote.trim(),
+    imageUrl: form.imageUrl.trim(),
+    imageAlt: form.imageAlt.trim(),
+    stockType: form.stockType,
+    weeklyStock: Number(form.weeklyStock),
+    allowSlicing: form.allowSlicing,
+    isActive: form.isActive,
+    categoryId: form.categoryId,
+  })
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+
+    const nextErrors = validateForm(form)
+    setFieldErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) {
+      setError('Revisa los campos marcados en rojo')
+      return
+    }
+
+    setSaving(true)
+    setError(null)
+
+    try {
+      const payload = buildPayload()
+      const endpoint = editingId ? `/api/admin/productos/${editingId}` : '/api/admin/productos'
+      const method = editingId ? 'PUT' : 'POST'
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+
+        const apiFieldErrors = data?.details?.fieldErrors as
+          | Record<string, string[]>
+          | undefined
+        if (apiFieldErrors) {
+          const mapped: ProductFormErrors = {}
+          for (const key of Object.keys(apiFieldErrors)) {
+            const first = apiFieldErrors[key]?.[0]
+            if (first && key in form) {
+              mapped[key as ProductFormField] = first
+            }
+          }
+          setFieldErrors(mapped)
+        }
+
+        throw new Error(data.error || 'No se pudo guardar el producto')
+      }
+
+      resetForm()
+      await fetchProducts()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo guardar el producto')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (product: ProductRow) => {
+    if (!window.confirm(`¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`)) return
+
+    try {
+      const res = await fetch(`/api/admin/productos/${product.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      await fetchProducts()
+    } catch {
+      setError('No se pudo eliminar el producto')
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -51,6 +334,13 @@ export default function AdminProductosPage() {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={handleCreate}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-amber-600 rounded-lg hover:bg-amber-700"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo producto
+          </button>
+          <button
             onClick={fetchProducts}
             disabled={loading}
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
@@ -59,6 +349,111 @@ export default function AdminProductosPage() {
           </button>
         </div>
       </div>
+
+      {formOpen && (
+        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900">
+              {editingId ? 'Editar producto' : 'Crear producto'}
+            </h3>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <input value={form.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Nombre" className={inputClass('name')} required />
+              {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
+            </div>
+            <div>
+              <input value={form.slug} onChange={(e) => handleSlugChange(e.target.value)} placeholder="Slug" className={inputClass('slug')} required />
+              {fieldErrors.slug && <p className="mt-1 text-xs text-red-600">{fieldErrors.slug}</p>}
+            </div>
+            <div>
+              <select value={form.categoryId} onChange={(e) => setFieldValue('categoryId', e.target.value)} className={inputClass('categoryId')} required>
+                <option value="">Categoría</option>
+                {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              {fieldErrors.categoryId && <p className="mt-1 text-xs text-red-600">{fieldErrors.categoryId}</p>}
+            </div>
+
+            <div>
+              <input value={form.price} onChange={(e) => setFieldValue('price', e.target.value)} type="number" step="0.01" min="0" placeholder="Precio (€)" className={inputClass('price')} required />
+              {fieldErrors.price && <p className="mt-1 text-xs text-red-600">{fieldErrors.price}</p>}
+            </div>
+            <div>
+              <input value={form.weight} onChange={(e) => setFieldValue('weight', e.target.value)} type="number" min="0" placeholder="Peso (g)" className={inputClass('weight')} />
+              {fieldErrors.weight && <p className="mt-1 text-xs text-red-600">{fieldErrors.weight}</p>}
+            </div>
+            <div>
+              <input value={form.weeklyStock} onChange={(e) => setFieldValue('weeklyStock', e.target.value)} type="number" min="0" placeholder="Stock semanal" className={inputClass('weeklyStock')} required />
+              {fieldErrors.weeklyStock && <p className="mt-1 text-xs text-red-600">{fieldErrors.weeklyStock}</p>}
+            </div>
+
+            <div className="md:col-span-2">
+              <input value={form.imageUrl} onChange={(e) => setFieldValue('imageUrl', e.target.value)} placeholder="URL imagen" className={cn(inputClass('imageUrl'), 'w-full')} required />
+              {fieldErrors.imageUrl && <p className="mt-1 text-xs text-red-600">{fieldErrors.imageUrl}</p>}
+            </div>
+            <div>
+              <input value={form.imageAlt} onChange={(e) => setFieldValue('imageAlt', e.target.value)} placeholder="Alt imagen" className={inputClass('imageAlt')} required />
+              {fieldErrors.imageAlt && <p className="mt-1 text-xs text-red-600">{fieldErrors.imageAlt}</p>}
+            </div>
+          </div>
+
+          <div>
+            <textarea value={form.description} onChange={(e) => setFieldValue('description', e.target.value)} placeholder="Descripción" className={cn(inputClass('description'), 'w-full min-h-20')} required />
+            {fieldErrors.description && <p className="mt-1 text-xs text-red-600">{fieldErrors.description}</p>}
+          </div>
+          <div>
+            <textarea value={form.ingredients} onChange={(e) => setFieldValue('ingredients', e.target.value)} placeholder="Ingredientes" className={cn(inputClass('ingredients'), 'w-full min-h-16')} required />
+            {fieldErrors.ingredients && <p className="mt-1 text-xs text-red-600">{fieldErrors.ingredients}</p>}
+          </div>
+          <input value={form.allergens} onChange={(e) => setFieldValue('allergens', e.target.value)} placeholder="Alérgenos (separados por coma)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+          <input value={form.riskNote} onChange={(e) => setFieldValue('riskNote', e.target.value)} placeholder="Nota de riesgo (opcional)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <select value={form.stockType} onChange={(e) => setForm((f) => ({ ...f, stockType: e.target.value as 'WEEKLY' | 'UNLIMITED' }))} className="px-3 py-2 rounded-lg border border-gray-200 text-sm">
+              <option value="WEEKLY">Stock semanal</option>
+              <option value="UNLIMITED">Stock ilimitado</option>
+            </select>
+            <div className="flex items-center gap-4 text-sm text-gray-700">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={form.allowSlicing} onChange={(e) => setForm((f) => ({ ...f, allowSlicing: e.target.checked }))} />
+                Permitir rebanado
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} />
+                Activo
+              </label>
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
+
+          <div className="flex items-center justify-end gap-2">
+            <button type="button" onClick={resetForm} className="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button type="submit" disabled={saving} className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-60">
+              <Save className="w-4 h-4" />
+              {saving ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear producto'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {!formOpen && error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {loading ? (
@@ -87,6 +482,7 @@ export default function AdminProductosPage() {
               <div className="col-span-2">Stock semanal</div>
               <div className="col-span-1">Pedidos</div>
               <div className="col-span-1">Estado</div>
+              <div className="col-span-1 text-right">Acciones</div>
             </div>
             <div className="divide-y divide-gray-50">
               {products.map((p) => (
@@ -124,17 +520,28 @@ export default function AdminProductosPage() {
                       {p.isActive ? 'Activo' : 'Inactivo'}
                     </span>
                   </div>
+                  <div className="col-span-1 hidden md:flex justify-end gap-1">
+                    <button
+                      onClick={() => handleEdit(p)}
+                      className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg"
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </>
         )}
       </div>
-
-      <p className="text-xs text-gray-400 text-center">
-        La gestión completa de productos (crear, editar, eliminar) se implementará en una fase posterior.
-        Para modificar productos, usa <code className="bg-gray-100 px-1 rounded">npm run db:studio</code>
-      </p>
     </div>
   )
 }

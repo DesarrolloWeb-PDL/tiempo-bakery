@@ -2,15 +2,16 @@ import { ProductCard } from '@/components/productos/product-card';
 import { TimeGatingBanner } from '@/components/time-gating-banner';
 import { Badge } from '@/components/ui/badge';
 import { prisma } from '@/lib/db';
-import { timeGating } from '@/lib/time-gating';
+import { getTimeGatingRuntime } from '@/lib/time-gating';
 
 export const dynamic = 'force-dynamic';
 
 // Obtener productos directamente desde la DB
 async function getProducts() {
   try {
-    const status = timeGating.getTimeUntilOpening();
-    const weekId = timeGating.getCurrentWeekId();
+    const { enabled, service } = await getTimeGatingRuntime();
+    const status = enabled ? service.getTimeUntilOpening() : { isOpen: true };
+    const weekId = service.getCurrentWeekId();
 
     const categories = await prisma.category.findMany({
       orderBy: { order: 'asc' },
@@ -71,13 +72,23 @@ async function getProducts() {
 }
 
 // Obtener time-gating directamente desde la lógica de negocio
-function getTimeGatingData() {
+async function getTimeGatingData() {
   try {
-    const status = timeGating.getTimeUntilOpening();
+    const { enabled, service } = await getTimeGatingRuntime();
+
+    if (!enabled) {
+      return {
+        isOpen: true,
+        timeRemaining: undefined,
+        nextOpening: undefined,
+      };
+    }
+
+    const status = service.getTimeUntilOpening();
     return {
       isOpen: status.isOpen,
       timeRemaining: status.remainingMs != null
-        ? timeGating.formatTimeRemaining(status.remainingMs)
+        ? service.formatTimeRemaining(status.remainingMs)
         : undefined,
       nextOpening: status.nextOpening
         ? (status.nextOpening.toISO() ?? undefined)
@@ -92,7 +103,7 @@ function getTimeGatingData() {
 export default async function HomePage() {
   const [productsData, timeGatingData] = await Promise.all([
     getProducts(),
-    Promise.resolve(getTimeGatingData()),
+    getTimeGatingData(),
   ]);
 
   return (
