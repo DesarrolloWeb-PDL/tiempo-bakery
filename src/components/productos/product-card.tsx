@@ -7,6 +7,14 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { AddToCartButton } from './add-to-cart-button';
 
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
 interface ProductCardProps {
   id: string;
   name: string;
@@ -107,7 +115,7 @@ export function ProductCard({
       <CardFooter className="flex flex-col gap-3 pt-0">
         <div className="flex items-center justify-between w-full">
           <span className="text-2xl font-bold text-amber-700">
-            {price.toFixed(2)}€
+            {formatCurrency(price)}
           </span>
           {stock.hasStock && (
             <span className="text-sm text-gray-500">

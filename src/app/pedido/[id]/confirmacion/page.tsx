@@ -9,6 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
 interface OrderItem {
   id: string;
   productName: string;
@@ -195,9 +203,9 @@ export default function OrderConfirmationPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">{item.subtotal.toFixed(2)}€</p>
+                        <p className="font-semibold">{formatCurrency(item.subtotal)}</p>
                         <p className="text-sm text-gray-500">
-                          {item.unitPrice.toFixed(2)}€/ud
+                          {formatCurrency(item.unitPrice)}/ud
                         </p>
                       </div>
                     </div>
@@ -278,19 +286,19 @@ export default function OrderConfirmationPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
-                    <span>{order.subtotal.toFixed(2)}€</span>
+                    <span>{formatCurrency(order.subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Envío</span>
                     <span>
                       {order.shippingCost === 0
                         ? 'Gratis'
-                        : `${order.shippingCost.toFixed(2)}€`}
+                        : formatCurrency(order.shippingCost)}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                     <span>Total</span>
-                    <span className="text-amber-700">{order.total.toFixed(2)}€</span>
+                    <span className="text-amber-700">{formatCurrency(order.total)}</span>
                   </div>
                 </div>
 

@@ -87,7 +87,7 @@ const DELIVERY_LABELS: Record<string, string> = {
 }
 
 function formatCurrency(n: number) {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n)
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n)
 }
 
 function formatDate(str: string) {

@@ -7,11 +7,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
-import { DeliveryMethod, SHIPPING_COSTS } from '@/types/checkout';
+import { DeliveryMethod, type ShippingCosts } from '@/types/checkout';
 import type { CartItem } from '@/types/cart';
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
 
 interface ReviewStepProps {
   items: CartItem[];
+  shippingCosts: ShippingCosts;
   customerData: {
     email: string;
     name: string;
@@ -40,6 +49,7 @@ interface ReviewStepProps {
 
 export function ReviewStep({
   items,
+  shippingCosts,
   customerData,
   deliveryData,
   pickupPoints,
@@ -50,7 +60,7 @@ export function ReviewStep({
   isSubmitting,
 }: ReviewStepProps) {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingCost = SHIPPING_COSTS[deliveryData.method];
+  const shippingCost = shippingCosts[deliveryData.method];
   const total = subtotal + shippingCost;
 
   const selectedPickupPoint = deliveryData.pickupLocationId
@@ -104,7 +114,7 @@ export function ReviewStep({
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-semibold text-amber-700">
-                    {(item.price * item.quantity).toFixed(2)}€
+                    {formatCurrency(item.price * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -182,17 +192,17 @@ export function ReviewStep({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">{subtotal.toFixed(2)}€</span>
+              <span className="font-medium">{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Gastos de envío</span>
               <span className="font-medium">
-                {shippingCost === 0 ? 'Gratis' : `${shippingCost.toFixed(2)}€`}
+                {shippingCost === 0 ? 'Gratis' : formatCurrency(shippingCost)}
               </span>
             </div>
             <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
               <span>Total</span>
-              <span className="text-amber-700">{total.toFixed(2)}€</span>
+              <span className="text-amber-700">{formatCurrency(total)}</span>
             </div>
           </div>
         </div>

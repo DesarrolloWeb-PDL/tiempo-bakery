@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { stockManager } from '@/lib/stock-manager';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
+import { getShippingCostByMethod, getShippingCostsRuntime } from '@/lib/shipping-costs';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -90,12 +91,8 @@ export async function POST(request: NextRequest) {
     });
 
     // 5. Calcular costos de envío
-    let shippingCost = 0;
-    if (data.deliveryMethod === 'NATIONAL_COURIER') {
-      shippingCost = 5.95;
-    } else if (data.deliveryMethod === 'LOCAL_DELIVERY') {
-      shippingCost = 3.5;
-    }
+    const shippingCosts = await getShippingCostsRuntime();
+    const shippingCost = getShippingCostByMethod(data.deliveryMethod, shippingCosts);
 
     const total = subtotal + shippingCost;
 
@@ -173,7 +170,7 @@ export async function POST(request: NextRequest) {
     // 11. Crear sesión de pago en Stripe
     const lineItems = order.items.map((item) => ({
       price_data: {
-        currency: 'eur',
+        currency: 'ars',
         product_data: {
           name: item.productName,
           description: item.sliced ? 'Rebanado' : 'Sin rebanar',
@@ -187,7 +184,7 @@ export async function POST(request: NextRequest) {
     if (shippingCost > 0) {
       lineItems.push({
         price_data: {
-          currency: 'eur',
+          currency: 'ars',
           product_data: {
             name: 'Gastos de envío',
             description:

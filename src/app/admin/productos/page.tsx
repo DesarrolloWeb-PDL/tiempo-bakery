@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { BarChart2, RefreshCw, Plus, Pencil, Trash2, X, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -69,7 +69,7 @@ const EMPTY_FORM: ProductFormState = {
 }
 
 function formatCurrency(n: number) {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n)
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n)
 }
 
 function slugify(value: string) {
@@ -94,6 +94,10 @@ export default function AdminProductosPage() {
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<ProductFormErrors>({})
   const [slugTouched, setSlugTouched] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [creatingCategory, setCreatingCategory] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -237,6 +241,70 @@ export default function AdminProductosPage() {
   const handleSlugChange = (value: string) => {
     setSlugTouched(true)
     setFieldValue('slug', slugify(value))
+  }
+
+  const handleCreateCategory = async () => {
+    const name = newCategoryName.trim()
+    if (name.length < 2) {
+      setError('La categoría debe tener al menos 2 caracteres')
+      return
+    }
+
+    setCreatingCategory(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/categorias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(data.error || 'No se pudo crear la categoría')
+      }
+
+      setCategories((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name, 'es')))
+      setFieldValue('categoryId', data.id)
+      setNewCategoryName('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo crear la categoría')
+    } finally {
+      setCreatingCategory(false)
+    }
+  }
+
+  const handleImageSelected = async (file: File) => {
+    setUploadingImage(true)
+    setError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/admin/uploads', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(data.error || 'No se pudo subir la imagen')
+      }
+
+      if (typeof data.url !== 'string') {
+        throw new Error('Respuesta inválida del servidor')
+      }
+
+      setFieldValue('imageUrl', data.url)
+      if (!form.imageAlt.trim() && form.name.trim()) {
+        setFieldValue('imageAlt', form.name.trim())
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo subir la imagen')
+    } finally {
+      setUploadingImage(false)
+    }
   }
 
   const buildPayload = () => ({
@@ -383,7 +451,7 @@ export default function AdminProductosPage() {
             </div>
 
             <div>
-              <input value={form.price} onChange={(e) => setFieldValue('price', e.target.value)} type="number" step="0.01" min="0" placeholder="Precio (€)" className={inputClass('price')} required />
+              <input value={form.price} onChange={(e) => setFieldValue('price', e.target.value)} type="number" step="0.01" min="0" placeholder="Precio (AR$)" className={inputClass('price')} required />
               {fieldErrors.price && <p className="mt-1 text-xs text-red-600">{fieldErrors.price}</p>}
             </div>
             <div>
@@ -402,6 +470,49 @@ export default function AdminProductosPage() {
             <div>
               <input value={form.imageAlt} onChange={(e) => setFieldValue('imageAlt', e.target.value)} placeholder="Alt imagen" className={inputClass('imageAlt')} required />
               {fieldErrors.imageAlt && <p className="mt-1 text-xs text-red-600">{fieldErrors.imageAlt}</p>}
+            </div>
+
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+              <div className="md:col-span-2">
+                <input
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="Nueva categoría (ej: Facturas)"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleCreateCategory}
+                disabled={creatingCategory}
+                className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
+              >
+                {creatingCategory ? 'Agregando...' : 'Agregar categoría'}
+              </button>
+            </div>
+
+            <div className="md:col-span-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  void handleImageSelected(file)
+                  e.currentTarget.value = ''
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
+              >
+                {uploadingImage ? 'Subiendo imagen...' : 'Subir imagen desde archivo'}
+              </button>
+              <p className="mt-1 text-xs text-gray-500">Acepta JPG, PNG o WEBP (máx. 5MB)</p>
             </div>
           </div>
 
@@ -441,7 +552,7 @@ export default function AdminProductosPage() {
             <button type="button" onClick={resetForm} className="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={saving} className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-60">
+            <button type="submit" disabled={saving || uploadingImage || creatingCategory} className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-60">
               <Save className="w-4 h-4" />
               {saving ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear producto'}
             </button>

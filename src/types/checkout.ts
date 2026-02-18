@@ -56,11 +56,17 @@ export type CheckoutDeliveryData = z.infer<typeof checkoutDeliverySchema>;
 export type CheckoutNotesData = z.infer<typeof checkoutNotesSchema>;
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
-// Costos de envío
-export const SHIPPING_COSTS = {
+export interface ShippingCosts {
+  PICKUP_POINT: number;
+  LOCAL_DELIVERY: number;
+  NATIONAL_COURIER: number;
+}
+
+// Costos de envío por defecto (fallback frontend)
+export const DEFAULT_SHIPPING_COSTS: ShippingCosts = {
   PICKUP_POINT: 0,
-  LOCAL_DELIVERY: 3.5,
-  NATIONAL_COURIER: 5.95,
+  LOCAL_DELIVERY: 3500,
+  NATIONAL_COURIER: 5950,
 } as const;
 
 // Interfaz para el resumen del pedido

@@ -1,18 +1,93 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, Settings, Key, Loader2 } from 'lucide-react'
+import { LogOut, Settings, Key, Loader2, Truck } from 'lucide-react'
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+  }).format(amount)
+}
 
 export default function AdminConfigPage() {
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
+  const [loadingShipping, setLoadingShipping] = useState(true)
+  const [savingShipping, setSavingShipping] = useState(false)
+  const [shippingMsg, setShippingMsg] = useState<string | null>(null)
+  const [shippingCosts, setShippingCosts] = useState({
+    pickupPoint: 0,
+    localDelivery: 3500,
+    nationalCourier: 5950,
+  })
+
+  const fetchShippingCosts = async () => {
+    setLoadingShipping(true)
+    setShippingMsg(null)
+    try {
+      const res = await fetch('/api/admin/envios')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setShippingCosts({
+        pickupPoint: Number(data.pickupPoint ?? 0),
+        localDelivery: Number(data.localDelivery ?? 3500),
+        nationalCourier: Number(data.nationalCourier ?? 5950),
+      })
+    } catch {
+      setShippingMsg('No se pudieron cargar los costos de envío')
+    } finally {
+      setLoadingShipping(false)
+    }
+  }
+
+  useEffect(() => {
+    void fetchShippingCosts()
+  }, [])
 
   const handleLogout = async () => {
     setLoggingOut(true)
     await fetch('/api/admin/login', { method: 'DELETE' })
     router.push('/admin/login')
     router.refresh()
+  }
+
+  const handleSaveShipping = async () => {
+    setSavingShipping(true)
+    setShippingMsg(null)
+    try {
+      const res = await fetch('/api/admin/envios', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          localDelivery: Math.max(0, shippingCosts.localDelivery),
+          nationalCourier: Math.max(0, shippingCosts.nationalCourier),
+        }),
+      })
+      if (!res.ok) throw new Error()
+      setShippingMsg('Costos de envío actualizados')
+    } catch {
+      setShippingMsg('No se pudieron guardar los costos de envío')
+    } finally {
+      setSavingShipping(false)
+    }
+  }
+
+  const handleResetShipping = async () => {
+    setSavingShipping(true)
+    setShippingMsg(null)
+    try {
+      const res = await fetch('/api/admin/envios', { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      await fetchShippingCosts()
+      setShippingMsg('Costos restablecidos a valores por defecto')
+    } catch {
+      setShippingMsg('No se pudieron restablecer los costos')
+    } finally {
+      setSavingShipping(false)
+    }
   }
 
   return (
@@ -70,6 +145,71 @@ export default function AdminConfigPage() {
               <p className="text-sm text-gray-800">{item.value}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Envíos */}
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+          <Truck className="w-4 h-4 text-amber-600" />
+          <h3 className="font-semibold text-gray-900 text-sm">Costos de envío</h3>
+        </div>
+        <div className="px-5 py-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Envío local (AR$)</label>
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={shippingCosts.localDelivery}
+                disabled={loadingShipping || savingShipping}
+                onChange={(e) =>
+                  setShippingCosts((prev) => ({ ...prev, localDelivery: Number(e.target.value) }))
+                }
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              />
+              <p className="text-xs text-gray-400 mt-1">{formatCurrency(shippingCosts.localDelivery)}</p>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Mensajería nacional (AR$)</label>
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={shippingCosts.nationalCourier}
+                disabled={loadingShipping || savingShipping}
+                onChange={(e) =>
+                  setShippingCosts((prev) => ({ ...prev, nationalCourier: Number(e.target.value) }))
+                }
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              />
+              <p className="text-xs text-gray-400 mt-1">{formatCurrency(shippingCosts.nationalCourier)}</p>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500">
+            Recogida en punto siempre se mantiene en <strong>gratis</strong>.
+          </p>
+
+          {shippingMsg && <p className="text-sm text-gray-600">{shippingMsg}</p>}
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleSaveShipping}
+              disabled={loadingShipping || savingShipping}
+              className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50"
+            >
+              {savingShipping ? 'Guardando...' : 'Guardar costos'}
+            </button>
+            <button
+              onClick={handleResetShipping}
+              disabled={loadingShipping || savingShipping}
+              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+            >
+              Restablecer
+            </button>
+          </div>
         </div>
       </div>
     </div>
