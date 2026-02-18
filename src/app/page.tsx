@@ -63,10 +63,19 @@ async function getProducts() {
 // Obtener time-gating directamente desde la lógica de negocio
 function getTimeGatingData() {
   try {
-    return timeGating.getTimeUntilOpening();
+    const status = timeGating.getTimeUntilOpening();
+    return {
+      isOpen: status.isOpen,
+      timeRemaining: status.remainingMs != null
+        ? timeGating.formatTimeRemaining(status.remainingMs)
+        : undefined,
+      nextOpening: status.nextOpening
+        ? status.nextOpening.toISO()
+        : undefined,
+    };
   } catch (error) {
     console.error('Error fetching time-gating:', error);
-    return { isOpen: true, message: '' };
+    return { isOpen: true, timeRemaining: undefined, nextOpening: undefined };
   }
 }
 
