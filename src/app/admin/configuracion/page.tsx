@@ -27,6 +27,7 @@ export default function AdminConfigPage() {
   // Theme customization
   const [loadingTheme, setLoadingTheme] = useState(true)
   const [savingTheme, setSavingTheme] = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
   const [themeMsg, setThemeMsg] = useState<string | null>(null)
   const [theme, setTheme] = useState({
     appTitle: 'Tiempo Bakery',
@@ -149,6 +150,37 @@ export default function AdminConfigPage() {
       setThemeMsg('No se pudo restablecer el tema')
     } finally {
       setSavingTheme(false)
+    }
+  }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0]
+    if (!file) return
+
+    setUploadingLogo(true)
+    setThemeMsg(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', 'logo')
+
+      const res = await fetch('/api/admin/uploads/logo', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al cargar el logo')
+
+      setTheme({ ...theme, logoUrl: data.url })
+      setThemeMsg('Logo cargado correctamente')
+      
+      // Limpiar el input
+      e.currentTarget.value = ''
+    } catch (error) {
+      setThemeMsg(`Error: ${error instanceof Error ? error.message : 'No se pudo cargar el logo'}`)
+    } finally {
+      setUploadingLogo(false)
     }
   }
 
@@ -308,24 +340,52 @@ export default function AdminConfigPage() {
             />
           </div>
 
-          {/* Logo URL */}
+          {/* Logo */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1">URL del logo</label>
-            <input
-              type="url"
-              value={theme.logoUrl}
-              disabled={loadingTheme || savingTheme}
-              onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-              placeholder="Ej: /img/logo.png"
-            />
+            <label className="block text-xs text-gray-500 mb-1">Logo de la tienda</label>
+            <div className="space-y-2">
+              {/* Cargar archivo */}
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="logo-upload"
+                  className={`flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {uploadingLogo ? 'Cargando...' : 'Seleccionar imagen'}
+                </label>
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  disabled={loadingTheme || savingTheme || uploadingLogo}
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
+              </div>
+
+              {/* O URL manual */}
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">O ingresa URL manualmente:</label>
+                <input
+                  type="url"
+                  value={theme.logoUrl}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                  placeholder="Ej: /img/logo.png"
+                />
+              </div>
+            </div>
+
+            {/* Preview */}
             {theme.logoUrl && (
-              <div className="mt-2 p-2 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Vista previa:</p>
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
                 <img
                   src={theme.logoUrl}
                   alt="Logo preview"
-                  className="h-12 object-contain"
+                  className="h-16 object-contain"
                 />
               </div>
             )}
