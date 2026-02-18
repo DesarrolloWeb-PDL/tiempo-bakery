@@ -1,32 +1,69 @@
 import { ProductCard } from '@/components/productos/product-card';
 import { TimeGatingBanner } from '@/components/time-gating-banner';
 import { Badge } from '@/components/ui/badge';
+import { prisma } from '@/lib/db';
+import { timeGating } from '@/lib/time-gating';
 
-// Obtener datos del servidor
+export const dynamic = 'force-dynamic';
+
+// Obtener productos directamente desde la DB
 async function getProducts() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/productos?disponibles=true`, {
-      cache: 'no-store',
+    const status = timeGating.getTimeUntilOpening();
+    const weekId = timeGating.getCurrentWeekId();
+
+    const categories = await prisma.category.findMany({
+      orderBy: { order: 'asc' },
+      include: {
+        products: {
+          where: { isActive: true },
+          orderBy: { name: 'asc' },
+          include: {
+            weeklyStocks: {
+              where: { weekId },
+            },
+          },
+        },
+      },
     });
-    
-    if (!res.ok) throw new Error('Failed to fetch products');
-    return res.json();
+
+    const porCategoria = categories
+      .map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        description: cat.description,
+        productos: cat.products.map((p) => {
+          const ws = p.weeklyStocks[0];
+          const stock = ws ? ws.currentStock : (p.stockType === 'UNLIMITED' ? 999 : 0);
+          return {
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            description: p.description,
+            price: p.price,
+            weight: p.weight,
+            imageUrl: p.imageUrl,
+            imageAlt: p.imageAlt,
+            allergens: p.allergens,
+            stock,
+            category: cat.name,
+            allowSlicing: p.allowSlicing,
+          };
+        }).filter((p) => !status.isOpen || p.stock > 0),
+      }))
+      .filter((cat) => cat.productos.length > 0);
+
+    return { porCategoria, total: porCategoria.reduce((s, c) => s + c.productos.length, 0) };
   } catch (error) {
     console.error('Error fetching products:', error);
-    return { productos: [], porCategoria: [], total: 0 };
+    return { porCategoria: [], total: 0 };
   }
 }
 
-async function getTimeGating() {
+// Obtener time-gating directamente desde la lógica de negocio
+function getTimeGatingData() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/time-gating`, {
-      cache: 'no-store',
-    });
-    
-    if (!res.ok) throw new Error('Failed to fetch time-gating');
-    return res.json();
+    return timeGating.getTimeUntilOpening();
   } catch (error) {
     console.error('Error fetching time-gating:', error);
     return { isOpen: true, message: '' };
@@ -36,7 +73,7 @@ async function getTimeGating() {
 export default async function HomePage() {
   const [productsData, timeGatingData] = await Promise.all([
     getProducts(),
-    getTimeGating(),
+    Promise.resolve(getTimeGatingData()),
   ]);
 
   return (
