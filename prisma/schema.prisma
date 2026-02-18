@@ -1,0 +1,232 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================
+// PRODUCTOS Y CATÁLOGO
+// ============================================
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    // "Panes", "Dulces"
+  slug        String    @unique
+  description String?
+  order       Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  description  String
+  price        Float
+  weight       Int?          // Peso en gramos
+  ingredients  String        // Lista de ingredientes
+  allergens    String        // JSON: ["Gluten", "Huevo", "Lácteos"]
+  riskNote     String?       // Ej: "Puede contener trazas de frutos secos"
+  imageUrl     String
+  imageAlt     String
+  
+  // Control de stock
+  stockType    String        @default("WEEKLY") // WEEKLY | UNLIMITED
+  weeklyStock  Int           @default(0) // Stock máximo semanal
+  
+  // Configuración
+  allowSlicing Boolean       @default(true)
+  isActive     Boolean       @default(true)
+  
+  // Relaciones
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id])
+  
+  weeklyStocks WeeklyStock[]
+  orderItems   OrderItem[]
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  @@index([categoryId])
+  @@index([slug])
+}
+
+// Control de stock por ciclo semanal
+model WeeklyStock {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  // Identificador del ciclo semanal (ej: "2025-W45")
+  weekId        String   // Formato ISO: YYYY-Www
+  
+  maxStock      Int      // Stock máximo para esta semana
+  currentStock  Int      // Stock disponible actual
+  reservedStock Int      @default(0) // Stock en carritos (no confirmado)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([productId, weekId])
+  @@index([weekId])
+}
+
+// ============================================
+// USUARIOS Y AUTENTICACIÓN
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  phone         String?
+  
+  // Autenticación (simplificada para MVP)
+  passwordHash  String?   // null si es guest
+  
+  // Dirección por defecto
+  address       String?
+  city          String?
+  postalCode    String?
+  
+  // Preferencias
+  emailNotifications Boolean @default(true)
+  
+  orders        Order[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([email])
+}
+
+// ============================================
+// PEDIDOS Y CHECKOUT
+// ============================================
+
+model Order {
+  id              String          @id @default(cuid())
+  orderNumber     String          @unique // Ej: "TBK-2025-0001"
+  
+  // Cliente
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id])
+  
+  // Info de contacto (para guests)
+  customerEmail   String
+  customerName    String
+  customerPhone   String
+  
+  // Ciclo semanal
+  weekId          String          // Semana de producción
+  
+  // Montos
+  subtotal        Float
+  shippingCost    Float
+  total           Float
+  
+  // Estado del pedido
+  status          String        @default("PENDING") // PENDING|PAID|BAKING|READY|DELIVERED|CANCELLED
+  
+  // Método de entrega
+  deliveryMethod  String        // PICKUP_POINT|LOCAL_DELIVERY|NATIONAL_COURIER
+  
+  // Detalles de entrega
+  pickupLocation  String?         // Si es recogida en punto
+  pickupAddress   String?
+  pickupSchedule  String?         // Horario del punto de recogida
+  
+  shippingAddress String?         // Si es envío
+  shippingCity    String?
+  shippingPostal  String?
+  
+  // Pago
+  paymentStatus   String        @default("PENDING")
+  paymentMethod   String        @default("card")
+  stripePaymentId String?
+  
+  // Notas
+  customerNotes   String?
+  adminNotes      String?
+  
+  // Items del pedido
+  items           OrderItem[]
+  
+  // Timestamps
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  paidAt          DateTime?
+  deliveredAt     DateTime?
+  
+  @@index([userId])
+  @@index([weekId])
+  @@index([status])
+  @@index([orderNumber])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  // Datos del producto en el momento de la compra
+  productName String
+  quantity    Int
+  unitPrice   Float
+  subtotal    Float
+  
+  // Opciones
+  sliced      Boolean  @default(true) // ¿Rebanado?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([orderId])
+  @@index([productId])
+}
+
+// ============================================
+// PUNTOS DE RECOGIDA
+// ============================================
+
+model PickupPoint {
+  id          String   @id @default(cuid())
+  name        String   // "Bulevar", "Cero Coma"
+  address     String
+  city        String
+  postalCode  String
+  
+  // Horarios de recogida
+  schedule    String   // "Viernes 17:00-20:00, Sábado 10:00-14:00"
+  
+  instructions String? // Instrucciones adicionales
+  
+  isActive    Boolean  @default(true)
+  order       Int      @default(0) // Para ordenar en el frontend
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// CONFIGURACIÓN DEL SITIO
+// ============================================
+
+model SiteConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  
+  updatedAt DateTime @updatedAt
+}
