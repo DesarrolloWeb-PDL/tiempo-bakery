@@ -248,7 +248,7 @@ export default function AdminStockPage() {
             <span className="w-2 h-2 rounded-full bg-gray-300 inline-block" /> Disponible
           </span>
         </div>
-        <span className="ml-auto">El campo "Máx." es el único editable</span>
+        <span className="ml-auto">El campo &ldquo;Máx.&rdquo; es el único editable</span>
       </div>
 
       {/* Tabla de stock */}
@@ -304,11 +304,11 @@ export default function AdminStockPage() {
                     >
                       {/* Producto */}
                       <div className="col-span-4 flex items-center gap-3 min-w-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={row.productImage}
                           alt={row.productName}
                           className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
-                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.jpg' }}
                         />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">{row.productName}</p>

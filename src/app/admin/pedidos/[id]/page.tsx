@@ -332,11 +332,11 @@ export default function AdminOrderDetailPage() {
             <div className="divide-y divide-gray-50 -mx-5">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-4 px-5 py-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.product.imageUrl}
                     alt={item.product.imageAlt}
                     className="w-12 h-12 rounded-lg object-cover bg-gray-100"
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.jpg' }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
@@ -409,7 +409,7 @@ export default function AdminOrderDetailPage() {
               {order.customerNotes && (
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Notas del cliente</p>
-                  <p className="text-sm text-gray-700 italic">"{order.customerNotes}"</p>
+                  <p className="text-sm text-gray-700 italic">&ldquo;{order.customerNotes}&rdquo;</p>
                 </div>
               )}
             </div>

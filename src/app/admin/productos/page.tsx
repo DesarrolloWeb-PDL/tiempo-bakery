@@ -92,11 +92,11 @@ export default function AdminProductosPage() {
               {products.map((p) => (
                 <div key={p.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50/50">
                   <div className="col-span-4 flex items-center gap-3 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={p.imageUrl}
                       alt={p.name}
                       className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.jpg' }}
                     />
                     <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
                   </div>
