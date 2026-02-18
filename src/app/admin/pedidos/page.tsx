@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, Filter, RefreshCw, ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
@@ -100,7 +100,7 @@ function formatDate(str: string) {
 // ─────────────────────────────────────────────
 // Página
 // ─────────────────────────────────────────────
-export default function AdminPedidosPage() {
+function PedidosContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -343,5 +343,13 @@ export default function AdminPedidosPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function AdminPedidosPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-400 text-sm">Cargando pedidos...</div>}>
+      <PedidosContent />
+    </Suspense>
   )
 }
