@@ -34,7 +34,13 @@ async function getProducts() {
         description: cat.description,
         productos: cat.products.map((p) => {
           const ws = p.weeklyStocks[0];
-          const stock = ws ? ws.currentStock : (p.stockType === 'UNLIMITED' ? 999 : 0);
+          const stockQty = ws ? ws.currentStock : (p.stockType === 'UNLIMITED' ? 999 : 0);
+          let allergens: string[] = [];
+          try {
+            allergens = JSON.parse(p.allergens || '[]');
+          } catch {
+            allergens = [];
+          }
           return {
             id: p.id,
             name: p.name,
@@ -44,12 +50,16 @@ async function getProducts() {
             weight: p.weight,
             imageUrl: p.imageUrl,
             imageAlt: p.imageAlt,
-            allergens: p.allergens,
-            stock,
-            category: cat.name,
+            allergens,
+            stock: {
+              available: stockQty,
+              hasStock: p.stockType === 'UNLIMITED' || stockQty > 0,
+              lowStock: p.stockType !== 'UNLIMITED' && stockQty > 0 && stockQty <= 3,
+            },
+            category: { name: cat.name },
             allowSlicing: p.allowSlicing,
           };
-        }).filter((p) => !status.isOpen || p.stock > 0),
+        }).filter((p) => !status.isOpen || p.stock.hasStock),
       }))
       .filter((cat) => cat.productos.length > 0);
 
