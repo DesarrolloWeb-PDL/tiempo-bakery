@@ -13,6 +13,7 @@ interface ProductRow {
   stockType: string
   weeklyStock: number
   isActive: boolean
+  published: boolean
   description: string
   ingredients: string
   allergens: string[]
@@ -44,6 +45,7 @@ interface ProductFormState {
   weeklyStock: string
   allowSlicing: boolean
   isActive: boolean
+  published: boolean
   categoryId: string
 }
 
@@ -65,6 +67,7 @@ const EMPTY_FORM: ProductFormState = {
   weeklyStock: '0',
   allowSlicing: true,
   isActive: true,
+  published: false,
   categoryId: '',
 }
 
@@ -194,6 +197,7 @@ export default function AdminProductosPage() {
     weeklyStock: String(product.weeklyStock),
     allowSlicing: product.allowSlicing,
     isActive: product.isActive,
+    published: product.published,
     categoryId: product.category.id,
   })
 
@@ -348,6 +352,7 @@ export default function AdminProductosPage() {
     weeklyStock: Number(form.weeklyStock),
     allowSlicing: form.allowSlicing,
     isActive: form.isActive,
+    published: form.published,
     categoryId: form.categoryId,
   })
 
@@ -413,6 +418,20 @@ export default function AdminProductosPage() {
       await fetchProducts()
     } catch {
       setError('No se pudo eliminar el producto')
+    }
+  }
+
+  const handlePublishToggle = async (product: ProductRow) => {
+    try {
+      const res = await fetch(`/api/admin/productos/${product.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: !product.published }),
+      })
+      if (!res.ok) throw new Error()
+      await fetchProducts()
+    } catch {
+      setError(`No se pudo ${product.published ? 'despublicar' : 'publicar'} el producto`)
     }
   }
 
@@ -582,6 +601,10 @@ export default function AdminProductosPage() {
                 <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} />
                 Activo
               </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={form.published} onChange={(e) => setForm((f) => ({ ...f, published: e.target.checked }))} />
+                Publicado
+              </label>
             </div>
           </div>
 
@@ -671,6 +694,23 @@ export default function AdminProductosPage() {
                     )}>
                       {p.isActive ? 'Activo' : 'Inactivo'}
                     </span>
+                  </div>
+                  <div className="col-span-1 hidden md:flex items-center justify-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void handlePublishToggle(p)
+                      }}
+                      className={cn(
+                        'text-xs px-2 py-1 rounded-full font-medium transition-colors',
+                        p.published
+                          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      )}
+                      title={p.published ? 'Despublicar' : 'Publicar'}
+                    >
+                      {p.published ? 'Publicado' : 'Borrador'}
+                    </button>
                   </div>
                   <div className="col-span-1 hidden md:flex justify-end gap-1">
                     <button

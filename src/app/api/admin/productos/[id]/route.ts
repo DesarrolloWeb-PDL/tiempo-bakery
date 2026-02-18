@@ -19,6 +19,7 @@ const productSchema = z.object({
   weeklyStock: z.number().int().min(0),
   allowSlicing: z.boolean(),
   isActive: z.boolean(),
+  published: z.boolean().default(false),
   categoryId: z.string().min(1),
 })
 
@@ -65,5 +66,36 @@ export async function DELETE(
   } catch (error) {
     console.error('Error deleting product:', error)
     return NextResponse.json({ error: 'Error al eliminar el producto' }, { status: 500 })
+  }
+}
+
+// PATCH para cambiar solo el estado published
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await req.json()
+    const { published } = body
+
+    if (typeof published !== 'boolean') {
+      return NextResponse.json(
+        { error: 'published debe ser un booleano' },
+        { status: 400 }
+      )
+    }
+
+    const product = await db.product.update({
+      where: { id: params.id },
+      data: { published },
+    })
+
+    return NextResponse.json({ published: product.published })
+  } catch (error) {
+    console.error('Error updating product published status:', error)
+    return NextResponse.json(
+      { error: 'Error al cambiar estado de publicación' },
+      { status: 500 }
+    )
   }
 }

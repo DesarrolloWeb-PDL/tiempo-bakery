@@ -20,6 +20,7 @@ const createProductSchema = z.object({
   weeklyStock: z.number().int().min(0),
   allowSlicing: z.boolean(),
   isActive: z.boolean(),
+  published: z.boolean().default(false),
   categoryId: z.string().min(1),
 })
 

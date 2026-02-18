@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     // Construir query
     const whereClause: any = {
       isActive: true,
+      published: true, // Solo mostrar productos publicados
     };
 
     if (categoriaSlug) {
