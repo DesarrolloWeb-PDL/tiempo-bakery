@@ -3,18 +3,41 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'img')
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
+const ADMIN_COOKIE = 'tbk_admin_auth'
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
+
+export const dynamic = 'force-dynamic'
+
+function getUploadDir() {
+  // En producción (Vercel/serverless), usar /tmp que es writable
+  // En desarrollo, usar /public/img para acceso directo
+  if (process.env.NODE_ENV === 'production') {
+    return path.join('/tmp', 'logo-uploads')
+  }
+  return path.join(process.cwd(), 'public', 'img')
+}
+
+function getServeUrl(filename: string) {
+  // En desarrollo, servir desde /public
+  // En producción, servir desde /api endpoint que lee de /tmp
+  if (process.env.NODE_ENV === 'production') {
+    return `/api/admin/uploads/logo-serve?file=${filename}`
+  }
+  return `/img/${filename}`
+}
 
 export async function POST(req: NextRequest) {
   try {
     console.log('[Logo Upload] Request received')
 
-    // Check auth
-    const authHeader = req.headers.get('cookie')
-    if (!authHeader?.includes('adminSession=')) {
-      console.log('[Logo Upload] Unauthorized - no session')
+    // Check auth - verificar cookie correcta
+    const cookieHeader = req.headers.get('cookie')
+    const hasAdminAuth = cookieHeader?.includes(`${ADMIN_COOKIE}=`)
+    
+    if (!hasAdminAuth) {
+      console.log('[Logo Upload] Unauthorized - no admin session')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -47,9 +70,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Create upload directory if it doesn't exist
+    const uploadDir = getUploadDir()
     try {
-      await fs.mkdir(UPLOAD_DIR, { recursive: true })
-      console.log(`[Logo Upload] Directory ready: ${UPLOAD_DIR}`)
+      await fs.mkdir(uploadDir, { recursive: true })
+      console.log(`[Logo Upload] Directory ready: ${uploadDir}`)
     } catch (err) {
       console.log('[Logo Upload] Error creating directory:', err)
       throw new Error('Cannot create upload directory')
@@ -59,7 +83,7 @@ export async function POST(req: NextRequest) {
     const ext = path.extname(file.name)
     const randomName = crypto.randomBytes(8).toString('hex')
     const filename = `logo-${randomName}${ext}`
-    const filepath = path.join(UPLOAD_DIR, filename)
+    const filepath = path.join(uploadDir, filename)
 
     console.log(`[Logo Upload] Saving to: ${filepath}`)
 
@@ -68,8 +92,8 @@ export async function POST(req: NextRequest) {
     await fs.writeFile(filepath, buffer)
     console.log(`[Logo Upload] File written successfully`)
 
-    // Return accessible URL (relative to /public)
-    const url = `/img/${filename}`
+    // Return accessible URL
+    const url = getServeUrl(filename)
     console.log(`[Logo Upload] Success, URL: ${url}`)
 
     return NextResponse.json({
@@ -86,5 +110,38 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 }
     )
+  }
+}
+
+// GET endpoint para servir archivos de /tmp en producción
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const filename = searchParams.get('file')
+    
+    if (!filename) {
+      return NextResponse.json({ error: 'No file specified' }, { status: 400 })
+    }
+
+    // En producción, leer de /tmp
+    const uploadDir = getUploadDir()
+    const filepath = path.join(uploadDir, filename)
+    
+    // Validar que el archivo está dentro del directorio permitido
+    if (!filepath.startsWith(uploadDir)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const buffer = await fs.readFile(filepath)
+    
+    return new NextResponse(buffer, {
+      headers: {
+        'Content-Type': 'image/*',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
+  } catch (error) {
+    console.error('[Logo Serve] Error:', error)
+    return NextResponse.json({ error: 'File not found' }, { status: 404 })
   }
 }

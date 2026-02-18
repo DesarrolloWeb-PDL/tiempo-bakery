@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mkdir, writeFile } from 'fs/promises'
+import { mkdir, writeFile, readFile } from 'fs/promises'
 import path from 'path'
 import { randomUUID } from 'crypto'
 
@@ -8,6 +8,24 @@ export const runtime = 'nodejs'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_SIZE = 5 * 1024 * 1024
+
+function getUploadDir() {
+  // En producción (Vercel/serverless), usar /tmp que es writable
+  // En desarrollo, usar /public/uploads que es persistente
+  if (process.env.NODE_ENV === 'production') {
+    return path.join('/tmp', 'producto-uploads')
+  }
+  return path.join(process.cwd(), 'public', 'uploads', 'productos')
+}
+
+function getServeUrl(filename: string) {
+  // En producción, servir desde /api endpoint que lee de /tmp
+  // En desarrollo, servir directamente desde /public
+  if (process.env.NODE_ENV === 'production') {
+    return `/api/admin/uploads/serve?file=${filename}`
+  }
+  return `/uploads/productos/${filename}`
+}
 
 function getExtension(fileName: string, mimeType: string) {
   const byMime: Record<string, string> = {
@@ -47,9 +65,7 @@ export async function POST(req: NextRequest) {
     const ext = getExtension(file.name, file.type)
     const fileName = `${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`
 
-    // Usar __dirname aproximado o path absoluto más seguro
-    const basePath = process.cwd()
-    const uploadDir = path.join(basePath, 'public', 'uploads', 'productos')
+    const uploadDir = getUploadDir()
     
     console.log('Directorio de upload:', uploadDir)
 
@@ -63,10 +79,49 @@ export async function POST(req: NextRequest) {
     await writeFile(fullPath, buffer)
 
     console.log('Archivo guardado exitosamente')
-    return NextResponse.json({ url: `/uploads/productos/${fileName}` })
+    const url = getServeUrl(fileName)
+    console.log('URL de acceso:', url)
+    return NextResponse.json({ url })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     console.error('Error uploading file:', errorMsg, error)
     return NextResponse.json({ error: `Error al subir imagen: ${errorMsg}` }, { status: 500 })
+  }
+}
+
+// GET endpoint para servir archivos de /tmp en producción
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const filename = searchParams.get('file')
+    
+    if (!filename) {
+      return NextResponse.json({ error: 'No file specified' }, { status: 400 })
+    }
+
+    const uploadDir = getUploadDir()
+    const filepath = path.join(uploadDir, filename)
+    
+    // Validar que el archivo está dentro del directorio permitido
+    if (!filepath.startsWith(uploadDir)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const buffer = await readFile(filepath)
+    
+    // Detectar tipo MIME del archivo
+    let contentType = 'image/jpeg'
+    if (filename.endsWith('.png')) contentType = 'image/png'
+    else if (filename.endsWith('.webp')) contentType = 'image/webp'
+    
+    return new NextResponse(buffer, {
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
+  } catch (error) {
+    console.error('[Upload Serve] Error:', error)
+    return NextResponse.json({ error: 'File not found' }, { status: 404 })
   }
 }
