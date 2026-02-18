@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 const themeSchema = z.object({
   appTitle: z.string().min(1).max(100),
   appSubtitle: z.string().max(200),
-  logoUrl: z.string().url().optional(),
+  logoUrl: z.string().min(1).max(500).optional().or(z.literal('')),
   primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
   secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
   accentColor: z.string().regex(/^#[0-9A-F]{6}$/i),
@@ -57,14 +57,17 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
+    console.log('[Theme PUT] Received body:', body)
     const parsed = themeSchema.safeParse(body)
 
     if (!parsed.success) {
+      console.error('[Theme PUT] Validation error:', parsed.error.flatten())
       return NextResponse.json(
         { error: 'Datos inválidos', details: parsed.error.flatten() },
         { status: 400 }
       )
     }
+    console.log('[Theme PUT] Validation passed, saving...')
 
     const updates = Object.entries(parsed.data).map(([key, value]) =>
       db.siteConfig.upsert({

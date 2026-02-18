@@ -124,15 +124,22 @@ export default function AdminConfigPage() {
     setSavingTheme(true)
     setThemeMsg(null)
     try {
+      console.log('[Save Theme] Enviando:', theme)
       const res = await fetch('/api/admin/tema', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(theme),
       })
-      if (!res.ok) throw new Error()
+      const data = await res.json()
+      console.log('[Save Theme] Respuesta:', { status: res.status, data })
+      if (!res.ok) {
+        throw new Error(data.error || `Error ${res.status}`)
+      }
       setThemeMsg('Configuración actualizada correctamente')
-    } catch {
-      setThemeMsg('No se pudo guardar la configuración')
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'No se pudo guardar la configuración'
+      console.error('[Save Theme] Error:', errorMsg)
+      setThemeMsg(`No se pudo guardar la configuración: ${errorMsg}`)
     } finally {
       setSavingTheme(false)
     }
