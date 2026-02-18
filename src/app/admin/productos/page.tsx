@@ -279,29 +279,52 @@ export default function AdminProductosPage() {
     setError(null)
 
     try {
+      // Validar el archivo localmente primero
+      const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
+      if (!ALLOWED_MIME.has(file.type)) {
+        throw new Error(`Formato no soportado: ${file.type}. Usa JPG, PNG o WEBP`)
+      }
+
+      const MAX_SIZE = 5 * 1024 * 1024
+      if (file.size > MAX_SIZE) {
+        throw new Error(`La imagen supera 5MB (tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+      }
+
       const formData = new FormData()
       formData.append('file', file)
+
+      console.log('Subiendo imagen:', { name: file.name, size: file.size, type: file.type })
 
       const res = await fetch('/api/admin/uploads', {
         method: 'POST',
         body: formData,
       })
 
-      const data = await res.json().catch(() => ({}))
+      const data = await res.json().catch((err) => {
+        console.error('Error parsing response:', err)
+        return {}
+      })
+
+      console.log('Respuesta del servidor:', { status: res.status, data })
+
       if (!res.ok) {
-        throw new Error(data.error || 'No se pudo subir la imagen')
+        throw new Error(data.error || `Error del servidor (${res.status})`)
       }
 
       if (typeof data.url !== 'string') {
-        throw new Error('Respuesta inválida del servidor')
+        console.error('URL inválida en respuesta:', data)
+        throw new Error('La respuesta del servidor no contiene una URL válida')
       }
 
+      console.log('Imagen subida exitosamente:', data.url)
       setFieldValue('imageUrl', data.url)
       if (!form.imageAlt.trim() && form.name.trim()) {
         setFieldValue('imageAlt', form.name.trim())
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo subir la imagen')
+      const errorMsg = err instanceof Error ? err.message : 'No se pudo subir la imagen'
+      console.error('Error en upload:', errorMsg)
+      setError(errorMsg)
     } finally {
       setUploadingImage(false)
     }
@@ -504,15 +527,33 @@ export default function AdminProductosPage() {
                   e.currentTarget.value = ''
                 }}
               />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingImage}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
-              >
-                {uploadingImage ? 'Subiendo imagen...' : 'Subir imagen desde archivo'}
-              </button>
-              <p className="mt-1 text-xs text-gray-500">Acepta JPG, PNG o WEBP (máx. 5MB)</p>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
+                >
+                  {uploadingImage ? 'Subiendo imagen...' : 'Subir imagen desde archivo'}
+                </button>
+                <p className="text-xs text-gray-500">Acepta JPG, PNG o WEBP (máx. 5MB)</p>
+                
+                {form.imageUrl && (
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
+                    <img
+                      src={form.imageUrl}
+                      alt={form.imageAlt || 'Preview'}
+                      className="h-24 object-contain rounded"
+                      onError={(e) => {
+                        console.error('Error loading image:', form.imageUrl)
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                    <p className="text-xs text-gray-400 mt-2 break-all">URL: {form.imageUrl}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

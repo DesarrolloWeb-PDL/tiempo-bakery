@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AddToCartButton } from './add-to-cart-button';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -48,6 +49,8 @@ export function ProductCard({
   stock,
   category,
 }: ProductCardProps) {
+  const { theme } = useAppTheme()
+
   return (
     <Card className="flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow">
       <Link href={`/productos/${slug}`} className="block">
@@ -81,7 +84,10 @@ export function ProductCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <Link href={`/productos/${slug}`}>
-            <h3 className="font-semibold text-lg hover:text-amber-700 transition-colors">
+            <h3 
+              className="font-semibold text-lg transition-colors hover:opacity-75"
+              style={{ color: theme.primaryColor }}
+            >
               {name}
             </h3>
           </Link>
@@ -114,7 +120,10 @@ export function ProductCard({
 
       <CardFooter className="flex flex-col gap-3 pt-0">
         <div className="flex items-center justify-between w-full">
-          <span className="text-2xl font-bold text-amber-700">
+          <span 
+            className="text-2xl font-bold"
+            style={{ color: theme.primaryColor }}
+          >
             {formatCurrency(price)}
           </span>
           {stock.hasStock && (

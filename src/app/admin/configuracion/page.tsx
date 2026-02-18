@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, Settings, Key, Loader2, Truck } from 'lucide-react'
+import { LogOut, Settings, Key, Loader2, Truck, Palette } from 'lucide-react'
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -24,6 +24,19 @@ export default function AdminConfigPage() {
     nationalCourier: 5950,
   })
 
+  // Theme customization
+  const [loadingTheme, setLoadingTheme] = useState(true)
+  const [savingTheme, setSavingTheme] = useState(false)
+  const [themeMsg, setThemeMsg] = useState<string | null>(null)
+  const [theme, setTheme] = useState({
+    appTitle: 'Tiempo Bakery',
+    appSubtitle: 'Panadería artesanal con preventa semanal',
+    logoUrl: '/img/espiga.png',
+    primaryColor: '#d89a44',
+    secondaryColor: '#2c2c2c',
+    accentColor: '#f5f5f5',
+  })
+
   const fetchShippingCosts = async () => {
     setLoadingShipping(true)
     setShippingMsg(null)
@@ -43,8 +56,24 @@ export default function AdminConfigPage() {
     }
   }
 
+  const fetchThemeConfig = async () => {
+    setLoadingTheme(true)
+    setThemeMsg(null)
+    try {
+      const res = await fetch('/api/admin/tema')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setTheme(data)
+    } catch {
+      setThemeMsg('No se pudo cargar la configuración del tema')
+    } finally {
+      setLoadingTheme(false)
+    }
+  }
+
   useEffect(() => {
     void fetchShippingCosts()
+    void fetchThemeConfig()
   }, [])
 
   const handleLogout = async () => {
@@ -87,6 +116,39 @@ export default function AdminConfigPage() {
       setShippingMsg('No se pudieron restablecer los costos')
     } finally {
       setSavingShipping(false)
+    }
+  }
+
+  const handleSaveTheme = async () => {
+    setSavingTheme(true)
+    setThemeMsg(null)
+    try {
+      const res = await fetch('/api/admin/tema', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(theme),
+      })
+      if (!res.ok) throw new Error()
+      setThemeMsg('Configuración actualizada correctamente')
+    } catch {
+      setThemeMsg('No se pudo guardar la configuración')
+    } finally {
+      setSavingTheme(false)
+    }
+  }
+
+  const handleResetTheme = async () => {
+    setSavingTheme(true)
+    setThemeMsg(null)
+    try {
+      const res = await fetch('/api/admin/tema', { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      await fetchThemeConfig()
+      setThemeMsg('Tema restablecido a valores por defecto')
+    } catch {
+      setThemeMsg('No se pudo restablecer el tema')
+    } finally {
+      setSavingTheme(false)
     }
   }
 
@@ -205,6 +267,153 @@ export default function AdminConfigPage() {
             <button
               onClick={handleResetShipping}
               disabled={loadingShipping || savingShipping}
+              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+            >
+              Restablecer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Personalización de la app */}
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+          <Palette className="w-4 h-4 text-amber-600" />
+          <h3 className="font-semibold text-gray-900 text-sm">Personalización de la app</h3>
+        </div>
+        <div className="px-5 py-4 space-y-4">
+          {/* Título */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Título de la tienda</label>
+            <input
+              type="text"
+              value={theme.appTitle}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, appTitle: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              placeholder="Ej: Tiempo Bakery"
+            />
+          </div>
+
+          {/* Subtítulo */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Subtítulo/Lema</label>
+            <input
+              type="text"
+              value={theme.appSubtitle}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, appSubtitle: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              placeholder="Ej: Panadería artesanal con preventa semanal"
+            />
+          </div>
+
+          {/* Logo URL */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">URL del logo</label>
+            <input
+              type="url"
+              value={theme.logoUrl}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              placeholder="Ej: /img/logo.png"
+            />
+            {theme.logoUrl && (
+              <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">Vista previa:</p>
+                <img
+                  src={theme.logoUrl}
+                  alt="Logo preview"
+                  className="h-12 object-contain"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Colores */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Color primario</label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={theme.primaryColor}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
+                  className="h-10 w-20 rounded border border-gray-200 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={theme.primaryColor}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
+                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                  placeholder="#000000"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Color secundario</label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={theme.secondaryColor}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, secondaryColor: e.target.value })}
+                  className="h-10 w-20 rounded border border-gray-200 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={theme.secondaryColor}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, secondaryColor: e.target.value })}
+                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                  placeholder="#000000"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Color de acentos</label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={theme.accentColor}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, accentColor: e.target.value })}
+                  className="h-10 w-20 rounded border border-gray-200 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={theme.accentColor}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, accentColor: e.target.value })}
+                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                  placeholder="#000000"
+                />
+              </div>
+            </div>
+          </div>
+
+          {themeMsg && (
+            <p className={`text-sm ${themeMsg.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
+              {themeMsg}
+            </p>
+          )}
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleSaveTheme}
+              disabled={loadingTheme || savingTheme}
+              className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50"
+            >
+              {savingTheme ? 'Guardando...' : 'Guardar personalización'}
+            </button>
+            <button
+              onClick={handleResetTheme}
+              disabled={loadingTheme || savingTheme}
               className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
             >
               Restablecer

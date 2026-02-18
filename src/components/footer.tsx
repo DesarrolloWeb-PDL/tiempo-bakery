@@ -1,15 +1,34 @@
+'use client'
+
+import { useAppTheme } from '@/hooks/useAppTheme'
+
 export default function Footer() {
+  const { theme } = useAppTheme()
+
   return (
-    <footer className="border-t border-gray-200 bg-gray-50">
+    <footer 
+      className="border-t bg-gray-50"
+      style={{ borderColor: theme.primaryColor + '30' }}
+    >
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Info */}
           <div>
-            <h3 className="font-semibold text-amber-900 mb-3">
-              🥖 Tiempo Bakery
+            <h3 
+              className="font-semibold mb-3"
+              style={{ color: theme.primaryColor }}
+            >
+              {theme.logoUrl && (
+                <img
+                  src={theme.logoUrl}
+                  alt={theme.appTitle}
+                  className="h-6 w-6 inline-block mr-2 object-contain"
+                />
+              )}
+              {theme.appTitle}
             </h3>
             <p className="text-sm text-gray-600">
-              Panadería artesanal con preventa semanal.
+              {theme.appSubtitle}
               <br />
               Horneado fresco cada semana.
             </p>
@@ -17,7 +36,10 @@ export default function Footer() {
 
           {/* Horarios */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">
+            <h3 
+              className="font-semibold mb-3"
+              style={{ color: theme.primaryColor }}
+            >
               Horario de Pedidos
             </h3>
             <p className="text-sm text-gray-600">
@@ -31,7 +53,10 @@ export default function Footer() {
 
           {/* Contacto */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">
+            <h3 
+              className="font-semibold mb-3"
+              style={{ color: theme.primaryColor }}
+            >
               Contacto
             </h3>
             <p className="text-sm text-gray-600">
@@ -42,12 +67,15 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-200">
+        <div 
+          className="mt-8 pt-6 border-t"
+          style={{ borderColor: theme.primaryColor + '30' }}
+        >
           <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} Tiempo Bakery. Todos los derechos reservados.
+            © {new Date().getFullYear()} {theme.appTitle}. Todos los derechos reservados.
           </p>
         </div>
       </div>
     </footer>
-  );
+  )
 }
