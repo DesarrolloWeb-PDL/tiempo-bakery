@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
 const ADMIN_COOKIE = 'tbk_admin_auth'
 

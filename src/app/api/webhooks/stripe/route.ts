@@ -4,13 +4,14 @@ import { prisma } from '@/lib/db';
 import { stockManager } from '@/lib/stock-manager';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-02-24.acacia',
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2025-02-24.acacia',
+  });
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
   try {
     const body = await request.text();
     const headersList = await headers();

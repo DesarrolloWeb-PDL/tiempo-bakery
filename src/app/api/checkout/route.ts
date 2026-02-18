@@ -5,9 +5,7 @@ import { timeGating } from '@/lib/time-gating';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-02-24.acacia',
-});
+export const dynamic = 'force-dynamic';
 
 const checkoutSchema = z.object({
   customerEmail: z.string().email(),
@@ -29,6 +27,10 @@ const checkoutSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2025-02-24.acacia',
+  });
+
   try {
     // 1. Verificar time-gating
     const gatingStatus = timeGating.getTimeUntilOpening();

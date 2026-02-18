@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { timeGating } from '@/lib/time-gating';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/productos/[slug]
  * Obtiene el detalle de un producto específico con su stock actual

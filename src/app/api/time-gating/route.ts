@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { timeGating } from '@/lib/time-gating';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/time-gating
  * Retorna el estado actual del sistema de time-gating

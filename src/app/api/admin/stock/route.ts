@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/admin/stock?weekId=2025-W08
 export async function GET(req: NextRequest) {
   try {

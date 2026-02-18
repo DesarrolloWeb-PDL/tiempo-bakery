@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_STATUSES = ['PENDING', 'PAID', 'BAKING', 'READY', 'DELIVERED', 'CANCELLED'] as const
 
 const updateSchema = z.object({
