@@ -70,7 +70,7 @@ function getTimeGatingData() {
         ? timeGating.formatTimeRemaining(status.remainingMs)
         : undefined,
       nextOpening: status.nextOpening
-        ? status.nextOpening.toISO()
+        ? (status.nextOpening.toISO() ?? undefined)
         : undefined,
     };
   } catch (error) {
