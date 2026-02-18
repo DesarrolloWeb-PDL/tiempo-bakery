@@ -175,8 +175,11 @@ export default function AdminConfigPage() {
       setTheme({ ...theme, logoUrl: data.url })
       setThemeMsg('Logo cargado correctamente')
       
-      // Limpiar el input
-      e.currentTarget.value = ''
+      // Limpiar el input - usar getElementById en lugar de e.currentTarget
+      const logoInput = document.getElementById('logo-upload') as HTMLInputElement
+      if (logoInput) {
+        logoInput.value = ''
+      }
     } catch (error) {
       setThemeMsg(`Error: ${error instanceof Error ? error.message : 'No se pudo cargar el logo'}`)
     } finally {

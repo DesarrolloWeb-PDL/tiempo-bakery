@@ -4,7 +4,6 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { CartSidebar } from "@/components/cart-sidebar";
-import { ThemeStyleInjector } from "@/components/theme-style-injector";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +20,6 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <ThemeStyleInjector />
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-1">
