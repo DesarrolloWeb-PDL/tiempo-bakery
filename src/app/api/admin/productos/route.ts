@@ -39,11 +39,11 @@ export async function GET() {
           category: { select: { id: true, name: true, slug: true } },
           _count: { select: { orderItems: true } },
         },
-        orderBy: [{ category: { order: 'asc' } }, { name: 'asc' }],
+        orderBy: [{ category: { name: 'asc' } }, { name: 'asc' }],
       }),
       db.category.findMany({
         select: { id: true, name: true, slug: true },
-        orderBy: [{ order: 'asc' }, { name: 'asc' }],
+        orderBy: [{ name: 'asc' }],
       }),
     ])
 

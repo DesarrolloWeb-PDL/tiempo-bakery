@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: [
-        { category: { order: 'asc' } },
+        { category: { name: 'asc' } },
         { name: 'asc' },
       ],
     });
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
 
     // Agrupar por categoría
     const categorias = await prisma.category.findMany({
-      orderBy: { order: 'asc' },
+      orderBy: { name: 'asc' },
     });
 
     const productosPorCategoria = categorias.map(categoria => ({
