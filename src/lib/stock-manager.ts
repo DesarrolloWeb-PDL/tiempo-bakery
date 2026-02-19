@@ -2,6 +2,104 @@ import { prisma } from './db';
 import { timeGating } from './time-gating';
 
 export class StockManager {
+  private async getProductMeta(productId: string) {
+    return prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true,
+        stockType: true,
+        weeklyStock: true,
+        isActive: true,
+        published: true,
+      },
+    })
+  }
+
+  private async ensureWeeklyStockRecord(productId: string, weekId: string) {
+    const existing = await prisma.weeklyStock.findUnique({
+      where: {
+        productId_weekId: { productId, weekId },
+      },
+    })
+
+    if (existing) return existing
+
+    const product = await this.getProductMeta(productId)
+    if (!product || product.stockType !== 'WEEKLY' || !product.isActive) {
+      return null
+    }
+
+    return prisma.weeklyStock.create({
+      data: {
+        productId,
+        weekId,
+        maxStock: product.weeklyStock,
+        currentStock: product.weeklyStock,
+        reservedStock: 0,
+      },
+    })
+  }
+
+  /**
+   * Re-sincroniza el stock de la semana actual sin perder ventas/reservas.
+   */
+  async resyncWeeklyStock(weekId?: string): Promise<{ weekId: string; updated: number; created: number }> {
+    const currentWeekId = weekId || timeGating.getCurrentWeekId()
+
+    const products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        stockType: 'WEEKLY',
+      },
+      select: {
+        id: true,
+        weeklyStock: true,
+      },
+    })
+
+    let updated = 0
+    let created = 0
+
+    for (const product of products) {
+      const existing = await prisma.weeklyStock.findUnique({
+        where: {
+          productId_weekId: {
+            productId: product.id,
+            weekId: currentWeekId,
+          },
+        },
+      })
+
+      if (!existing) {
+        await prisma.weeklyStock.create({
+          data: {
+            productId: product.id,
+            weekId: currentWeekId,
+            maxStock: product.weeklyStock,
+            currentStock: product.weeklyStock,
+            reservedStock: 0,
+          },
+        })
+        created += 1
+        continue
+      }
+
+      const sold = existing.maxStock - existing.currentStock - existing.reservedStock
+      const nextCurrentStock = Math.max(0, product.weeklyStock - sold - existing.reservedStock)
+
+      await prisma.weeklyStock.update({
+        where: { id: existing.id },
+        data: {
+          maxStock: product.weeklyStock,
+          currentStock: nextCurrentStock,
+        },
+      })
+      updated += 1
+    }
+
+    return { weekId: currentWeekId, updated, created }
+  }
+
   /**
    * Inicializa el stock para una nueva semana
    */
@@ -50,14 +148,16 @@ export class StockManager {
   ): Promise<{ available: boolean; currentStock: number }> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
 
-    const stock = await prisma.weeklyStock.findUnique({
-      where: {
-        productId_weekId: {
-          productId,
-          weekId: currentWeekId,
-        },
-      },
-    });
+    const product = await this.getProductMeta(productId)
+    if (!product || !product.isActive || !product.published) {
+      return { available: false, currentStock: 0 }
+    }
+
+    if (product.stockType === 'UNLIMITED') {
+      return { available: true, currentStock: Number.MAX_SAFE_INTEGER }
+    }
+
+    const stock = await this.ensureWeeklyStockRecord(productId, currentWeekId)
 
     if (!stock) {
       return { available: false, currentStock: 0 };
@@ -79,6 +179,12 @@ export class StockManager {
     weekId?: string
   ): Promise<boolean> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
+
+    const product = await this.getProductMeta(productId)
+    if (!product || !product.isActive || !product.published) return false
+    if (product.stockType === 'UNLIMITED') return true
+
+    await this.ensureWeeklyStockRecord(productId, currentWeekId)
 
     try {
       const stock = await prisma.weeklyStock.update({
@@ -119,6 +225,11 @@ export class StockManager {
   ): Promise<void> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
 
+    const product = await this.getProductMeta(productId)
+    if (!product || product.stockType === 'UNLIMITED') return
+
+    await this.ensureWeeklyStockRecord(productId, currentWeekId)
+
     await prisma.weeklyStock.update({
       where: {
         productId_weekId: {
@@ -143,6 +254,11 @@ export class StockManager {
     weekId?: string
   ): Promise<void> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
+
+    const product = await this.getProductMeta(productId)
+    if (!product || product.stockType === 'UNLIMITED') return
+
+    await this.ensureWeeklyStockRecord(productId, currentWeekId)
 
     await prisma.weeklyStock.update({
       where: {
@@ -176,14 +292,18 @@ export class StockManager {
   } | null> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
 
-    const stock = await prisma.weeklyStock.findUnique({
-      where: {
-        productId_weekId: {
-          productId,
-          weekId: currentWeekId,
-        },
-      },
-    });
+    const product = await this.getProductMeta(productId)
+    if (!product) return null
+    if (product.stockType === 'UNLIMITED') {
+      return {
+        maxStock: Number.MAX_SAFE_INTEGER,
+        currentStock: Number.MAX_SAFE_INTEGER,
+        reservedStock: 0,
+        availableStock: Number.MAX_SAFE_INTEGER,
+      }
+    }
+
+    const stock = await this.ensureWeeklyStockRecord(productId, currentWeekId)
 
     if (!stock) return null;
 

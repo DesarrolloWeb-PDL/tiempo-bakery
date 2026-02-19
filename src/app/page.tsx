@@ -17,7 +17,7 @@ async function getProducts() {
       orderBy: { order: 'asc' },
       include: {
         products: {
-          where: { isActive: true },
+          where: { isActive: true, published: true },
           orderBy: { name: 'asc' },
           include: {
             weeklyStocks: {
@@ -35,7 +35,9 @@ async function getProducts() {
         description: cat.description,
         productos: cat.products.map((p) => {
           const ws = p.weeklyStocks[0];
-          const stockQty = ws ? ws.currentStock : (p.stockType === 'UNLIMITED' ? 999 : 0);
+          const stockQty = ws
+            ? Math.max(0, ws.currentStock - ws.reservedStock)
+            : (p.stockType === 'UNLIMITED' ? 999 : p.weeklyStock);
           let allergens: string[] = [];
           try {
             allergens = JSON.parse(p.allergens || '[]');

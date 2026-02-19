@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
+import { timeGating } from '@/lib/time-gating'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,6 +60,44 @@ function buildData(parsed: z.infer<typeof createProductSchema>) {
     ...parsed,
     allergens: JSON.stringify(parsed.allergens ?? []),
   }
+}
+
+async function syncWeeklyStockForCurrentWeek(product: {
+  id: string
+  stockType: string
+  isActive: boolean
+  weeklyStock: number
+}) {
+  if (product.stockType !== 'WEEKLY' || !product.isActive) return
+
+  const weekId = timeGating.getCurrentWeekId()
+  const existing = await db.weeklyStock.findUnique({
+    where: { productId_weekId: { productId: product.id, weekId } },
+  })
+
+  if (!existing) {
+    await db.weeklyStock.create({
+      data: {
+        productId: product.id,
+        weekId,
+        maxStock: product.weeklyStock,
+        currentStock: product.weeklyStock,
+        reservedStock: 0,
+      },
+    })
+    return
+  }
+
+  const sold = existing.maxStock - existing.currentStock - existing.reservedStock
+  const nextCurrentStock = Math.max(0, product.weeklyStock - sold - existing.reservedStock)
+
+  await db.weeklyStock.update({
+    where: { id: existing.id },
+    data: {
+      maxStock: product.weeklyStock,
+      currentStock: nextCurrentStock,
+    },
+  })
 }
 
 export async function GET() {
@@ -138,6 +177,8 @@ export async function POST(req: NextRequest) {
     const product = await db.product.create({
       data: buildData(parsed.data),
     })
+
+    await syncWeeklyStockForCurrentWeek(product)
 
     return NextResponse.json(product, { status: 201 })
   } catch (error) {

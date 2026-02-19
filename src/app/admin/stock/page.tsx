@@ -103,6 +103,7 @@ export default function AdminStockPage() {
   const [data, setData] = useState<StockData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [resyncing, setResyncing] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   // Edits: productId -> new maxStock value
   const [edits, setEdits] = useState<Record<string, number>>({})
@@ -157,6 +158,35 @@ export default function AdminStockPage() {
     }
   }
 
+  const handleResync = async () => {
+    setResyncing(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/admin/stock/resync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weekId: currentWeekId }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'No se pudo re-sincronizar el stock')
+
+      setMessage({
+        type: 'success',
+        text: `Stock re-sincronizado (${data.total} productos: ${data.updated} actualizados, ${data.created} nuevos)`,
+      })
+      await fetchStock()
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'No se pudo re-sincronizar el stock',
+      })
+    } finally {
+      setResyncing(false)
+      setTimeout(() => setMessage(null), 5000)
+    }
+  }
+
   // Agrupar filas por categoría
   const grouped = data?.rows.reduce<Record<string, StockRow[]>>((acc, row) => {
     if (!acc[row.category]) acc[row.category] = []
@@ -175,6 +205,14 @@ export default function AdminStockPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleResync}
+            disabled={loading || saving || resyncing}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50"
+          >
+            {resyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            Re-sincronizar semana
+          </button>
           {isDirty && (
             <button
               onClick={handleSave}
