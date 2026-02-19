@@ -108,8 +108,19 @@ export default function AdminProductosPage() {
     try {
       const res = await fetch('/api/admin/productos')
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || data.details || 'No se pudo cargar el catálogo')
+        const raw = await res.text()
+        let data: { error?: string; details?: string } = {}
+        try {
+          data = JSON.parse(raw)
+        } catch {
+          data = {}
+        }
+
+        const fallbackDetails = raw
+          ? `HTTP ${res.status}: ${raw.replace(/\s+/g, ' ').slice(0, 180)}`
+          : `HTTP ${res.status}`
+
+        throw new Error(data.error || data.details || fallbackDetails)
       }
       const data = await res.json()
       setProducts(data.products ?? [])
