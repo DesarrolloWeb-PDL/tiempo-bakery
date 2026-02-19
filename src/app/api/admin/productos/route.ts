@@ -5,6 +5,25 @@ import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
+function mapDbError(error: unknown, fallback: string) {
+  const payload: Record<string, string> = { error: fallback }
+  if (!(error instanceof Error)) return payload
+
+  payload.details = error.message
+
+  if (error.message.includes('Environment variable not found: DATABASE_URL')) {
+    payload.error = 'Configuración incompleta: falta DATABASE_URL'
+  } else if (error.message.includes('Environment variable not found: POSTGRES_URL')) {
+    payload.error = 'Configuración incompleta: falta POSTGRES_URL'
+  } else if (error.message.includes("Can't reach database server")) {
+    payload.error = 'No se puede conectar a la base de datos'
+  } else if (error.message.includes('does not exist')) {
+    payload.error = 'La base de datos no está migrada o faltan tablas'
+  }
+
+  return payload
+}
+
 const createProductSchema = z.object({
   name: z.string().min(2),
   slug: z.string().min(2),
@@ -89,14 +108,7 @@ export async function GET() {
     return NextResponse.json({ products: normalizedProducts, categories })
   } catch (error) {
     console.error('Error fetching products for admin:', error)
-    const payload: Record<string, string> = { error: 'Error al obtener productos' }
-    if (error instanceof Error) {
-      payload.details = error.message
-      if (error.message.includes('Environment variable not found: DATABASE_URL')) {
-        payload.error = 'Configuración incompleta: falta DATABASE_URL'
-      }
-    }
-    return NextResponse.json(payload, { status: 500 })
+    return NextResponse.json(mapDbError(error, 'Error al obtener productos'), { status: 500 })
   }
 }
 

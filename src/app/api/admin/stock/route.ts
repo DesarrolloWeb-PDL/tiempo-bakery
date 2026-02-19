@@ -4,6 +4,25 @@ import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
+function mapDbError(error: unknown, fallback: string) {
+  const payload: Record<string, string> = { error: fallback }
+  if (!(error instanceof Error)) return payload
+
+  payload.details = error.message
+
+  if (error.message.includes('Environment variable not found: DATABASE_URL')) {
+    payload.error = 'Configuración incompleta: falta DATABASE_URL'
+  } else if (error.message.includes('Environment variable not found: POSTGRES_URL')) {
+    payload.error = 'Configuración incompleta: falta POSTGRES_URL'
+  } else if (error.message.includes("Can't reach database server")) {
+    payload.error = 'No se puede conectar a la base de datos'
+  } else if (error.message.includes('does not exist')) {
+    payload.error = 'La base de datos no está migrada o faltan tablas'
+  }
+
+  return payload
+}
+
 // GET /api/admin/stock?weekId=2025-W08
 export async function GET(req: NextRequest) {
   try {
@@ -21,7 +40,7 @@ export async function GET(req: NextRequest) {
         weeklyStocks: { where: { weekId } },
         category: { select: { name: true, slug: true } },
       },
-      orderBy: [{ category: { order: 'asc' } }, { name: 'asc' }],
+      orderBy: [{ category: { name: 'asc' } }, { name: 'asc' }],
     })
 
     const rows = products.map((p: typeof products[number]) => {
@@ -45,7 +64,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ weekId, rows })
   } catch (error) {
     console.error('Error fetching stock:', error)
-    return NextResponse.json({ error: 'Error al obtener stock' }, { status: 500 })
+    return NextResponse.json(mapDbError(error, 'Error al obtener stock'), { status: 500 })
   }
 }
 
@@ -98,6 +117,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ updated: results.length, weekId })
   } catch (error) {
     console.error('Error upserting stock:', error)
-    return NextResponse.json({ error: 'Error al actualizar stock' }, { status: 500 })
+    return NextResponse.json(mapDbError(error, 'Error al actualizar stock'), { status: 500 })
   }
 }

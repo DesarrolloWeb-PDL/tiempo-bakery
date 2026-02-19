@@ -185,12 +185,24 @@ export default function AdminDashboard() {
     setError(null)
     try {
       const res = await fetch('/api/admin/metrics')
-      if (!res.ok) throw new Error('Error al cargar métricas')
+      if (!res.ok) {
+        const raw = await res.text()
+        let data: { error?: string; details?: string } = {}
+        try {
+          data = JSON.parse(raw)
+        } catch {
+          data = {}
+        }
+        const fallback = raw
+          ? `HTTP ${res.status}: ${raw.replace(/\s+/g, ' ').slice(0, 180)}`
+          : `HTTP ${res.status}`
+        throw new Error(data.error || data.details || fallback)
+      }
       const json = await res.json()
       setData(json)
       setLastUpdated(new Date())
     } catch (e) {
-      setError('No se pudieron cargar las métricas. ¿Está la base de datos activa?')
+      setError(e instanceof Error ? e.message : 'No se pudieron cargar las métricas')
     } finally {
       setLoading(false)
     }
