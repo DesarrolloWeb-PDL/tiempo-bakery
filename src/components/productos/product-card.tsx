@@ -50,17 +50,36 @@ export function ProductCard({
   category,
 }: ProductCardProps) {
   const { theme } = useAppTheme()
+  const normalizeImageUrl = (value: string) => {
+    if (!value) return '/img/espiga.png'
+    try {
+      const parsed = new URL(value)
+      if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+        return parsed.pathname + parsed.search
+      }
+      return value
+    } catch {
+      return value
+    }
+  }
+
+  const [cardImageUrl, setCardImageUrl] = React.useState(() => normalizeImageUrl(imageUrl))
+
+  React.useEffect(() => {
+    setCardImageUrl(normalizeImageUrl(imageUrl))
+  }, [imageUrl])
 
   return (
     <Card className="flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow">
       <Link href={`/productos/${slug}`} className="block">
         <div className="relative h-48 w-full bg-gray-100">
           <Image
-            src={imageUrl}
+            src={cardImageUrl}
             alt={imageAlt}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={() => setCardImageUrl('/img/espiga.png')}
           />
           {stock.lowStock && stock.hasStock && (
             <Badge

@@ -48,6 +48,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Logo Serve] Error:', error)
-    return NextResponse.json({ error: 'File not found' }, { status: 404 })
+    return NextResponse.redirect(new URL('/img/espiga.png', req.url), 307)
   }
 }

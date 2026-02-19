@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
 import crypto from 'crypto'
+import { createHash } from 'crypto'
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
 const ADMIN_COOKIE = 'tbk_admin_auth'
@@ -9,6 +10,43 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
 
 export const dynamic = 'force-dynamic'
+
+function isCloudinaryConfigured() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+  )
+}
+
+async function uploadLogoToCloudinary(file: File) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
+  const apiKey = process.env.CLOUDINARY_API_KEY!
+  const apiSecret = process.env.CLOUDINARY_API_SECRET!
+  const timestamp = Math.floor(Date.now() / 1000)
+  const folder = 'tiempo-bakery/logo'
+  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`
+  const signature = createHash('sha1').update(toSign).digest('hex')
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('api_key', apiKey)
+  formData.append('timestamp', String(timestamp))
+  formData.append('signature', signature)
+  formData.append('folder', folder)
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  const data = await response.json().catch(() => ({} as Record<string, unknown>))
+  if (!response.ok || typeof data.secure_url !== 'string') {
+    throw new Error('No se pudo subir el logo a Cloudinary')
+  }
+
+  return data.secure_url
+}
 
 function getUploadDir() {
   // En producción (Vercel/serverless), usar /tmp que es writable
@@ -67,6 +105,16 @@ export async function POST(req: NextRequest) {
         { error: 'File too large (max 5MB)' },
         { status: 400 }
       )
+    }
+
+    if (isCloudinaryConfigured()) {
+      const url = await uploadLogoToCloudinary(file)
+      return NextResponse.json({
+        url,
+        filename: file.name,
+        size: file.size,
+        type: file.type,
+      })
     }
 
     // Create upload directory if it doesn't exist
@@ -142,6 +190,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Logo Serve] Error:', error)
-    return NextResponse.json({ error: 'File not found' }, { status: 404 })
+    return NextResponse.redirect(new URL('/img/espiga.png', req.url), 307)
   }
 }

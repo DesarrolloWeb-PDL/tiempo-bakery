@@ -2,12 +2,50 @@ import { NextRequest, NextResponse } from 'next/server'
 import { mkdir, writeFile, readFile } from 'fs/promises'
 import path from 'path'
 import { randomUUID } from 'crypto'
+import { createHash } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_SIZE = 5 * 1024 * 1024
+
+function isCloudinaryConfigured() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+  )
+}
+
+async function uploadToCloudinary(file: File) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
+  const apiKey = process.env.CLOUDINARY_API_KEY!
+  const apiSecret = process.env.CLOUDINARY_API_SECRET!
+  const timestamp = Math.floor(Date.now() / 1000)
+  const folder = 'tiempo-bakery/productos'
+  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`
+  const signature = createHash('sha1').update(toSign).digest('hex')
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('api_key', apiKey)
+  formData.append('timestamp', String(timestamp))
+  formData.append('signature', signature)
+  formData.append('folder', folder)
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  const data = await response.json().catch(() => ({} as Record<string, unknown>))
+  if (!response.ok || typeof data.secure_url !== 'string') {
+    throw new Error('No se pudo subir la imagen a Cloudinary')
+  }
+
+  return data.secure_url
+}
 
 function getUploadDir() {
   // En producción (Vercel/serverless), usar /tmp que es writable
@@ -60,6 +98,11 @@ export async function POST(req: NextRequest) {
     if (file.size > MAX_SIZE) {
       console.error('Archivo muy grande:', file.size)
       return NextResponse.json({ error: 'La imagen supera 5MB' }, { status: 400 })
+    }
+
+    if (isCloudinaryConfigured()) {
+      const cloudUrl = await uploadToCloudinary(file)
+      return NextResponse.json({ url: cloudUrl })
     }
 
     const ext = getExtension(file.name, file.type)
@@ -122,6 +165,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Upload Serve] Error:', error)
-    return NextResponse.json({ error: 'File not found' }, { status: 404 })
+    return NextResponse.redirect(new URL('/img/espiga.png', req.url), 307)
   }
 }

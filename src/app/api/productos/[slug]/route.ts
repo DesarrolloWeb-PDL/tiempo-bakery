@@ -47,7 +47,7 @@ export async function GET(
       );
     }
 
-    if (!producto.isActive) {
+    if (!producto.isActive || !producto.published) {
       return NextResponse.json(
         { error: 'Producto no disponible' },
         { status: 404 }
@@ -55,9 +55,11 @@ export async function GET(
     }
 
     const stockInfo = producto.weeklyStocks[0];
-    const availableStock = stockInfo
-      ? stockInfo.currentStock - stockInfo.reservedStock
-      : 0;
+    const availableStock = producto.stockType === 'UNLIMITED'
+      ? Number.MAX_SAFE_INTEGER
+      : stockInfo
+        ? stockInfo.currentStock - stockInfo.reservedStock
+        : producto.weeklyStock;
 
     const response = {
       id: producto.id,
@@ -75,9 +77,9 @@ export async function GET(
       category: producto.category,
       stock: {
         available: availableStock,
-        max: stockInfo?.maxStock || 0,
-        hasStock: availableStock > 0,
-        lowStock: availableStock > 0 && availableStock <= 5,
+        max: producto.stockType === 'UNLIMITED' ? Number.MAX_SAFE_INTEGER : (stockInfo?.maxStock || producto.weeklyStock),
+        hasStock: producto.stockType === 'UNLIMITED' || availableStock > 0,
+        lowStock: producto.stockType !== 'UNLIMITED' && availableStock > 0 && availableStock <= 5,
       },
       weekId: currentWeekId,
     };

@@ -20,6 +20,19 @@ const DEFAULT_THEME: AppTheme = {
   accentColor: '#f5f5f5',
 }
 
+function normalizeThemeUrl(value: string) {
+  if (!value) return value
+  try {
+    const parsed = new URL(value)
+    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+      return parsed.pathname + parsed.search
+    }
+    return value
+  } catch {
+    return value
+  }
+}
+
 let cachedTheme: AppTheme | null = null
 
 export function useAppTheme() {
@@ -55,7 +68,11 @@ export function useAppTheme() {
         }
         
         const data = await res.json()
-        const finalTheme = { ...DEFAULT_THEME, ...data }
+        const finalTheme = {
+          ...DEFAULT_THEME,
+          ...data,
+          logoUrl: normalizeThemeUrl((data as AppTheme).logoUrl ?? DEFAULT_THEME.logoUrl),
+        }
         cachedTheme = finalTheme
         setTheme(finalTheme)
       } catch (err) {
