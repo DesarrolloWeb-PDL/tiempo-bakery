@@ -4,6 +4,36 @@ import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
+function mapDbError(error: unknown, fallback: string) {
+  const payload: Record<string, string> = { error: fallback }
+  if (!(error instanceof Error)) return payload
+
+  const configuredDbUrl = process.env.DATABASE_URL ?? ''
+  payload.details = error.message
+
+  if (error.message.includes('Environment variable not found: DATABASE_URL')) {
+    payload.error = 'Configuración incompleta: falta DATABASE_URL'
+  } else if (error.message.includes('Environment variable not found: POSTGRES_URL')) {
+    payload.error = 'Configuración incompleta: falta POSTGRES_URL'
+  } else if (error.message.includes("Can't reach database server")) {
+    payload.error = 'No se puede conectar a la base de datos'
+    try {
+      const host = configuredDbUrl ? new URL(configuredDbUrl).hostname : ''
+      if (host === 'localhost' || host === '127.0.0.1') {
+        payload.error = 'No se puede conectar a la base de datos: DATABASE_URL apunta a localhost en producción'
+      } else if (configuredDbUrl && !configuredDbUrl.includes('sslmode=')) {
+        payload.error = 'No se puede conectar a la base de datos: revisá sslmode=require en DATABASE_URL'
+      }
+    } catch {
+      // noop
+    }
+  } else if (error.message.includes('does not exist')) {
+    payload.error = 'La base de datos no está migrada o faltan tablas'
+  }
+
+  return payload
+}
+
 const themeSchema = z.object({
   appTitle: z.string().min(1).max(100),
   appSubtitle: z.string().max(200),
@@ -50,7 +80,7 @@ export async function GET() {
     return NextResponse.json({ ...DEFAULT_THEME, ...theme })
   } catch (error) {
     console.error('Error fetching theme config:', error)
-    return NextResponse.json({ error: 'Error al obtener configuración de tema' }, { status: 500 })
+    return NextResponse.json({ ...DEFAULT_THEME })
   }
 }
 
@@ -82,7 +112,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating theme config:', error)
-    return NextResponse.json({ error: 'Error al guardar configuración de tema' }, { status: 500 })
+    return NextResponse.json(mapDbError(error, 'Error al guardar configuración de tema'), { status: 500 })
   }
 }
 
@@ -110,6 +140,6 @@ export async function DELETE() {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error resetting theme config:', error)
-    return NextResponse.json({ error: 'Error al restablecer tema' }, { status: 500 })
+    return NextResponse.json(mapDbError(error, 'Error al restablecer tema'), { status: 500 })
   }
 }
