@@ -107,14 +107,17 @@ export default function AdminProductosPage() {
     setError(null)
     try {
       const res = await fetch('/api/admin/productos')
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || data.details || 'No se pudo cargar el catálogo')
+      }
       const data = await res.json()
       setProducts(data.products ?? [])
       setCategories(data.categories ?? [])
-    } catch {
+    } catch (err) {
       setProducts([])
       setCategories([])
-      setError('No se pudo cargar el catálogo')
+      setError(err instanceof Error ? err.message : 'No se pudo cargar el catálogo')
     } finally {
       setLoading(false)
     }

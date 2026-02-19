@@ -90,8 +90,11 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching products for admin:', error)
     const payload: Record<string, string> = { error: 'Error al obtener productos' }
-    if (process.env.NODE_ENV !== 'production' && error instanceof Error) {
+    if (error instanceof Error) {
       payload.details = error.message
+      if (error.message.includes('Environment variable not found: DATABASE_URL')) {
+        payload.error = 'Configuración incompleta: falta DATABASE_URL'
+      }
     }
     return NextResponse.json(payload, { status: 500 })
   }
