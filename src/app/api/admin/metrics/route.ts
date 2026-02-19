@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 function mapDbError(error: unknown, fallback: string) {
   const payload: Record<string, string> = { error: fallback }
   if (!(error instanceof Error)) return payload
+  const configuredDbUrl = process.env.DATABASE_URL ?? ''
 
   payload.details = error.message
 
@@ -15,6 +16,16 @@ function mapDbError(error: unknown, fallback: string) {
     payload.error = 'Configuración incompleta: falta POSTGRES_URL'
   } else if (error.message.includes("Can't reach database server")) {
     payload.error = 'No se puede conectar a la base de datos'
+    try {
+      const host = configuredDbUrl ? new URL(configuredDbUrl).hostname : ''
+      if (host === 'localhost' || host === '127.0.0.1') {
+        payload.error = 'No se puede conectar a la base de datos: DATABASE_URL apunta a localhost en producción'
+      } else if (configuredDbUrl && !configuredDbUrl.includes('sslmode=')) {
+        payload.error = 'No se puede conectar a la base de datos: revisá sslmode=require en DATABASE_URL'
+      }
+    } catch {
+      // noop
+    }
   } else if (error.message.includes('does not exist')) {
     payload.error = 'La base de datos no está migrada o faltan tablas'
   }
