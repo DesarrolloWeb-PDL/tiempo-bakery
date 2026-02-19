@@ -33,19 +33,44 @@ function buildData(parsed: z.infer<typeof createProductSchema>) {
 
 export async function GET() {
   try {
-    const [products, categories] = await Promise.all([
-      db.product.findMany({
-        include: {
-          category: { select: { id: true, name: true, slug: true } },
-          _count: { select: { orderItems: true } },
-        },
-        orderBy: [{ category: { name: 'asc' } }, { name: 'asc' }],
-      }),
-      db.category.findMany({
-        select: { id: true, name: true, slug: true },
-        orderBy: [{ name: 'asc' }],
-      }),
-    ])
+    let products: any[] = []
+    let categories: any[] = []
+
+    try {
+      ;[products, categories] = await Promise.all([
+        db.product.findMany({
+          include: {
+            category: { select: { id: true, name: true, slug: true } },
+            _count: { select: { orderItems: true } },
+          },
+          orderBy: [{ category: { name: 'asc' } }, { name: 'asc' }],
+        }),
+        db.category.findMany({
+          select: { id: true, name: true, slug: true },
+          orderBy: [{ name: 'asc' }],
+        }),
+      ])
+    } catch (compatError) {
+      console.warn('Admin productos fallback activado por incompatibilidad de esquema:', compatError)
+
+      ;[products, categories] = await Promise.all([
+        db.product.findMany({
+          include: {
+            category: { select: { id: true, name: true } },
+          },
+          orderBy: [{ name: 'asc' }],
+        }),
+        db.category.findMany({
+          select: { id: true, name: true },
+          orderBy: [{ name: 'asc' }],
+        }),
+      ])
+
+      products = products.map((product) => ({
+        ...product,
+        _count: { orderItems: 0 },
+      }))
+    }
 
     const normalizedProducts = products.map((product) => {
       let allergens: string[] = []
@@ -64,7 +89,11 @@ export async function GET() {
     return NextResponse.json({ products: normalizedProducts, categories })
   } catch (error) {
     console.error('Error fetching products for admin:', error)
-    return NextResponse.json({ error: 'Error al obtener productos' }, { status: 500 })
+    const payload: Record<string, string> = { error: 'Error al obtener productos' }
+    if (process.env.NODE_ENV !== 'production' && error instanceof Error) {
+      payload.details = error.message
+    }
+    return NextResponse.json(payload, { status: 500 })
   }
 }
 
