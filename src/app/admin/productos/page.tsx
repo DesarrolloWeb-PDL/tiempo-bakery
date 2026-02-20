@@ -100,6 +100,7 @@ export default function AdminProductosPage() {
   const [newCategoryName, setNewCategoryName] = useState('')
   const [creatingCategory, setCreatingCategory] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const fetchProducts = async () => {
@@ -139,6 +140,10 @@ export default function AdminProductosPage() {
   }, [])
 
   const resetForm = () => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl)
+      setLocalPreviewUrl(null)
+    }
     setForm(EMPTY_FORM)
     setEditingId(null)
     setFormOpen(false)
@@ -293,56 +298,57 @@ export default function AdminProductosPage() {
   }
 
   const handleImageSelected = async (file: File) => {
+    // Validar localmente antes de cualquier cosa
+    const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
+    if (!ALLOWED_MIME.has(file.type)) {
+      setError(`Formato no soportado: ${file.type}. Usa JPG, PNG o WEBP`)
+      return
+    }
+    const MAX_SIZE = 5 * 1024 * 1024
+    if (file.size > MAX_SIZE) {
+      setError(`La imagen supera 5MB (tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+      return
+    }
+
+    // Mostrar preview local inmediatamente (antes de subir al servidor)
+    if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl)
+    const blobUrl = URL.createObjectURL(file)
+    setLocalPreviewUrl(blobUrl)
+    setFieldValue('imageUrl', '')
+
     setUploadingImage(true)
     setError(null)
 
     try {
-      // Validar el archivo localmente primero
-      const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
-      if (!ALLOWED_MIME.has(file.type)) {
-        throw new Error(`Formato no soportado: ${file.type}. Usa JPG, PNG o WEBP`)
-      }
-
-      const MAX_SIZE = 5 * 1024 * 1024
-      if (file.size > MAX_SIZE) {
-        throw new Error(`La imagen supera 5MB (tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
-      }
-
       const formData = new FormData()
       formData.append('file', file)
-
-      console.log('Subiendo imagen:', { name: file.name, size: file.size, type: file.type })
 
       const res = await fetch('/api/admin/uploads', {
         method: 'POST',
         body: formData,
       })
 
-      const data = await res.json().catch((err) => {
-        console.error('Error parsing response:', err)
-        return {}
-      })
-
-      console.log('Respuesta del servidor:', { status: res.status, data })
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
         throw new Error(data.error || `Error del servidor (${res.status})`)
       }
 
       if (typeof data.url !== 'string') {
-        console.error('URL inválida en respuesta:', data)
         throw new Error('La respuesta del servidor no contiene una URL válida')
       }
 
-      console.log('Imagen subida exitosamente:', data.url)
+      // Upload exitoso: reemplazar blob local por URL del servidor
+      URL.revokeObjectURL(blobUrl)
+      setLocalPreviewUrl(null)
       setFieldValue('imageUrl', data.url)
       if (!form.imageAlt.trim() && form.name.trim()) {
         setFieldValue('imageAlt', form.name.trim())
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'No se pudo subir la imagen'
-      console.error('Error en upload:', errorMsg)
       setError(errorMsg)
+      // Mantener el preview local aunque haya fallado el servidor
     } finally {
       setUploadingImage(false)
     }
@@ -561,29 +567,48 @@ export default function AdminProductosPage() {
                 }}
               />
               <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingImage}
-                  className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
-                >
-                  {uploadingImage ? 'Subiendo imagen...' : 'Subir imagen desde archivo'}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
+                  >
+                    {uploadingImage ? 'Subiendo...' : (localPreviewUrl || form.imageUrl) ? 'Cambiar imagen' : 'Subir imagen'}
+                  </button>
+                  {uploadingImage && (
+                    <span className="text-xs text-amber-600 animate-pulse">Guardando en servidor…</span>
+                  )}
+                  {!uploadingImage && form.imageUrl && (
+                    <span className="text-xs text-green-600">✓ Guardada</span>
+                  )}
+                  {!uploadingImage && localPreviewUrl && !form.imageUrl && (
+                    <span className="text-xs text-red-500">⚠ Error al subir, reintenta</span>
+                  )}
+                </div>
                 <p className="text-xs text-gray-500">Acepta JPG, PNG o WEBP (máx. 5MB)</p>
-                
-                {form.imageUrl && (
-                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
+
+                {(localPreviewUrl || form.imageUrl) && (
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start gap-4">
                     <img
-                      src={form.imageUrl}
+                      src={localPreviewUrl ?? form.imageUrl}
                       alt={form.imageAlt || 'Preview'}
-                      className="h-24 object-contain rounded"
+                      className="h-28 w-28 object-cover rounded-lg border border-gray-200 flex-shrink-0"
                       onError={(e) => {
-                        console.error('Error loading image:', form.imageUrl)
                         e.currentTarget.style.display = 'none'
                       }}
                     />
-                    <p className="text-xs text-gray-400 mt-2 break-all">URL: {form.imageUrl}</p>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      {localPreviewUrl && !form.imageUrl && (
+                        <p className="text-amber-600 font-medium">Vista previa local — subiendo al servidor…</p>
+                      )}
+                      {form.imageUrl && (
+                        <p className="text-green-700 font-medium">Imagen guardada en servidor</p>
+                      )}
+                      {form.imageUrl && (
+                        <p className="break-all text-gray-400">{form.imageUrl}</p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -682,6 +707,9 @@ export default function AdminProductosPage() {
                       src={p.imageUrl}
                       alt={p.name}
                       className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.src = '/img/espiga.png'
+                      }}
                     />
                     <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
                   </div>
