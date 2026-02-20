@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, Settings, Key, Loader2, Truck, Palette } from 'lucide-react'
+import { LogOut, Settings, Key, Loader2, Truck, Palette, MapPin, Layout, Info, Mail } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 
 function formatCurrency(amount: number) {
@@ -11,6 +11,29 @@ function formatCurrency(amount: number) {
     currency: 'ARS',
     minimumFractionDigits: 2,
   }).format(amount)
+}
+
+// --- COMPONENTES AUXILIARES ---
+
+
+function PuntosEntregaAdmin() {
+  return <div>Puntos de entrega (implementación aquí)</div>;
+}
+
+function FooterConfigAdmin() {
+  return <div>Footer (implementación aquí)</div>;
+}
+
+function NavConfigAdmin() {
+  return <div>Navegación (implementación aquí)</div>;
+}
+
+function SobreNosotrosConfigAdmin() {
+  return <div>Sobre Nosotros (implementación aquí)</div>;
+}
+
+function ContactoConfigAdmin() {
+  return <div>Contacto (implementación aquí)</div>;
 }
 
 export default function AdminConfigPage() {
@@ -529,20 +552,3 @@ export default function AdminConfigPage() {
     </div>
   )
 }
-
-// --- COMPONENTES AUXILIARES ---
-
-// PuntosEntregaAdmin
-// ...código de PuntosEntregaAdmin aquí...
-
-// FooterConfigAdmin
-// ...código de FooterConfigAdmin aquí...
-
-// NavConfigAdmin
-// ...código de NavConfigAdmin aquí...
-
-// SobreNosotrosConfigAdmin
-// ...código de SobreNosotrosConfigAdmin aquí...
-
-// ContactoConfigAdmin
-// ...código de ContactoConfigAdmin aquí...
