@@ -37,6 +37,75 @@ function ContactoConfigAdmin() {
 }
 
 export default function AdminConfigPage() {
+              <Tabs.Content value="entrega">
+                <div className="space-y-8">
+                  {/* Días y horarios de preventa */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <h2 className="text-lg font-bold mb-4">Días y horarios de preventa</h2>
+                    {/* Aquí iría el formulario para editar apertura/cierre semanal (apertura/cierre, día, hora, minuto) */}
+                    {/* ...existing code... */}
+                  </div>
+
+                  {/* Puntos de entrega */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <h2 className="text-lg font-bold mb-4">Puntos de entrega</h2>
+                    <table className="w-full text-sm border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="px-2 py-2">Activo</th>
+                          <th className="px-2 py-2">Nombre</th>
+                          <th className="px-2 py-2">Dirección</th>
+                          <th className="px-2 py-2">Ciudad</th>
+                          <th className="px-2 py-2">Código Postal</th>
+                          <th className="px-2 py-2">Horario</th>
+                          <th className="px-2 py-2">Notas</th>
+                          <th className="px-2 py-2">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* Aquí se mapearán los puntos de entrega existentes, cada uno editable y con botón Guardar y Eliminar */}
+                        {/* ...existing code... */}
+                      </tbody>
+                    </table>
+                    <div className="mt-4">
+                      <button className="px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700">
+                        Agregar nuevo punto
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Costos de envío */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <h2 className="text-lg font-bold mb-4">Costos de envío</h2>
+                    {/* Formulario para editar costos por tipo: recogida, local, nacional */}
+                    {/* ...existing code... */}
+                  </div>
+                </div>
+              </Tabs.Content>
+        <Tabs.Content value="entrega">
+          <div className="space-y-8">
+            {/* Días y horarios de preventa */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <h2 className="text-lg font-bold mb-4">Días y horarios de preventa</h2>
+              {/* Aquí iría el formulario para editar apertura/cierre semanal (apertura/cierre, día, hora, minuto) */}
+              {/* ...existing code... */}
+            </div>
+
+            {/* Puntos de entrega */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <h2 className="text-lg font-bold mb-4">Puntos de entrega</h2>
+              {/* Tabla editable de puntos de entrega: nombre, dirección, ciudad, código postal, horario, notas, activo/inactivo */}
+              {/* ...existing code... */}
+            </div>
+
+            {/* Costos de envío */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <h2 className="text-lg font-bold mb-4">Costos de envío</h2>
+              {/* Formulario para editar costos por tipo: recogida, local, nacional */}
+              {/* ...existing code... */}
+            </div>
+          </div>
+        </Tabs.Content>
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
   const [loadingShipping, setLoadingShipping] = useState(true)
@@ -223,10 +292,10 @@ export default function AdminConfigPage() {
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <Settings className="w-6 h-6 text-amber-600" /> Configuración
       </h1>
-      <Tabs.Root defaultValue="puntos" className="w-full">
+      <Tabs.Root defaultValue="entrega" className="w-full">
         <Tabs.List className="flex gap-2 border-b mb-6">
-          <Tabs.Trigger value="puntos" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
-            <MapPin className="w-4 h-4" /> Puntos de Entrega
+          <Tabs.Trigger value="entrega" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+            <Truck className="w-4 h-4" /> Días y lugares de entrega
           </Tabs.Trigger>
           <Tabs.Trigger value="footer" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
             <Layout className="w-4 h-4" /> Footer
@@ -242,8 +311,9 @@ export default function AdminConfigPage() {
           </Tabs.Trigger>
         </Tabs.List>
 
-        <Tabs.Content value="puntos">
-          <PuntosEntregaAdmin />
+        <Tabs.Content value="entrega">
+          {/* Formulario unificado de días, horarios, puntos de entrega y costos de envío */}
+          {/* Aquí irá la implementación completa editable */}
         </Tabs.Content>
         <Tabs.Content value="footer">
           <FooterConfigAdmin />

@@ -14,12 +14,24 @@ interface TimeGatingBannerProps {
     seconds: number;
   };
   nextOpening?: string;
+  openingDayLabel?: string;
+  openingHour?: number;
+  openingMinute?: number;
+  closingDayLabel?: string;
+  closingHour?: number;
+  closingMinute?: number;
 }
 
 export function TimeGatingBanner({
   isOpen,
   timeRemaining,
   nextOpening,
+  openingDayLabel,
+  openingHour,
+  openingMinute,
+  closingDayLabel,
+  closingHour,
+  closingMinute,
 }: TimeGatingBannerProps) {
   if (isOpen) {
     return (
@@ -35,7 +47,7 @@ export function TimeGatingBanner({
               ¡Estamos abiertos!
             </h3>
             <p className="text-sm text-green-700">
-              Realiza tu pedido antes del domingo a las 20:00
+              Realiza tu pedido entre {openingDayLabel} {String(openingHour).padStart(2, '0')}:{String(openingMinute).padStart(2, '0')} y {closingDayLabel} {String(closingHour).padStart(2, '0')}:{String(closingMinute).padStart(2, '0')}
             </p>
           </div>
           <Badge variant="success" className="shrink-0">
@@ -64,6 +76,9 @@ export function TimeGatingBanner({
               {timeRemaining.minutes}m
             </p>
           )}
+          <p className="text-xs text-amber-700 mt-2">
+            Horario de pedidos: {openingDayLabel} {String(openingHour).padStart(2, '0')}:{String(openingMinute).padStart(2, '0')} a {closingDayLabel} {String(closingHour).padStart(2, '0')}:{String(closingMinute).padStart(2, '0')}
+          </p>
         </div>
         <Badge variant="warning" className="shrink-0">
           Cerrado
