@@ -598,7 +598,7 @@ export default function AdminConfigPage() {
           </div>
 
           {themeMsg && (
-            <p className={`text-sm ${themeMsg.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm ${typeof themeMsg === 'string' && themeMsg?.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
               {themeMsg}
             </p>
           )}
