@@ -91,6 +91,11 @@ export default function AdminProductosPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false)
+  const [categoryForm, setCategoryForm] = useState({ id: '', name: '', description: '' })
+  const [categoryError, setCategoryError] = useState<string | null>(null)
+  const [categorySaving, setCategorySaving] = useState(false)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ProductFormState>(EMPTY_FORM)
@@ -471,6 +476,13 @@ export default function AdminProductosPage() {
             Nuevo producto
           </button>
           <button
+            onClick={() => setCategoryModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4" />
+            Nueva categoría
+          </button>
+          <button
             onClick={fetchProducts}
             disabled={loading}
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
@@ -479,6 +491,116 @@ export default function AdminProductosPage() {
           </button>
         </div>
       </div>
+      {/* Modal para crear/editar/eliminar categoría */}
+      {categoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md space-y-4 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">Gestión de categorías</h3>
+              <button type="button" onClick={() => setCategoryModalOpen(false)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Listado de categorías */}
+            <div className="space-y-2">
+              {categories.map((cat) => (
+                <div key={cat.id} className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900 flex-1">{cat.name}</span>
+                  <button
+                    className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
+                    onClick={() => {
+                      setEditingCategoryId(cat.id);
+                      setCategoryForm({ id: cat.id, name: cat.name, description: cat.description || '' });
+                    }}
+                  >Editar</button>
+                  <button
+                    className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded"
+                    onClick={async () => {
+                      if (!window.confirm(`¿Eliminar la categoría "${cat.name}"?`)) return;
+                      setCategorySaving(true);
+                      try {
+                        const res = await fetch(`/api/admin/categorias/${cat.id}`, { method: 'DELETE' });
+                        if (!res.ok) throw new Error('No se pudo eliminar');
+                        setCategories((prev) => prev.filter((c) => c.id !== cat.id));
+                        if (editingCategoryId === cat.id) {
+                          setEditingCategoryId(null);
+                          setCategoryForm({ id: '', name: '', description: '' });
+                        }
+                      } catch (err) {
+                        setCategoryError('Error al eliminar la categoría');
+                      } finally {
+                        setCategorySaving(false);
+                      }
+                    }}
+                  >Eliminar</button>
+                </div>
+              ))}
+            </div>
+            {/* Formulario de crear/editar */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setCategorySaving(true);
+                setCategoryError(null);
+                try {
+                  const method = editingCategoryId ? 'PUT' : 'POST';
+                  const endpoint = editingCategoryId ? `/api/admin/categorias/${editingCategoryId}` : '/api/admin/categorias';
+                  const res = await fetch(endpoint, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: categoryForm.name, description: categoryForm.description }),
+                  });
+                  const data = await res.json().catch(() => ({}));
+                  if (!res.ok) throw new Error(data.error || 'No se pudo guardar la categoría');
+                  if (editingCategoryId) {
+                    setCategories((prev) => prev.map((c) => c.id === editingCategoryId ? data : c));
+                  } else {
+                    setCategories((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name, 'es')));
+                  }
+                  setCategoryForm({ id: '', name: '', description: '' });
+                  setEditingCategoryId(null);
+                } catch (err) {
+                  setCategoryError(err instanceof Error ? err.message : 'No se pudo guardar la categoría');
+                } finally {
+                  setCategorySaving(false);
+                }
+              }}
+              className="space-y-3 mt-4"
+            >
+              <div>
+                <input
+                  value={categoryForm.name}
+                  onChange={(e) => setCategoryForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="Nombre de la categoría"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <textarea
+                  value={categoryForm.description}
+                  onChange={(e) => setCategoryForm((f) => ({ ...f, description: e.target.value }))}
+                  placeholder="Descripción (opcional)"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                  rows={3}
+                />
+              </div>
+              {categoryError && <p className="text-sm text-red-600">{categoryError}</p>}
+              <div className="flex items-center justify-end gap-2">
+                <button type="button" onClick={() => {
+                  setCategoryForm({ id: '', name: '', description: '' });
+                  setEditingCategoryId(null);
+                }} className="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={categorySaving} className="px-3 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60">
+                  {categorySaving ? 'Guardando...' : editingCategoryId ? 'Guardar cambios' : 'Crear categoría'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {formOpen && (
         <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
