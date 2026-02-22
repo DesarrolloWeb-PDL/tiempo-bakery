@@ -291,8 +291,10 @@ export default function AdminConfigPage() {
         </Tabs.List>
 
         <Tabs.Content value="entrega">
-          {/* Formulario unificado de días, horarios, puntos de entrega y costos de envío */}
-          {/* Aquí irá la implementación completa editable */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 text-center text-gray-500">
+            <h2 className="text-lg font-bold mb-2">Días y lugares de entrega</h2>
+            <p>Próximamente aquí podrás editar días, horarios, puntos de entrega y costos de envío.</p>
+          </div>
         </Tabs.Content>
         <Tabs.Content value="footer">
           <FooterConfigAdmin />
