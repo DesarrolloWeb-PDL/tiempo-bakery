@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LogOut, Settings, Key, Loader2, Truck, Palette, MapPin, Layout, Info, Mail } from 'lucide-react'
+import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs'
 
 function formatCurrency(amount: number) {
@@ -522,10 +523,13 @@ export default function AdminConfigPage() {
             {theme.logoUrl && (
               <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                 <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
-                <img
+                <Image
                   src={theme.logoUrl}
                   alt="Logo preview"
+                  width={64}
+                  height={64}
                   className="h-16 object-contain"
+                  priority
                 />
               </div>
             )}
