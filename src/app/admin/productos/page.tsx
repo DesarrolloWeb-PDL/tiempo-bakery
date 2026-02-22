@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { BarChart2, RefreshCw, Plus, Pencil, Trash2, X, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -28,6 +29,7 @@ interface ProductRow {
 interface CategoryOption {
   id: string
   name: string
+  description?: string
 }
 
 interface ProductFormState {
@@ -808,12 +810,14 @@ export default function AdminProductosPage() {
                 <div key={p.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50/50">
                   <div className="col-span-4 flex items-center gap-3 min-w-0">
                     {/* Imagen actual */}
-                    <img
+                    <Image
                       src={p.imageUrl}
                       alt={p.name}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
                       onError={(e) => {
-                        e.currentTarget.src = '/img/espiga.png'
+                        (e.currentTarget as HTMLImageElement).src = '/img/espiga.png'
                       }}
                     />
                     <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
