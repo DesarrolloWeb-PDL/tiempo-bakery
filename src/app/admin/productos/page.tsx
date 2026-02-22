@@ -92,13 +92,43 @@ export default function AdminProductosPage() {
               {products.map((p) => (
                 <div key={p.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50/50">
                   <div className="col-span-4 flex items-center gap-3 min-w-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    {/* Imagen actual */}
                     <img
                       src={p.imageUrl}
                       alt={p.name}
                       className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
                     />
                     <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                    {/* Subir nueva imagen */}
+                    <form
+                      className="ml-2"
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        const form = e.target as HTMLFormElement;
+                        const fileInput = form.elements.namedItem('file') as HTMLInputElement;
+                        if (!fileInput.files?.[0]) return;
+                        const data = new FormData();
+                        data.append('file', fileInput.files[0]);
+                        data.append('productId', p.id);
+                        const res = await fetch('/api/admin/productos/upload-image', {
+                          method: 'POST',
+                          body: data,
+                        });
+                        if (res.ok) {
+                          const { imageUrl } = await res.json();
+                          // Actualizar imagen en la BD (requiere endpoint PATCH)
+                          await fetch(`/api/admin/productos/${p.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ imageUrl }),
+                          });
+                          fetchProducts();
+                        }
+                      }}
+                    >
+                      <input type="file" name="file" accept="image/*" className="text-xs" />
+                      <button type="submit" className="text-xs bg-amber-100 px-2 py-1 rounded ml-1">Subir</button>
+                    </form>
                   </div>
                   <div className="col-span-2 hidden md:block">
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
