@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { prisma } from './db';
 
 export interface TimeGatingConfig {
   timezone: string;
@@ -152,3 +153,59 @@ export class TimeGatingService {
 }
 
 export const timeGating = new TimeGatingService();
+
+function parseIntOr(value: string | undefined, fallback: number) {
+  if (value == null) return fallback;
+  const n = Number.parseInt(value, 10);
+  return Number.isNaN(n) ? fallback : n;
+}
+
+function parseBoolOr(value: string | undefined, fallback: boolean) {
+  if (value == null) return fallback;
+  return value === 'true';
+}
+
+export async function getTimeGatingRuntime(): Promise<{
+  enabled: boolean;
+  service: TimeGatingService;
+}> {
+  try {
+    const configs = await prisma.siteConfig.findMany({
+      where: {
+        key: {
+          in: [
+            'time_gating_enabled',
+            'opening_day',
+            'opening_hour',
+            'opening_minute',
+            'closing_day',
+            'closing_hour',
+            'closing_minute',
+          ],
+        },
+      },
+    });
+
+    const map = new Map(configs.map((cfg) => [cfg.key, cfg.value]));
+
+    const config: TimeGatingConfig = {
+      timezone: DEFAULT_CONFIG.timezone,
+      openingDay: parseIntOr(map.get('opening_day'), DEFAULT_CONFIG.openingDay),
+      openingHour: parseIntOr(map.get('opening_hour'), DEFAULT_CONFIG.openingHour),
+      openingMinute: parseIntOr(map.get('opening_minute'), DEFAULT_CONFIG.openingMinute),
+      closingDay: parseIntOr(map.get('closing_day'), DEFAULT_CONFIG.closingDay),
+      closingHour: parseIntOr(map.get('closing_hour'), DEFAULT_CONFIG.closingHour),
+      closingMinute: parseIntOr(map.get('closing_minute'), DEFAULT_CONFIG.closingMinute),
+    };
+
+    const enabled = parseBoolOr(map.get('time_gating_enabled'), true);
+
+    return {
+      enabled,
+      service: new TimeGatingService(config),
+    };
+  } catch (error) {
+    console.error('Error loading time-gating config from DB, using defaults:', error);
+    return { enabled: true, service: timeGating };
+  }
+}

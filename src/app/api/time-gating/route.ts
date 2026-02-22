@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { timeGating } from '@/lib/time-gating';
+import { getTimeGatingRuntime } from '@/lib/time-gating';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,8 +9,18 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
-    const status = timeGating.getTimeUntilOpening();
-    const currentWeekId = timeGating.getCurrentWeekId();
+    const { enabled, service } = await getTimeGatingRuntime();
+    const currentWeekId = service.getCurrentWeekId();
+
+    if (!enabled) {
+      return NextResponse.json({
+        isOpen: true,
+        currentWeekId,
+        message: 'Pedidos habilitados sin restricción horaria.',
+      });
+    }
+
+    const status = service.getTimeUntilOpening();
 
     if (status.isOpen) {
       return NextResponse.json({
@@ -20,7 +30,7 @@ export async function GET() {
       });
     }
 
-    const timeRemaining = timeGating.formatTimeRemaining(status.remainingMs!);
+    const timeRemaining = service.formatTimeRemaining(status.remainingMs!);
 
     return NextResponse.json({
       isOpen: false,

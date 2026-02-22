@@ -1,0 +1,7 @@
+# Ignorar archivos de imagen subidos (no comprometerlos en git)
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.avif

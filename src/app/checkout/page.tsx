@@ -9,8 +9,16 @@ import { CustomerInfoStep } from '@/components/checkout/customer-info-step';
 import { DeliveryStep } from '@/components/checkout/delivery-step';
 import { ReviewStep } from '@/components/checkout/review-step';
 import { Badge } from '@/components/ui/badge';
-import { DeliveryMethod } from '@/types/checkout';
+import { DeliveryMethod, DEFAULT_SHIPPING_COSTS, type ShippingCosts } from '@/types/checkout';
 import type { CheckoutFormData } from '@/types/checkout';
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
 
 interface PickupPoint {
   id: string;
@@ -30,6 +38,7 @@ export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [pickupPoints, setPickupPoints] = React.useState<PickupPoint[]>([]);
+  const [shippingCosts, setShippingCosts] = React.useState<ShippingCosts>(DEFAULT_SHIPPING_COSTS);
 
   // Estado del formulario
   const [formData, setFormData] = React.useState<Partial<CheckoutFormData>>({
@@ -46,6 +55,20 @@ export default function CheckoutPage() {
       .then((res) => res.json())
       .then((data) => setPickupPoints(data.puntos || []))
       .catch((err) => console.error('Error loading pickup points:', err));
+
+    fetch('/api/shipping-costs')
+      .then((res) => {
+        if (!res.ok) throw new Error('No se pudieron cargar costos de envío')
+        return res.json()
+      })
+      .then((data) => {
+        setShippingCosts({
+          PICKUP_POINT: Number(data.pickupPoint ?? 0),
+          LOCAL_DELIVERY: Number(data.localDelivery ?? DEFAULT_SHIPPING_COSTS.LOCAL_DELIVERY),
+          NATIONAL_COURIER: Number(data.nationalCourier ?? DEFAULT_SHIPPING_COSTS.NATIONAL_COURIER),
+        })
+      })
+      .catch((err) => console.error('Error loading shipping costs:', err));
   }, []);
 
   // Redirigir si el carrito está vacío
@@ -128,6 +151,12 @@ export default function CheckoutPage() {
     { number: 3, title: 'Revisar', complete: false },
   ];
 
+  const shippingCost = currentStep >= 2 && formData.method
+    ? shippingCosts[formData.method]
+    : 0;
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = subtotal + shippingCost;
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
@@ -202,6 +231,7 @@ export default function CheckoutPage() {
               <DeliveryStep
                 pickupPoints={pickupPoints}
                 selectedMethod={formData.method || DeliveryMethod.PICKUP_POINT}
+                shippingCosts={shippingCosts}
                 pickupLocationId={formData.pickupLocationId}
                 address={formData.address}
                 city={formData.city}
@@ -215,6 +245,7 @@ export default function CheckoutPage() {
             {currentStep === 3 && (
               <ReviewStep
                 items={items}
+                shippingCosts={shippingCosts}
                 customerData={{
                   email: formData.email || '',
                   name: formData.name || '',
@@ -250,12 +281,12 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <p className="font-medium">{item.name}</p>
                       <p className="text-gray-500">
-                        {item.quantity} x {item.price.toFixed(2)}€
+                        {item.quantity} x {formatCurrency(item.price)}
                         {item.sliced && ' • Rebanado'}
                       </p>
                     </div>
                     <span className="font-medium">
-                      {(item.price * item.quantity).toFixed(2)}€
+                      {formatCurrency(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -264,40 +295,19 @@ export default function CheckoutPage() {
               <div className="border-t border-gray-200 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">
-                    {items
-                      .reduce((sum, item) => sum + item.price * item.quantity, 0)
-                      .toFixed(2)}
-                    €
-                  </span>
+                  <span className="font-medium">{formatCurrency(subtotal)}</span>
                 </div>
                 {currentStep >= 2 && formData.method && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Envío</span>
                     <span className="font-medium">
-                      {formData.method === DeliveryMethod.PICKUP_POINT
-                        ? 'Gratis'
-                        : formData.method === DeliveryMethod.LOCAL_DELIVERY
-                        ? '3.50€'
-                        : '5.95€'}
+                      {shippingCost === 0 ? 'Gratis' : formatCurrency(shippingCost)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
                   <span>Total</span>
-                  <span className="text-amber-700">
-                    {(
-                      items.reduce((sum, item) => sum + item.price * item.quantity, 0) +
-                      (currentStep >= 2 && formData.method
-                        ? formData.method === DeliveryMethod.PICKUP_POINT
-                          ? 0
-                          : formData.method === DeliveryMethod.LOCAL_DELIVERY
-                          ? 3.5
-                          : 5.95
-                        : 0)
-                    ).toFixed(2)}
-                    €
-                  </span>
+                  <span className="text-amber-700">{formatCurrency(total)}</span>
                 </div>
               </div>
 

@@ -8,7 +8,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("POSTGRES_URL")
+  directUrl = env("DATABASE_URL")
 }
 
 // ============================================
@@ -46,6 +46,7 @@ model Product {
   // Configuración
   allowSlicing Boolean       @default(true)
   isActive     Boolean       @default(true)
+  published    Boolean       @default(false) // Publicado en la tienda (visible para clientes)
   
   // Relaciones
   categoryId   String

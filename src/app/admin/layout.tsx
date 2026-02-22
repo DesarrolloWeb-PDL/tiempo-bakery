@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   Package,
   BarChart2,
+  Clock3,
   Settings,
   Menu,
   X,
@@ -36,6 +37,11 @@ const navItems = [
     label: 'Productos',
     href: '/admin/productos',
     icon: BarChart2,
+  },
+  {
+    label: 'Preventa',
+    href: '/admin/preventa',
+    icon: Clock3,
   },
   {
     label: 'Configuración',

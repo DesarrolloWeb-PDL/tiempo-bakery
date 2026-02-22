@@ -9,6 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
 import { cn } from '@/lib/utils';
 
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
 export function CartSidebar() {
   const {
     items,
@@ -153,7 +161,7 @@ export function CartSidebar() {
 
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-amber-700">
-                          {(item.price * item.quantity).toFixed(2)}€
+                          {formatCurrency(item.price * item.quantity)}
                         </span>
                         <Button
                           variant="ghost"
@@ -185,7 +193,7 @@ export function CartSidebar() {
                   Subtotal
                 </span>
                 <span className="text-xl font-bold text-amber-700">
-                  {subtotal.toFixed(2)}€
+                  {formatCurrency(subtotal)}
                 </span>
               </div>
 

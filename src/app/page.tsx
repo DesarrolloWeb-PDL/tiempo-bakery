@@ -2,21 +2,22 @@ import { ProductCard } from '@/components/productos/product-card';
 import { TimeGatingBanner } from '@/components/time-gating-banner';
 import { Badge } from '@/components/ui/badge';
 import { prisma } from '@/lib/db';
-import { timeGating } from '@/lib/time-gating';
+import { getTimeGatingRuntime } from '@/lib/time-gating';
 
 export const dynamic = 'force-dynamic';
 
 // Obtener productos directamente desde la DB
 async function getProducts() {
   try {
-    const status = timeGating.getTimeUntilOpening();
-    const weekId = timeGating.getCurrentWeekId();
+    const { enabled, service } = await getTimeGatingRuntime();
+    const status = enabled ? service.getTimeUntilOpening() : { isOpen: true };
+    const weekId = service.getCurrentWeekId();
 
     const categories = await prisma.category.findMany({
       orderBy: { order: 'asc' },
       include: {
         products: {
-          where: { isActive: true },
+          where: { isActive: true, published: true },
           orderBy: { name: 'asc' },
           include: {
             weeklyStocks: {
@@ -34,7 +35,9 @@ async function getProducts() {
         description: cat.description,
         productos: cat.products.map((p) => {
           const ws = p.weeklyStocks[0];
-          const stockQty = ws ? ws.currentStock : (p.stockType === 'UNLIMITED' ? 999 : 0);
+          const stockQty = ws
+            ? Math.max(0, ws.currentStock - ws.reservedStock)
+            : (p.stockType === 'UNLIMITED' ? 999 : p.weeklyStock);
           let allergens: string[] = [];
           try {
             allergens = JSON.parse(p.allergens || '[]');
@@ -71,13 +74,23 @@ async function getProducts() {
 }
 
 // Obtener time-gating directamente desde la lógica de negocio
-function getTimeGatingData() {
+async function getTimeGatingData() {
   try {
-    const status = timeGating.getTimeUntilOpening();
+    const { enabled, service } = await getTimeGatingRuntime();
+
+    if (!enabled) {
+      return {
+        isOpen: true,
+        timeRemaining: undefined,
+        nextOpening: undefined,
+      };
+    }
+
+    const status = service.getTimeUntilOpening();
     return {
       isOpen: status.isOpen,
       timeRemaining: status.remainingMs != null
-        ? timeGating.formatTimeRemaining(status.remainingMs)
+        ? service.formatTimeRemaining(status.remainingMs)
         : undefined,
       nextOpening: status.nextOpening
         ? (status.nextOpening.toISO() ?? undefined)
@@ -92,7 +105,7 @@ function getTimeGatingData() {
 export default async function HomePage() {
   const [productsData, timeGatingData] = await Promise.all([
     getProducts(),
-    Promise.resolve(getTimeGatingData()),
+    getTimeGatingData(),
   ]);
 
   return (

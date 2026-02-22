@@ -6,7 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Truck, Package } from 'lucide-react';
-import { DeliveryMethod, SHIPPING_COSTS } from '@/types/checkout';
+import { DeliveryMethod, type ShippingCosts } from '@/types/checkout';
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
 
 interface PickupPoint {
   id: string;
@@ -20,6 +28,7 @@ interface PickupPoint {
 interface DeliveryStepProps {
   pickupPoints: PickupPoint[];
   selectedMethod: DeliveryMethod;
+  shippingCosts: ShippingCosts;
   pickupLocationId?: string;
   address?: string;
   city?: string;
@@ -32,6 +41,7 @@ interface DeliveryStepProps {
 export function DeliveryStep({
   pickupPoints,
   selectedMethod,
+  shippingCosts,
   pickupLocationId,
   address,
   city,
@@ -77,21 +87,21 @@ export function DeliveryStep({
       icon: MapPin,
       title: 'Recogida en punto',
       description: 'Gratis - Recoge en uno de nuestros puntos de venta',
-      cost: SHIPPING_COSTS.PICKUP_POINT,
+      cost: shippingCosts.PICKUP_POINT,
     },
     {
       method: DeliveryMethod.LOCAL_DELIVERY,
       icon: Truck,
       title: 'Envío local (Utrera)',
       description: 'Entrega a domicilio en Utrera',
-      cost: SHIPPING_COSTS.LOCAL_DELIVERY,
+      cost: shippingCosts.LOCAL_DELIVERY,
     },
     {
       method: DeliveryMethod.NATIONAL_COURIER,
       icon: Package,
       title: 'Mensajería nacional',
       description: 'Envío a toda España',
-      cost: SHIPPING_COSTS.NATIONAL_COURIER,
+      cost: shippingCosts.NATIONAL_COURIER,
     },
   ];
 
@@ -146,7 +156,7 @@ export function DeliveryStep({
                       variant={isSelected ? 'default' : 'secondary'}
                       className="shrink-0"
                     >
-                      {option.cost === 0 ? 'Gratis' : `${option.cost.toFixed(2)}€`}
+                      {option.cost === 0 ? 'Gratis' : formatCurrency(option.cost)}
                     </Badge>
                   </div>
                 </button>
