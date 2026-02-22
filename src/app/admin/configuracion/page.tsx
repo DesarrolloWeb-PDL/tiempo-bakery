@@ -85,30 +85,6 @@ export default function AdminConfigPage() {
       </div>
     </Tabs.Content>
   );
-        <Tabs.Content value="entrega">
-          <div className="space-y-8">
-            {/* Días y horarios de preventa */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <h2 className="text-lg font-bold mb-4">Días y horarios de preventa</h2>
-              {/* Aquí iría el formulario para editar apertura/cierre semanal (apertura/cierre, día, hora, minuto) */}
-              {/* ...existing code... */}
-            </div>
-
-            {/* Puntos de entrega */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <h2 className="text-lg font-bold mb-4">Puntos de entrega</h2>
-              {/* Tabla editable de puntos de entrega: nombre, dirección, ciudad, código postal, horario, notas, activo/inactivo */}
-              {/* ...existing code... */}
-            </div>
-
-            {/* Costos de envío */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <h2 className="text-lg font-bold mb-4">Costos de envío</h2>
-              {/* Formulario para editar costos por tipo: recogida, local, nacional */}
-              {/* ...existing code... */}
-            </div>
-          </div>
-        </Tabs.Content>
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
   const [loadingShipping, setLoadingShipping] = useState(true)
