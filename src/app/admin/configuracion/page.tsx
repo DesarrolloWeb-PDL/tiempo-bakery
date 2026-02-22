@@ -38,6 +38,11 @@ function ContactoConfigAdmin() {
 }
 
 export default function AdminConfigPage() {
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [loadingShipping, setLoadingShipping] = useState(true);
+  // ...otros hooks y variables aquí...
+
   return (
     <Tabs.Content value="entrega">
       <div className="space-y-8">
@@ -85,9 +90,6 @@ export default function AdminConfigPage() {
       </div>
     </Tabs.Content>
   );
-  const router = useRouter()
-  const [loggingOut, setLoggingOut] = useState(false)
-  const [loadingShipping, setLoadingShipping] = useState(true)
   const [savingShipping, setSavingShipping] = useState(false)
   const [shippingMsg, setShippingMsg] = useState<string | null>(null)
   const [shippingCosts, setShippingCosts] = useState({
