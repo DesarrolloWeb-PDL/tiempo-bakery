@@ -534,24 +534,7 @@ export default function AdminProductosPage() {
               {fieldErrors.imageAlt && <p className="mt-1 text-xs text-red-600">{fieldErrors.imageAlt}</p>}
             </div>
 
-            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
-              <div className="md:col-span-2">
-                <input
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  placeholder="Nueva categoría (ej: Facturas)"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleCreateCategory}
-                disabled={creatingCategory}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
-              >
-                {creatingCategory ? 'Agregando...' : 'Agregar categoría'}
-              </button>
-            </div>
+            {/* Quitar creación de categoría desde el formulario de producto */}
 
             <div className="md:col-span-3">
               <input
@@ -712,36 +695,7 @@ export default function AdminProductosPage() {
                       }}
                     />
                     <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
-                    {/* Subir nueva imagen */}
-                    <form
-                      className="ml-2"
-                      onSubmit={async (e) => {
-                        e.preventDefault();
-                        const form = e.target as HTMLFormElement;
-                        const fileInput = form.elements.namedItem('file') as HTMLInputElement;
-                        if (!fileInput.files?.[0]) return;
-                        const data = new FormData();
-                        data.append('file', fileInput.files[0]);
-                        data.append('productId', p.id);
-                        const res = await fetch('/api/admin/productos/upload-image', {
-                          method: 'POST',
-                          body: data,
-                        });
-                        if (res.ok) {
-                          const { imageUrl } = await res.json();
-                          // Actualizar imagen en la BD (requiere endpoint PATCH)
-                          await fetch(`/api/admin/productos/${p.id}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ imageUrl }),
-                          });
-                          fetchProducts();
-                        }
-                      }}
-                    >
-                      <input type="file" name="file" accept="image/*" className="text-xs" />
-                      <button type="submit" className="text-xs bg-amber-100 px-2 py-1 rounded ml-1">Subir</button>
-                    </form>
+                    {/* Subida de imagen solo desde el formulario de edición/creación */}
                   </div>
                   <div className="col-span-2 hidden md:block">
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
