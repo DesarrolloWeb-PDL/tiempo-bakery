@@ -37,51 +37,53 @@ function ContactoConfigAdmin() {
 }
 
 export default function AdminConfigPage() {
-              <Tabs.Content value="entrega">
-                <div className="space-y-8">
-                  {/* Días y horarios de preventa */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <h2 className="text-lg font-bold mb-4">Días y horarios de preventa</h2>
-                    {/* Aquí iría el formulario para editar apertura/cierre semanal (apertura/cierre, día, hora, minuto) */}
-                    {/* ...existing code... */}
-                  </div>
+  return (
+    <Tabs.Content value="entrega">
+      <div className="space-y-8">
+        {/* Días y horarios de preventa */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-lg font-bold mb-4">Días y horarios de preventa</h2>
+          {/* Aquí iría el formulario para editar apertura/cierre semanal (apertura/cierre, día, hora, minuto) */}
+          {/* ...existing code... */}
+        </div>
 
-                  {/* Puntos de entrega */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <h2 className="text-lg font-bold mb-4">Puntos de entrega</h2>
-                    <table className="w-full text-sm border-collapse">
-                      <thead>
-                        <tr className="bg-gray-50">
-                          <th className="px-2 py-2">Activo</th>
-                          <th className="px-2 py-2">Nombre</th>
-                          <th className="px-2 py-2">Dirección</th>
-                          <th className="px-2 py-2">Ciudad</th>
-                          <th className="px-2 py-2">Código Postal</th>
-                          <th className="px-2 py-2">Horario</th>
-                          <th className="px-2 py-2">Notas</th>
-                          <th className="px-2 py-2">Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* Aquí se mapearán los puntos de entrega existentes, cada uno editable y con botón Guardar y Eliminar */}
-                        {/* ...existing code... */}
-                      </tbody>
-                    </table>
-                    <div className="mt-4">
-                      <button className="px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700">
-                        Agregar nuevo punto
-                      </button>
-                    </div>
-                  </div>
+        {/* Puntos de entrega */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-lg font-bold mb-4">Puntos de entrega</h2>
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-2 py-2">Activo</th>
+                <th className="px-2 py-2">Nombre</th>
+                <th className="px-2 py-2">Dirección</th>
+                <th className="px-2 py-2">Ciudad</th>
+                <th className="px-2 py-2">Código Postal</th>
+                <th className="px-2 py-2">Horario</th>
+                <th className="px-2 py-2">Notas</th>
+                <th className="px-2 py-2">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Aquí se mapearán los puntos de entrega existentes, cada uno editable y con botón Guardar y Eliminar */}
+              {/* ...existing code... */}
+            </tbody>
+          </table>
+          <div className="mt-4">
+            <button className="px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700">
+              Agregar nuevo punto
+            </button>
+          </div>
+        </div>
 
-                  {/* Costos de envío */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <h2 className="text-lg font-bold mb-4">Costos de envío</h2>
-                    {/* Formulario para editar costos por tipo: recogida, local, nacional */}
-                    {/* ...existing code... */}
-                  </div>
-                </div>
-              </Tabs.Content>
+        {/* Costos de envío */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-lg font-bold mb-4">Costos de envío</h2>
+          {/* Formulario para editar costos por tipo: recogida, local, nacional */}
+          {/* ...existing code... */}
+        </div>
+      </div>
+    </Tabs.Content>
+  );
         <Tabs.Content value="entrega">
           <div className="space-y-8">
             {/* Días y horarios de preventa */}
