@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { createHash } from 'crypto';
-import { FormData, File } from 'formdata-node';
-import { fetch } from 'undici';
+import axios from 'axios';
+import FormData from 'form-data';
 
 export const runtime = 'nodejs';
 
@@ -25,19 +25,20 @@ async function uploadToCloudinaryBuffer(buffer: Buffer, filename: string, mimety
   const signature = createHash('sha1').update(toSign).digest('hex');
 
   const formData = new FormData();
-  formData.append('file', new File([buffer], filename, { type: mimetype }));
+  formData.append('file', buffer, { filename, contentType: mimetype });
   formData.append('api_key', apiKey);
   formData.append('timestamp', String(timestamp));
   formData.append('signature', signature);
   formData.append('folder', folder);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-    method: 'POST',
-    body: formData,
-  });
+  const response = await axios.post(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    formData,
+    { headers: formData.getHeaders() }
+  );
 
-  const data = await response.json().catch(() => ({} as Record<string, unknown>));
-  if (!response.ok || typeof data.secure_url !== 'string') {
+  const data = response.data;
+  if (!data || typeof data.secure_url !== 'string') {
     throw new Error('No se pudo subir la imagen a Cloudinary');
   }
   return data.secure_url;
