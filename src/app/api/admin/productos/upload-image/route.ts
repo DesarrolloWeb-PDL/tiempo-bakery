@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { createHash } from 'crypto';
+import { FormData } from 'formdata-node';
+import { fileFromPath, File } from 'formdata-node/file-from-path';
+import { fetch } from 'undici';
 
 export const runtime = 'nodejs';
 
@@ -13,7 +16,7 @@ function isCloudinaryConfigured() {
   );
 }
 
-async function uploadToCloudinaryBuffer(buffer: Buffer, filename: string) {
+async function uploadToCloudinaryBuffer(buffer: Buffer, filename: string, mimetype: string) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const apiKey = process.env.CLOUDINARY_API_KEY!;
   const apiSecret = process.env.CLOUDINARY_API_SECRET!;
@@ -23,7 +26,7 @@ async function uploadToCloudinaryBuffer(buffer: Buffer, filename: string) {
   const signature = createHash('sha1').update(toSign).digest('hex');
 
   const formData = new FormData();
-  formData.append('file', new Blob([buffer]), filename);
+  formData.append('file', new File([buffer], filename, { type: mimetype }));
   formData.append('api_key', apiKey);
   formData.append('timestamp', String(timestamp));
   formData.append('signature', signature);
@@ -55,11 +58,12 @@ export async function POST(req: NextRequest) {
 
   const ext = file.name.split('.').pop();
   const filename = `${productId}_${Date.now()}.${ext}`;
+  const mimetype = file.type || 'application/octet-stream';
   const buffer = Buffer.from(await file.arrayBuffer());
 
   if (isCloudinaryConfigured()) {
     try {
-      const url = await uploadToCloudinaryBuffer(buffer, filename);
+      const url = await uploadToCloudinaryBuffer(buffer, filename, mimetype);
       return NextResponse.json({ imageUrl: url });
     } catch (error) {
       return NextResponse.json({ error: 'Error al subir a Cloudinary' }, { status: 500 });
