@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { createHash } from 'crypto';
-import { FormData } from 'formdata-node';
-import { fileFromPath, File } from 'formdata-node/file-from-path';
+import { FormData, File } from 'formdata-node';
 import { fetch } from 'undici';
 
 export const runtime = 'nodejs';
