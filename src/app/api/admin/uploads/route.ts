@@ -4,8 +4,8 @@ import { mkdir, writeFile, readFile } from 'fs/promises'
 import path from 'path'
 import { randomUUID } from 'crypto'
 import { createHash } from 'crypto'
-import { FormData as NodeFormData, File as NodeFile } from 'formdata-node';
-import { fileFromPath } from 'formdata-node/file-from-path';
+import * as formdataNode from 'formdata-node';
+import axios from 'axios';
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -21,7 +21,7 @@ function isCloudinaryConfigured() {
   )
 }
 
-async function uploadToCloudinary(file: File) {
+async function uploadToCloudinary(file: any) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const apiKey = process.env.CLOUDINARY_API_KEY!;
   const apiSecret = process.env.CLOUDINARY_API_SECRET!;
@@ -33,24 +33,28 @@ async function uploadToCloudinary(file: File) {
   // Convertir File a NodeFile (formdata-node)
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const nodeFile = new NodeFile([buffer], file.name, { type: file.type });
+  const nodeFile = new formdataNode.File([buffer], file.name, { type: file.type });
 
-  const formData = new NodeFormData();
-  formData.set('file', nodeFile);
-  formData.set('api_key', apiKey);
-  formData.set('timestamp', String(timestamp));
-  formData.set('signature', signature);
-  formData.set('folder', folder);
+  const nodeFormData = new formdataNode.FormData();
+  nodeFormData.set('file', nodeFile);
+  nodeFormData.set('api_key', apiKey);
+  nodeFormData.set('timestamp', String(timestamp));
+  nodeFormData.set('signature', signature);
+  nodeFormData.set('folder', folder);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-    method: 'POST',
-    body: formData,
-    // @ts-ignore
-    headers: formData.headers,
-  });
+  // Usar axios para enviar el formData-node
+  const response = await axios.post(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    nodeFormData,
+    {
+      headers: (nodeFormData as any).getHeaders(),
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    }
+  );
 
-  const data = await response.json().catch(() => ({} as Record<string, unknown>));
-  if (!response.ok || typeof data.secure_url !== 'string') {
+  const data = response.data;
+  if (typeof data.secure_url !== 'string') {
     throw new Error('No se pudo subir la imagen a Cloudinary');
   }
 
