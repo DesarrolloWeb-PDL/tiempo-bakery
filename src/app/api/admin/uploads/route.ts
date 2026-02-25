@@ -1,8 +1,11 @@
+
 import { NextRequest, NextResponse } from 'next/server'
 import { mkdir, writeFile, readFile } from 'fs/promises'
 import path from 'path'
 import { randomUUID } from 'crypto'
 import { createHash } from 'crypto'
+import { FormData as NodeFormData, File as NodeFile } from 'formdata-node';
+import { fileFromPath } from 'formdata-node/file-from-path';
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -19,32 +22,39 @@ function isCloudinaryConfigured() {
 }
 
 async function uploadToCloudinary(file: File) {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
-  const apiKey = process.env.CLOUDINARY_API_KEY!
-  const apiSecret = process.env.CLOUDINARY_API_SECRET!
-  const timestamp = Math.floor(Date.now() / 1000)
-  const folder = 'tiempo-bakery/productos'
-  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`
-  const signature = createHash('sha1').update(toSign).digest('hex')
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+  const apiKey = process.env.CLOUDINARY_API_KEY!;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET!;
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = 'tiempo-bakery/productos';
+  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+  const signature = createHash('sha1').update(toSign).digest('hex');
 
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('api_key', apiKey)
-  formData.append('timestamp', String(timestamp))
-  formData.append('signature', signature)
-  formData.append('folder', folder)
+  // Convertir File a NodeFile (formdata-node)
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const nodeFile = new NodeFile([buffer], file.name, { type: file.type });
+
+  const formData = new NodeFormData();
+  formData.set('file', nodeFile);
+  formData.set('api_key', apiKey);
+  formData.set('timestamp', String(timestamp));
+  formData.set('signature', signature);
+  formData.set('folder', folder);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
     method: 'POST',
     body: formData,
-  })
+    // @ts-ignore
+    headers: formData.headers,
+  });
 
-  const data = await response.json().catch(() => ({} as Record<string, unknown>))
+  const data = await response.json().catch(() => ({} as Record<string, unknown>));
   if (!response.ok || typeof data.secure_url !== 'string') {
-    throw new Error('No se pudo subir la imagen a Cloudinary')
+    throw new Error('No se pudo subir la imagen a Cloudinary');
   }
 
-  return data.secure_url
+  return data.secure_url;
 }
 
 function getUploadDir() {
