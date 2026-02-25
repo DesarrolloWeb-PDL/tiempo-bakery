@@ -4,7 +4,7 @@ import { mkdir, writeFile, readFile } from 'fs/promises'
 import path from 'path'
 import { randomUUID } from 'crypto'
 import { createHash } from 'crypto'
-import * as formdataNode from 'formdata-node';
+import FormData from 'form-data';
 import axios from 'axios';
 
 export const dynamic = 'force-dynamic'
@@ -30,24 +30,24 @@ async function uploadToCloudinary(file: any) {
   const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
   const signature = createHash('sha1').update(toSign).digest('hex');
 
-  // Convertir File a NodeFile (formdata-node)
+
+  // Convertir File a Buffer
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const nodeFile = new formdataNode.File([buffer], file.name, { type: file.type });
 
-  const nodeFormData = new formdataNode.FormData();
-  nodeFormData.set('file', nodeFile);
-  nodeFormData.set('api_key', apiKey);
-  nodeFormData.set('timestamp', String(timestamp));
-  nodeFormData.set('signature', signature);
-  nodeFormData.set('folder', folder);
+  // Usar form-data de Node.js
+  const formData = new FormData();
+  formData.append('file', buffer, { filename: file.name, contentType: file.type });
+  formData.append('api_key', apiKey);
+  formData.append('timestamp', String(timestamp));
+  formData.append('signature', signature);
+  formData.append('folder', folder);
 
-  // Usar axios para enviar el formData-node
   const response = await axios.post(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    nodeFormData,
+    formData,
     {
-      headers: (nodeFormData as any).getHeaders(),
+      headers: formData.getHeaders(),
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
     }
