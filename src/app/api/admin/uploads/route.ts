@@ -43,22 +43,29 @@ async function uploadToCloudinary(file: any) {
   formData.append('signature', signature);
   formData.append('folder', folder);
 
-  const response = await axios.post(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    formData,
-    {
-      headers: formData.getHeaders(),
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
+  try {
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      formData,
+      {
+        headers: formData.getHeaders(),
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      }
+    );
+    const data = response.data;
+    if (typeof data.secure_url !== 'string') {
+      throw new Error('La respuesta de Cloudinary no contiene secure_url');
     }
-  );
-
-  const data = response.data;
-  if (typeof data.secure_url !== 'string') {
-    throw new Error('No se pudo subir la imagen a Cloudinary');
+    return data.secure_url;
+  } catch (err: any) {
+    if (err.response) {
+      const status = err.response.status;
+      const msg = err.response.data?.error?.message || err.response.data?.message || err.message;
+      throw new Error(`Cloudinary error ${status}: ${msg}`);
+    }
+    throw new Error('Error al subir imagen: ' + (err.message || 'desconocido'));
   }
-
-  return data.secure_url;
 }
 
 function getUploadDir() {
