@@ -69,5 +69,3 @@ _¡Listo! Con Cloudinary tienes una solución profesional, robusta y escalable p
 - [Vercel Docs](https://vercel.com/docs)
 
 ---
-
-_Archivo generado automáticamente para facilitar la integración de imágenes en producción._

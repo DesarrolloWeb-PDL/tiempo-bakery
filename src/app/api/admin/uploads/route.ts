@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 import { mkdir, writeFile, readFile } from 'fs/promises'
 import path from 'path'
@@ -12,61 +11,6 @@ export const runtime = 'nodejs'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_SIZE = 5 * 1024 * 1024
-
-function isCloudinaryConfigured() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-  )
-}
-
-async function uploadToCloudinary(file: any) {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-  const apiKey = process.env.CLOUDINARY_API_KEY!;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET!;
-  const timestamp = Math.floor(Date.now() / 1000);
-  const folder = 'tiempo-bakery/productos';
-  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
-  const signature = createHash('sha1').update(toSign).digest('hex');
-
-
-  // Convertir File a Buffer
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  // Usar form-data de Node.js
-  const formData = new FormData();
-  formData.append('file', buffer, { filename: file.name, contentType: file.type });
-  formData.append('api_key', apiKey);
-  formData.append('timestamp', String(timestamp));
-  formData.append('signature', signature);
-  formData.append('folder', folder);
-
-  try {
-    const response = await axios.post(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      formData,
-      {
-        headers: formData.getHeaders(),
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-      }
-    );
-    const data = response.data;
-    if (typeof data.secure_url !== 'string') {
-      throw new Error('La respuesta de Cloudinary no contiene secure_url');
-    }
-    return data.secure_url;
-  } catch (err: any) {
-    if (err.response) {
-      const status = err.response.status;
-      const msg = err.response.data?.error?.message || err.response.data?.message || err.message;
-      throw new Error(`Cloudinary error ${status}: ${msg}`);
-    }
-    throw new Error('Error al subir imagen: ' + (err.message || 'desconocido'));
-  }
-}
 
 function getUploadDir() {
   // En producción (Vercel/serverless), usar /tmp que es writable

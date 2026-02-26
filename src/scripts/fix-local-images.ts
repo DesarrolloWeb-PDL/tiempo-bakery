@@ -13,8 +13,7 @@ async function main() {
   for (const prod of productos) {
     if (
       prod.imageUrl &&
-      !prod.imageUrl.startsWith('http') &&
-      !prod.imageUrl.includes('cloudinary.com')
+      !prod.imageUrl.startsWith('http')
     ) {
       console.log(`Producto con imagen local: ${prod.name} (${prod.id}) -> ${prod.imageUrl}`)
       await prisma.product.update({
