@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { NextRequest, NextResponse } from 'next/server';
+import stream from 'stream';
 
 // Configuración de Cloudinary
 cloudinary.config({
@@ -13,12 +14,27 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get('file');
 
-    if (!file) {
-      return NextResponse.json({ error: 'No se proporcionó ningún archivo.' }, { status: 400 });
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json({ error: 'No se proporcionó ningún archivo válido.' }, { status: 400 });
     }
 
-    const uploadResult = await cloudinary.uploader.upload(file.path, {
-      folder: 'uploads',
+    const buffer = await file.arrayBuffer();
+    const readableStream = new stream.Readable();
+    readableStream.push(Buffer.from(buffer));
+    readableStream.push(null);
+
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream({
+        folder: 'uploads',
+      }, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+
+      readableStream.pipe(uploadStream);
     });
 
     return NextResponse.json({

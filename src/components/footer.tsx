@@ -1,6 +1,7 @@
 'use client'
 
 import { useAppTheme } from '@/hooks/useAppTheme'
+import Image from 'next/image'
 
 export default function Footer() {
   const { theme } = useAppTheme()
@@ -19,10 +20,12 @@ export default function Footer() {
               style={{ color: theme.primaryColor }}
             >
               {theme.logoUrl && (
-                <img
+                <Image
                   src={theme.logoUrl}
                   alt={theme.appTitle}
                   className="h-6 w-6 inline-block mr-2 object-contain"
+                  width={24}
+                  height={24}
                 />
               )}
               {theme.appTitle}

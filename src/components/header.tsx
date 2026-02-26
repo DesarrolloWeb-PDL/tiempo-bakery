@@ -69,10 +69,12 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             {theme.logoUrl && (
-              <img
+              <Image
                 src={theme.logoUrl}
                 alt={theme.appTitle}
                 className="h-10 w-10 object-contain"
+                width={40}
+                height={40}
               />
             )}
             <div>
