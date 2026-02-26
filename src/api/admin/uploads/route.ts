@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Configuración de Cloudinary
 cloudinary.config({
