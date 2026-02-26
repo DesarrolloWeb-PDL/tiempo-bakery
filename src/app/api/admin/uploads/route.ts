@@ -65,12 +65,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'La imagen supera 5MB' }, { status: 400 })
     }
 
-    // En producción, siempre usar Cloudinary
-    if (process.env.NODE_ENV === 'production' || isCloudinaryConfigured()) {
-      const cloudUrl = await uploadToCloudinary(file)
-      return NextResponse.json({ url: cloudUrl })
-    }
-
     const ext = getExtension(file.name, file.type)
     const fileName = `${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`
 
