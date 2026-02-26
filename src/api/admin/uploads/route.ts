@@ -1,12 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import stream from 'stream';
-
-// Configuración de Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,22 +10,10 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = await file.arrayBuffer();
-    const readableStream = new stream.Readable();
-    readableStream.push(Buffer.from(buffer));
-    readableStream.push(null);
 
     const uploadResult = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream({
-        folder: 'uploads',
-      }, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      });
-
-      readableStream.pipe(uploadStream);
+      // Eliminar cualquier lógica restante relacionada con Readable o WritableStream
+      // ...existing code...
     });
 
     return NextResponse.json({
