@@ -25,3 +25,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al subir la imagen.' }, { status: 500 });
   }
 }
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const fileName = searchParams.get('file');
+
+  if (!fileName) {
+    return NextResponse.json({ error: 'No se especificó ningún archivo.' }, { status: 400 });
+  }
+
+  try {
+    const fileUrl = `https://raw.githubusercontent.com/DesarrolloWeb-PDL/img-tiempo-bakery/main/productos/${fileName}`;
+    return NextResponse.redirect(fileUrl);
+  } catch (error) {
+    console.error('Error al redirigir a la imagen:', error);
+    return NextResponse.json({ error: 'Error al redirigir a la imagen.' }, { status: 500 });
+  }
+}
