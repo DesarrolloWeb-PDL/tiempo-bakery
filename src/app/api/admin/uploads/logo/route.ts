@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import { createHash } from 'crypto'
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
 const ADMIN_COOKIE = 'tbk_admin_auth'
@@ -105,16 +104,6 @@ export async function POST(req: NextRequest) {
         { error: 'File too large (max 5MB)' },
         { status: 400 }
       )
-    }
-
-    if (isCloudinaryConfigured()) {
-      const url = await uploadLogoToCloudinary(file)
-      return NextResponse.json({
-        url,
-        filename: file.name,
-        size: file.size,
-        type: file.type,
-      })
     }
 
     // Create upload directory if it doesn't exist
