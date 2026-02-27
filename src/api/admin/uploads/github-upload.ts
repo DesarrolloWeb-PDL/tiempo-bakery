@@ -6,10 +6,10 @@ const BRANCH = 'main';
 
 export async function POST(req: Request) {
   const formData = await req.formData();
-  const file = formData.get('file') as Blob;
+  const file = formData.get('file');
 
-  if (!file) {
-    return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+  if (!file || !(file instanceof File)) {
+    return NextResponse.json({ error: 'No file uploaded or invalid file type' }, { status: 400 });
   }
 
   const fileName = `productos/${Date.now()}-${file.name}`;
