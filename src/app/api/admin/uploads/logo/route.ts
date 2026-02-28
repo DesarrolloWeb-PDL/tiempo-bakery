@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
 import crypto from 'crypto'
+import { createHash } from 'crypto'
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
 const ADMIN_COOKIE = 'tbk_admin_auth'
