@@ -4,7 +4,7 @@ export default defineConfig({
   datasources: {
     db: {
       provider: 'postgresql',
-      url: process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/dbname',
+      url: 'postgresql://usuario:contraseña@localhost:5432/nombre_base_datos',
     },
   },
 });
