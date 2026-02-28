@@ -15,26 +15,33 @@ export async function POST(req: Request) {
   const fileName = `productos/${Date.now()}-${file.name}`;
   const fileContent = await file.text();
 
-  const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${fileName}`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${GITHUB_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      message: `Add ${fileName}`,
-      content: Buffer.from(fileContent).toString('base64'),
-      branch: BRANCH,
-    }),
-  });
+  try {
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${fileName}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `Add ${fileName}`,
+        content: Buffer.from(fileContent).toString('base64'),
+        branch: BRANCH,
+      }),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    return NextResponse.json({ error: error.message }, { status: response.status });
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error al subir la imagen:', error);
+      return NextResponse.json({ error: error.message }, { status: response.status });
+    }
+
+    const data = await response.json();
+    const fileUrl = data.content.html_url;
+
+    console.log('Imagen subida exitosamente:', fileUrl);
+    return NextResponse.json({ url: fileUrl });
+  } catch (err) {
+    console.error('Error inesperado:', err);
+    return NextResponse.json({ error: 'Error inesperado al subir la imagen' }, { status: 500 });
   }
-
-  const data = await response.json();
-  const fileUrl = data.content.html_url;
-
-  return NextResponse.json({ url: fileUrl });
 }
