@@ -309,7 +309,7 @@ Por ahora, los productos tienen URLs de placeholder. Para agregar imágenes real
 
 1. **Opción temporal**: Usar URLs externas (Imgur, Unsplash, etc.)
 2. **Opción local**: Poner imágenes en `public/images/productos/`
-3. **Opción producción**: Configurar Cloudinary (ver [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md))
+3. **Opción producción**: Configurar Vercel Blob
 
 Luego ejecuta:
 ```bash

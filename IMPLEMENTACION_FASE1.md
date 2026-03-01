@@ -237,7 +237,7 @@ Edita `src/lib/time-gating.ts`
 
 ### Agregar imágenes reales
 1. Sube a `/public/images/productos/`
-2. O usa Cloudinary (ver VERCEL_DEPLOY.md)
+2. O usa Vercel Blob
 3. Actualiza URLs en Prisma Studio
 
 ---

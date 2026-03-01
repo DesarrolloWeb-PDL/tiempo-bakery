@@ -7,14 +7,6 @@ import FormData from 'form-data';
 
 export const runtime = 'nodejs';
 
-function isCloudinaryConfigured() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-  );
-}
-
 async function uploadToCloudinaryBuffer(buffer: Buffer, filename: string, mimetype: string) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const apiKey = process.env.CLOUDINARY_API_KEY!;
@@ -60,15 +52,6 @@ export async function POST(req: NextRequest) {
   const filename = `${productId}_${Date.now()}.${ext}`;
   const mimetype = file.type || 'application/octet-stream';
   const buffer = Buffer.from(await file.arrayBuffer());
-
-  if (isCloudinaryConfigured()) {
-    try {
-      const url = await uploadToCloudinaryBuffer(buffer, filename, mimetype);
-      return NextResponse.json({ imageUrl: url });
-    } catch (error) {
-      return NextResponse.json({ error: 'Error al subir a Cloudinary' }, { status: 500 });
-    }
-  }
 
   // Fallback local (solo para desarrollo)
   const uploadDir = path.join(process.cwd(), 'public', 'images', 'productos');

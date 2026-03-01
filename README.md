@@ -421,7 +421,7 @@ timezone: 'Europe/Madrid'  // Ajustar según tu ubicación
 
 ### 🚀 Fase 4: Optimización y Producción (Futura)
 - [ ] Tests automatizados (Jest + Playwright)
-- [ ] Optimización de imágenes (Cloudinary)
+- [ ] Optimización de imágenes
 - [ ] Mejoras de SEO (metadata, sitemap)
 - [ ] Analytics (Vercel Analytics / Google Analytics)
 - [ ] Monitoreo de errores (Sentry)

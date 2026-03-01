@@ -55,9 +55,6 @@ cp .env.example .env.local
 2. **Edita `.env.local`** y configura:
 
 ```bash
-# Database (usa la URL del PASO 1)
-DATABASE_URL="tu-url-de-base-de-datos"
-
 # Stripe (obtén desde https://dashboard.stripe.com/test/apikeys)
 STRIPE_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
@@ -310,11 +307,8 @@ vercel --prod
 ### Imágenes no cargan
 
 **Para MVP:**
-- Usa URLs externas (Cloudinary, Imgur, etc.)
-- O sube imágenes a `/public/images/`
-
-**Para producción:**
-- Configura Cloudinary o Vercel Blob
+- Usa URLs externas (Imgur, etc.)
+- Configura Vercel Blob
 
 ---
 
