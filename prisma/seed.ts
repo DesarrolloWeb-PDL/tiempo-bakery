@@ -1,6 +1,10 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  accelerateUrl: process.env.DATABASE_URL,
+}).$extends(withAccelerate());
 
 async function main() {
   console.log('🌱 Iniciando seed de la base de datos...');

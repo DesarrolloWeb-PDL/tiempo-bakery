@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
-import crypto from 'crypto'
+import { randomBytes, createHash } from 'crypto'
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
 const ADMIN_COOKIE = 'tbk_admin_auth'
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
 
     // Generate unique filename
     const ext = path.extname(file.name)
-    const randomName = crypto.randomBytes(8).toString('hex')
+    const randomName = randomBytes(8).toString('hex')
     const filename = `logo-${randomName}${ext}`
     const filepath = path.join(uploadDir, filename)
 

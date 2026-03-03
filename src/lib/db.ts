@@ -1,23 +1,18 @@
 import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
-const inferredDatabaseUrl =
-  process.env.DATABASE_URL ??
-  process.env.POSTGRES_PRISMA_URL ??
-  process.env.POSTGRES_URL ??
-  process.env.POSTGRES_URL_NON_POOLING;
-
-if (!process.env.DATABASE_URL && inferredDatabaseUrl) {
-  process.env.DATABASE_URL = inferredDatabaseUrl;
-}
-
-if (!process.env.POSTGRES_URL && inferredDatabaseUrl) {
-  process.env.POSTGRES_URL = inferredDatabaseUrl;
+// Casteamos a PrismaClient para que TypeScript infiera correctamente los tipos
+// de include/select. En runtime, el valor real es el cliente extendido con Accelerate.
+function createPrismaClient(): PrismaClient {
+  return new PrismaClient({
+    accelerateUrl: process.env.DATABASE_URL,
+  }).$extends(withAccelerate()) as unknown as PrismaClient;
 }
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

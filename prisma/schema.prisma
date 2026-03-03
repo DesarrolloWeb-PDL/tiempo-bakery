@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider = "postgresql"
+}
+
 model Category {
   id          String    @id @default(cuid())
   name        String
@@ -14,9 +18,9 @@ model Category {
 }
 
 model Product {
-  id           String        @id @default(cuid())
+  id           String         @id @default(cuid())
   name         String
-  slug         String        @unique
+  slug         String         @unique
   description  String
   price        Float
   weight       Int?
@@ -25,18 +29,18 @@ model Product {
   riskNote     String?
   imageUrl     String
   imageAlt     String
-  stockType    String        @default("WEEKLY")
-  weeklyStock  Int           @default(0)
-  allowSlicing Boolean       @default(true)
-  isActive     Boolean       @default(true)
+  stockType    String         @default("WEEKLY")
+  weeklyStock  Int            @default(0)
+  allowSlicing Boolean        @default(true)
+  isActive     Boolean        @default(true)
   categoryId   String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  published    Boolean       @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  published    Boolean        @default(false)
   orderItems   OrderItem[]
-  category     Category      @relation(fields: [categoryId], references: [id])
+  category     Category       @relation(fields: [categoryId], references: [id])
+  images       ProductImage[]
   weeklyStocks WeeklyStock[]
-  images      ProductImage[]
 
   @@index([categoryId])
   @@index([slug])
