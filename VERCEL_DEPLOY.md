@@ -122,6 +122,7 @@ git push -u origin main
 
 ```bash
 DATABASE_URL
+DIRECT_URL
 STRIPE_SECRET_KEY
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_WEBHOOK_SECRET
@@ -146,6 +147,7 @@ vercel
 
 # Agregar variables de entorno
 vercel env add DATABASE_URL
+vercel env add DIRECT_URL
 vercel env add STRIPE_SECRET_KEY
 vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
@@ -177,12 +179,12 @@ Ya está configurado en `package.json`:
 {
   "scripts": {
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma db push && next build"
+      "vercel-build": "prisma generate && prisma migrate deploy && next build"
   }
 }
 ```
 
-> ⚠️ `prisma db push` sincroniza el schema sin crear migraciones. Para producción, es mejor usar migraciones.
+> ✅ `prisma migrate deploy` aplica migraciones versionadas, recomendado para producción.
 
 ---
 
@@ -295,6 +297,13 @@ vercel --prod
 - La `DATABASE_URL` incluye `?sslmode=require`
 - Las credenciales son correctas
 - La base de datos está activa
+
+### Error: "The datasource.url property is required in your Prisma config file when using prisma migrate deploy"
+
+**Verificar:**
+- Existe `DIRECT_URL` o `DATABASE_URL` en variables de entorno de Vercel
+- Si usas Prisma Accelerate en `DATABASE_URL`, define también `DIRECT_URL` con conexión PostgreSQL directa
+- Tras agregar variables, vuelve a desplegar (`Redeploy`) para que el build tome los nuevos valores
 
 ### Webhooks de Stripe no funcionan
 

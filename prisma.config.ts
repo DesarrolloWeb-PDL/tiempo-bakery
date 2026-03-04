@@ -1,6 +1,10 @@
 import "dotenv/config";
 import { defineConfig } from 'prisma/config';
 
+function resolveDatasourceUrl(): string | undefined {
+  return process.env.DIRECT_URL ?? process.env.DATABASE_URL;
+}
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -8,7 +12,7 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    // URL directa a la base de datos (usada por el CLI de Prisma para migraciones)
-    url: process.env.DIRECT_URL!,
+    // Para migraciones priorizamos DIRECT_URL; en Vercel también aceptamos DATABASE_URL.
+    url: resolveDatasourceUrl(),
   },
 });
