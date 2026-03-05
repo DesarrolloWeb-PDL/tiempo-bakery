@@ -9,6 +9,7 @@ import {
   ShoppingBag,
   Package,
   BarChart2,
+  Database,
   Clock3,
   Settings,
   Menu,
@@ -38,6 +39,11 @@ const navItems = [
     label: 'Productos',
     href: '/admin/productos',
     icon: BarChart2,
+  },
+  {
+    label: 'Base de datos',
+    href: '/admin/datos',
+    icon: Database,
   },
   {
     label: 'Preventa',
