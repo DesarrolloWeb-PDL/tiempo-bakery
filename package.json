@@ -13,7 +13,8 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build"
+    "db:migrate:deploy:if-configured": "sh -c 'if [ -n \"${DIRECT_URL:-}${POSTGRES_URL_NON_POOLING:-}${DATABASE_URL:-}${POSTGRES_URL:-}${POSTGRES_PRISMA_URL:-}\" ]; then prisma migrate deploy; else echo \"Skipping prisma migrate deploy: no datasource URL env var configured.\"; fi'",
+    "vercel-build": "prisma generate && npm run db:migrate:deploy:if-configured && next build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
