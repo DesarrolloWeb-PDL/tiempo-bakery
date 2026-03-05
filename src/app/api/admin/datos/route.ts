@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,12 +17,7 @@ type ProductRow = {
 }
 
 function isAbsoluteLocalhostUrl(value: string): boolean {
-  try {
-    const parsed = new URL(value)
-    return parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1'
-  } catch {
-    return false
-  }
+  return normalizePublicAssetUrl(value) !== value
 }
 
 function mapDbError(error: unknown, fallback: string) {
@@ -101,7 +97,37 @@ export async function GET() {
       accentColor: themeMap.theme_accentColor ?? '#f5f5f5',
     }
 
-    const productRows = products as ProductRow[]
+    const normalizedThemeLogo = normalizePublicAssetUrl(theme.logoUrl)
+    if (normalizedThemeLogo !== theme.logoUrl) {
+      await db.siteConfig.upsert({
+        where: { key: 'theme_logoUrl' },
+        create: { key: 'theme_logoUrl', value: normalizedThemeLogo },
+        update: { value: normalizedThemeLogo },
+      })
+      theme.logoUrl = normalizedThemeLogo
+    }
+
+    let productRows = products as ProductRow[]
+
+    const productsToFix = productRows.filter((product) =>
+      isAbsoluteLocalhostUrl(product.imageUrl)
+    )
+
+    if (productsToFix.length > 0) {
+      await db.$transaction(
+        productsToFix.map((product) =>
+          db.product.update({
+            where: { id: product.id },
+            data: { imageUrl: normalizePublicAssetUrl(product.imageUrl) },
+          })
+        )
+      )
+
+      productRows = productRows.map((product) => ({
+        ...product,
+        imageUrl: normalizePublicAssetUrl(product.imageUrl),
+      }))
+    }
 
     const productsWithAbsoluteLocalhostImage = productRows.filter((p) =>
       isAbsoluteLocalhostUrl(p.imageUrl)

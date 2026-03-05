@@ -3,6 +3,7 @@ import { prisma as db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { timeGating } from '@/lib/time-gating'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,6 +59,7 @@ const createProductSchema = z.object({
 function buildData(parsed: z.infer<typeof createProductSchema>) {
   return {
     ...parsed,
+    imageUrl: normalizePublicAssetUrl(parsed.imageUrl),
     allergens: JSON.stringify(parsed.allergens ?? []),
   }
 }
@@ -141,6 +143,27 @@ export async function GET() {
       }))
     }
 
+    const productsToFix = products.filter((product) => {
+      if (typeof product.imageUrl !== 'string') return false
+      return normalizePublicAssetUrl(product.imageUrl) !== product.imageUrl
+    })
+
+    if (productsToFix.length > 0) {
+      await db.$transaction(
+        productsToFix.map((product) =>
+          db.product.update({
+            where: { id: product.id },
+            data: { imageUrl: normalizePublicAssetUrl(product.imageUrl) },
+          })
+        )
+      )
+
+      products = products.map((product) => ({
+        ...product,
+        imageUrl: normalizePublicAssetUrl(product.imageUrl),
+      }))
+    }
+
     const normalizedProducts = products.map((product) => {
       let allergens: string[] = []
       try {
@@ -183,6 +206,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
     console.error('Error creating product:', error)
-    return NextResponse.json({ error: 'Error al crear producto' }, { status: 500 })
+    return NextResponse.json(mapDbError(error, 'Error al crear producto'), { status: 500 })
   }
 }

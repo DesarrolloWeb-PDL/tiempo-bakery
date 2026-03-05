@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
 import { timeGating } from '@/lib/time-gating'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +28,7 @@ const productSchema = z.object({
 function buildData(parsed: z.infer<typeof productSchema>) {
   return {
     ...parsed,
+    imageUrl: normalizePublicAssetUrl(parsed.imageUrl),
     allergens: JSON.stringify(parsed.allergens ?? []),
   }
 }
@@ -122,6 +124,9 @@ export async function PATCH(
     const data: Record<string, any> = {};
     for (const key of allowedFields) {
       if (key in body) data[key] = body[key];
+    }
+    if (typeof data.imageUrl === 'string') {
+      data.imageUrl = normalizePublicAssetUrl(data.imageUrl)
     }
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: 'No hay campos válidos para actualizar.' }, { status: 400 });

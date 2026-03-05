@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,7 +78,19 @@ export async function GET() {
       ;(theme as any)[key] = config.value
     })
 
-    return NextResponse.json({ ...DEFAULT_THEME, ...theme })
+    const mergedTheme = { ...DEFAULT_THEME, ...theme }
+    const normalizedLogoUrl = normalizePublicAssetUrl(mergedTheme.logoUrl)
+
+    if (normalizedLogoUrl !== mergedTheme.logoUrl) {
+      await db.siteConfig.upsert({
+        where: { key: 'theme_logoUrl' },
+        create: { key: 'theme_logoUrl', value: normalizedLogoUrl },
+        update: { value: normalizedLogoUrl },
+      })
+      mergedTheme.logoUrl = normalizedLogoUrl
+    }
+
+    return NextResponse.json(mergedTheme)
   } catch (error) {
     console.error('Error fetching theme config:', error)
     return NextResponse.json({ ...DEFAULT_THEME })
@@ -99,7 +112,12 @@ export async function PUT(req: NextRequest) {
     }
     console.log('[Theme PUT] Validation passed, saving...')
 
-    const updates = Object.entries(parsed.data).map(([key, value]) =>
+    const normalizedData: ThemeConfig = {
+      ...parsed.data,
+      logoUrl: normalizePublicAssetUrl(parsed.data.logoUrl ?? ''),
+    }
+
+    const updates = Object.entries(normalizedData).map(([key, value]) =>
       db.siteConfig.upsert({
         where: { key: `theme_${key}` },
         create: { key: `theme_${key}`, value: String(value) },

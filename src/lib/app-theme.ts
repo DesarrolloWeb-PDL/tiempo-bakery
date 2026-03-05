@@ -1,4 +1,5 @@
 import { prisma as db } from '@/lib/db'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 export interface AppTheme {
   appTitle: string
@@ -41,7 +42,11 @@ export async function getThemeConfig(): Promise<AppTheme> {
       ;(theme as any)[key] = config.value
     })
 
-    return { ...DEFAULT_THEME, ...theme }
+    const mergedTheme = { ...DEFAULT_THEME, ...theme }
+    return {
+      ...mergedTheme,
+      logoUrl: normalizePublicAssetUrl(mergedTheme.logoUrl),
+    }
   } catch (error) {
     console.error('Error fetching theme config:', error)
     return DEFAULT_THEME

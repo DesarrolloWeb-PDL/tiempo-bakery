@@ -3,6 +3,24 @@ import { prisma as db } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
+function mapDbError(error: unknown, fallback: string) {
+  const payload: Record<string, string> = { error: fallback }
+  if (!(error instanceof Error)) return payload
+  payload.details = error.message
+
+  if (error.message.includes('Environment variable not found: DATABASE_URL')) {
+    payload.error = 'Configuracion incompleta: falta DATABASE_URL'
+  } else if (error.message.includes('Environment variable not found: POSTGRES_URL')) {
+    payload.error = 'Configuracion incompleta: falta POSTGRES_URL'
+  } else if (error.message.includes("Can't reach database server")) {
+    payload.error = 'No se puede conectar a la base de datos'
+  } else if (error.message.includes('does not exist')) {
+    payload.error = 'La base de datos no esta migrada o faltan tablas'
+  }
+
+  return payload
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -81,6 +99,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('Error fetching admin orders:', error)
-    return NextResponse.json({ error: 'Error al obtener pedidos' }, { status: 500 })
+    return NextResponse.json(mapDbError(error, 'Error al obtener pedidos'), { status: 500 })
   }
 }

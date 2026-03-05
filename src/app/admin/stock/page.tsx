@@ -114,10 +114,23 @@ export default function AdminStockPage() {
     setMessage(null)
     try {
       const res = await fetch(`/api/admin/stock?weekId=${currentWeekId}`)
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const raw = await res.text()
+        let payload: { error?: string; details?: string } = {}
+        try {
+          payload = JSON.parse(raw)
+        } catch {
+          payload = {}
+        }
+        throw new Error(payload.error || payload.details || `HTTP ${res.status}`)
+      }
       setData(await res.json())
-    } catch {
+    } catch (err) {
       setData(null)
+      setMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'No se pudo cargar el stock',
+      })
     } finally {
       setLoading(false)
     }

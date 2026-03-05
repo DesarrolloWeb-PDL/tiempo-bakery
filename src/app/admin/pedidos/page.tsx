@@ -106,6 +106,7 @@ function PedidosContent() {
 
   const [data, setData] = useState<OrdersResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState(searchParams.get('search') ?? '')
   const [status, setStatus] = useState(searchParams.get('status') ?? 'ALL')
   const [paymentStatus, setPaymentStatus] = useState(searchParams.get('paymentStatus') ?? 'ALL')
@@ -113,6 +114,7 @@ function PedidosContent() {
 
   const fetchOrders = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const params = new URLSearchParams()
       if (search) params.set('search', search)
@@ -122,10 +124,20 @@ function PedidosContent() {
       params.set('limit', '20')
 
       const res = await fetch(`/api/admin/pedidos?${params.toString()}`)
-      if (!res.ok) throw new Error('Error')
+      if (!res.ok) {
+        const raw = await res.text()
+        let payload: { error?: string; details?: string } = {}
+        try {
+          payload = JSON.parse(raw)
+        } catch {
+          payload = {}
+        }
+        throw new Error(payload.error || payload.details || `HTTP ${res.status}`)
+      }
       setData(await res.json())
-    } catch {
+    } catch (err) {
       setData(null)
+      setError(err instanceof Error ? err.message : 'No se pudieron cargar los pedidos')
     } finally {
       setLoading(false)
     }
@@ -168,6 +180,12 @@ function PedidosContent() {
           Actualizar
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="bg-white border border-gray-200 rounded-xl p-4">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
         productId: p.id,
         productName: p.name,
         productSlug: p.slug,
-        productImage: p.imageUrl,
+        productImage: normalizePublicAssetUrl(p.imageUrl),
         category: p.category.name,
         defaultWeeklyStock: p.weeklyStock,
         weekStockId: ws?.id ?? null,
