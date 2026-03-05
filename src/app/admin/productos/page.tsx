@@ -697,6 +697,7 @@ export default function AdminProductosPage() {
 
                 {(localPreviewUrl || form.imageUrl) && (
                   <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start gap-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={localPreviewUrl ?? form.imageUrl}
                       alt={form.imageAlt || 'Preview'}

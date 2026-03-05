@@ -78,7 +78,11 @@ export async function GET() {
       ;(theme as any)[key] = config.value
     })
 
-    const mergedTheme = { ...DEFAULT_THEME, ...theme }
+    const mergedTheme: ThemeConfig = {
+      ...DEFAULT_THEME,
+      ...theme,
+      logoUrl: theme.logoUrl ?? DEFAULT_THEME.logoUrl,
+    }
     const normalizedLogoUrl = normalizePublicAssetUrl(mergedTheme.logoUrl)
 
     if (normalizedLogoUrl !== mergedTheme.logoUrl) {

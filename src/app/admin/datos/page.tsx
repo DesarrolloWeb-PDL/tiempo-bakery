@@ -140,6 +140,7 @@ export default function AdminDatosPage() {
             <p className="text-sm text-gray-600">Subtitulo: {data.theme.appSubtitle}</p>
             <p className="text-sm text-gray-600 break-all">Logo URL: {data.theme.logoUrl}</p>
             <div className="pt-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={data.theme.logoUrl}
                 alt="Logo actual"
@@ -213,6 +214,7 @@ export default function AdminDatosPage() {
             <div className="divide-y divide-gray-100 max-h-[540px] overflow-auto">
               {data.products.map((product) => (
                 <div key={product.id} className="px-4 py-3 flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={product.imageUrl || '/img/espiga.png'}
                     alt={product.imageAlt || product.name}
