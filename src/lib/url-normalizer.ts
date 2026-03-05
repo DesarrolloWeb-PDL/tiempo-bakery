@@ -1,5 +1,5 @@
-export function normalizePublicAssetUrl(value: string): string {
-  if (!value) return value
+export function normalizePublicAssetUrl(value?: string | null): string {
+  if (!value) return ''
 
   try {
     const parsed = new URL(value)
