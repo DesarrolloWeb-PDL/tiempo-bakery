@@ -66,6 +66,18 @@ export default function AdminConfigPage() {
     secondaryColor: '#2c2c2c',
     accentColor: '#f5f5f5',
   })
+  const [loadingPayments, setLoadingPayments] = useState(true)
+  const [savingPayments, setSavingPayments] = useState(false)
+  const [paymentMsg, setPaymentMsg] = useState<string | null>(null)
+  const [paymentSettings, setPaymentSettings] = useState<{
+    defaultProvider: 'STRIPE' | 'MERCADO_PAGO'
+    enabledProviders: string[]
+    options: Array<{ value: 'STRIPE' | 'MERCADO_PAGO'; label: string; enabled: boolean }>
+  }>({
+    defaultProvider: 'STRIPE',
+    enabledProviders: [],
+    options: [],
+  })
 
   const fetchShippingCosts = async () => {
     setLoadingShipping(true)
@@ -101,9 +113,25 @@ export default function AdminConfigPage() {
     }
   }
 
+  const fetchPaymentSettings = async () => {
+    setLoadingPayments(true)
+    setPaymentMsg(null)
+    try {
+      const res = await fetch('/api/admin/pagos')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setPaymentSettings(data)
+    } catch {
+      setPaymentMsg('No se pudo cargar la configuración de pagos')
+    } finally {
+      setLoadingPayments(false)
+    }
+  }
+
   useEffect(() => {
     void fetchShippingCosts()
     void fetchThemeConfig()
+    void fetchPaymentSettings()
   }, [])
 
   const handleLogout = async () => {
@@ -186,6 +214,26 @@ export default function AdminConfigPage() {
       setThemeMsg('No se pudo restablecer el tema')
     } finally {
       setSavingTheme(false)
+    }
+  }
+
+  const handleSavePayments = async () => {
+    setSavingPayments(true)
+    setPaymentMsg(null)
+    try {
+      const res = await fetch('/api/admin/pagos', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ defaultProvider: paymentSettings.defaultProvider }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'No se pudo guardar la configuración')
+      setPaymentMsg(`Proveedor por defecto actualizado a ${data.label}`)
+      await fetchPaymentSettings()
+    } catch (error) {
+      setPaymentMsg(error instanceof Error ? error.message : 'No se pudo guardar la configuración de pagos')
+    } finally {
+      setSavingPayments(false)
     }
   }
 
@@ -308,13 +356,72 @@ export default function AdminConfigPage() {
             { label: 'Versión', value: '1.0.0' },
             { label: 'Stack', value: 'Next.js 14 + Prisma' },
             { label: 'Base de datos', value: 'SQLite (dev) / PostgreSQL (prod)' },
-            { label: 'Pagos', value: 'Stripe' },
+            { label: 'Pagos', value: paymentSettings.enabledProviders.length ? paymentSettings.enabledProviders.join(' + ') : 'Sin configurar' },
           ].map((item) => (
             <div key={item.label}>
               <p className="text-xs text-gray-400">{item.label}</p>
               <p className="text-sm text-gray-800">{item.value}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-6">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+          <Settings className="w-4 h-4 text-amber-600" />
+          <h3 className="font-semibold text-gray-900 text-sm">Pagos</h3>
+        </div>
+        <div className="px-5 py-4 space-y-4">
+          <div className="space-y-2">
+            {paymentSettings.options.map((option) => (
+              <div key={option.value} className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-800">{option.label}</p>
+                  <p className="text-xs text-gray-500">
+                    {option.enabled ? 'Configurado en variables de entorno' : 'Falta credencial en variables de entorno'}
+                  </p>
+                </div>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${option.enabled ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                  {option.enabled ? 'Disponible' : 'Inactivo'}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Proveedor por defecto en checkout</label>
+            <select
+              value={paymentSettings.defaultProvider}
+              disabled={loadingPayments || savingPayments}
+              onChange={(e) =>
+                setPaymentSettings((prev) => ({
+                  ...prev,
+                  defaultProvider: e.target.value as 'STRIPE' | 'MERCADO_PAGO',
+                }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+            >
+              {paymentSettings.options.map((option) => (
+                <option key={option.value} value={option.value} disabled={!option.enabled}>
+                  {option.label}{!option.enabled ? ' (no disponible)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <p className="text-xs text-gray-500">
+            Credenciales requeridas: STRIPE_SECRET_KEY para Stripe y MERCADOPAGO_ACCESS_TOKEN para Mercado Pago. Ambas usan NEXT_PUBLIC_URL para retornos y webhooks.
+          </p>
+
+          {paymentMsg && <p className="text-sm text-gray-600">{paymentMsg}</p>}
+
+          <button
+            onClick={handleSavePayments}
+            disabled={loadingPayments || savingPayments || !paymentSettings.enabledProviders.length}
+            className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50"
+          >
+            {savingPayments ? 'Guardando...' : 'Guardar pagos'}
+          </button>
         </div>
       </div>
 

@@ -9,7 +9,7 @@ import { CustomerInfoStep } from '@/components/checkout/customer-info-step';
 import { DeliveryStep } from '@/components/checkout/delivery-step';
 import { ReviewStep } from '@/components/checkout/review-step';
 import { Badge } from '@/components/ui/badge';
-import { DeliveryMethod, DEFAULT_SHIPPING_COSTS, type ShippingCosts } from '@/types/checkout';
+import { DeliveryMethod, DEFAULT_SHIPPING_COSTS, PaymentProvider, type PaymentMethodOption, type ShippingCosts } from '@/types/checkout';
 import type { CheckoutFormData } from '@/types/checkout';
 
 function formatCurrency(amount: number) {
@@ -39,6 +39,8 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [pickupPoints, setPickupPoints] = React.useState<PickupPoint[]>([]);
   const [shippingCosts, setShippingCosts] = React.useState<ShippingCosts>(DEFAULT_SHIPPING_COSTS);
+  const [paymentOptions, setPaymentOptions] = React.useState<PaymentMethodOption[]>([]);
+  const [selectedPaymentProvider, setSelectedPaymentProvider] = React.useState<PaymentProvider>(PaymentProvider.STRIPE);
 
   // Estado del formulario
   const [formData, setFormData] = React.useState<Partial<CheckoutFormData>>({
@@ -69,6 +71,17 @@ export default function CheckoutPage() {
         })
       })
       .catch((err) => console.error('Error loading shipping costs:', err));
+
+    fetch('/api/payment-methods')
+      .then((res) => {
+        if (!res.ok) throw new Error('No se pudieron cargar medios de pago')
+        return res.json()
+      })
+      .then((data) => {
+        setPaymentOptions(data.options || [])
+        setSelectedPaymentProvider(data.defaultProvider || PaymentProvider.STRIPE)
+      })
+      .catch((err) => console.error('Error loading payment methods:', err));
   }, []);
 
   // Redirigir si el carrito está vacío
@@ -100,6 +113,7 @@ export default function CheckoutPage() {
         customerName: formData.name,
         customerPhone: formData.phone,
         deliveryMethod: formData.method,
+        paymentProvider: selectedPaymentProvider,
         pickupLocationId: formData.pickupLocationId,
         shippingAddress: formData.address,
         shippingCity: formData.city,
@@ -127,11 +141,11 @@ export default function CheckoutPage() {
       // Limpiar carrito
       clearCart();
 
-      // Redirigir a Stripe Checkout
+      // Redirigir al checkout del proveedor seleccionado
       if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
       } else {
-        // Si no hay URL de Stripe, ir a confirmación directamente
+        // Si no hay URL externa, ir a confirmación directamente
         router.push(`/pedido/${result.orderId}/confirmacion`);
       }
     } catch (error) {
@@ -258,6 +272,9 @@ export default function CheckoutPage() {
                   city: formData.city,
                   postalCode: formData.postalCode,
                 }}
+                paymentOptions={paymentOptions}
+                selectedPaymentProvider={selectedPaymentProvider}
+                onPaymentProviderChange={setSelectedPaymentProvider}
                 pickupPoints={pickupPoints}
                 customerNotes={(formData.customerNotes as string | undefined) || ''}
                 onNotesChange={handleNotesChange}
@@ -313,7 +330,7 @@ export default function CheckoutPage() {
 
               <div className="mt-6 p-4 bg-amber-50 rounded-lg">
                 <p className="text-xs text-amber-800">
-                  <strong>Nota:</strong> Serás redirigido a Stripe para completar el pago
+                  <strong>Nota:</strong> Serás redirigido a {selectedPaymentProvider === PaymentProvider.MERCADO_PAGO ? 'Mercado Pago' : 'Stripe'} para completar el pago
                   de forma segura.
                 </p>
               </div>

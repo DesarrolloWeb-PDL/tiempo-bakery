@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
+import ImagenUploadAdmin from '@/components/productos/imagen-upload-admin'
 import Image from 'next/image'
 import { BarChart2, RefreshCw, Plus, Pencil, Trash2, X, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -649,7 +650,10 @@ export default function AdminProductosPage() {
               {fieldErrors.weeklyStock && <p className="mt-1 text-xs text-red-600">{fieldErrors.weeklyStock}</p>}
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 space-y-2">
+              <ImagenUploadAdmin
+                onUpload={(url) => setFieldValue('imageUrl', url)}
+              />
               <input value={form.imageUrl} onChange={(e) => setFieldValue('imageUrl', e.target.value)} placeholder="URL imagen" className={cn(inputClass('imageUrl'), 'w-full')} required />
               {fieldErrors.imageUrl && <p className="mt-1 text-xs text-red-600">{fieldErrors.imageUrl}</p>}
             </div>
@@ -658,41 +662,9 @@ export default function AdminProductosPage() {
               {fieldErrors.imageAlt && <p className="mt-1 text-xs text-red-600">{fieldErrors.imageAlt}</p>}
             </div>
 
-            {/* Quitar creación de categoría desde el formulario de producto */}
-
+            {/* El upload ahora se maneja con ImagenUploadAdmin */}
             <div className="md:col-span-3">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
-                  void handleImageSelected(file)
-                  e.currentTarget.value = ''
-                }}
-              />
               <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingImage}
-                    className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60"
-                  >
-                    {uploadingImage ? 'Subiendo...' : (localPreviewUrl || form.imageUrl) ? 'Cambiar imagen' : 'Subir imagen'}
-                  </button>
-                  {uploadingImage && (
-                    <span className="text-xs text-amber-600 animate-pulse">Guardando en servidor…</span>
-                  )}
-                  {!uploadingImage && form.imageUrl && (
-                    <span className="text-xs text-green-600">✓ Guardada</span>
-                  )}
-                  {!uploadingImage && localPreviewUrl && !form.imageUrl && (
-                    <span className="text-xs text-red-500">⚠ Error al subir, reintenta</span>
-                  )}
-                </div>
                 <p className="text-xs text-gray-500">Acepta JPG, PNG o WEBP (máx. 5MB)</p>
 
                 {(localPreviewUrl || form.imageUrl) && (

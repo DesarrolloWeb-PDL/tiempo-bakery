@@ -7,6 +7,11 @@ export enum DeliveryMethod {
   NATIONAL_COURIER = 'NATIONAL_COURIER',
 }
 
+export enum PaymentProvider {
+  STRIPE = 'STRIPE',
+  MERCADO_PAGO = 'MERCADO_PAGO',
+}
+
 // Schemas de validación
 export const checkoutCustomerSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -43,6 +48,7 @@ export const checkoutSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   phone: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos'),
   method: z.nativeEnum(DeliveryMethod),
+  paymentProvider: z.nativeEnum(PaymentProvider).optional(),
   pickupLocationId: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
@@ -83,5 +89,11 @@ export interface CheckoutResponse {
   orderId?: string;
   orderNumber?: string;
   checkoutUrl?: string;
+  paymentProvider?: PaymentProvider;
   error?: string;
+}
+
+export interface PaymentMethodOption {
+  value: PaymentProvider;
+  label: string;
 }

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db';
 import { stockManager } from '@/lib/stock-manager';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
 import { getShippingCostByMethod, getShippingCostsRuntime } from '@/lib/shipping-costs';
+import { createMercadoPagoPreference } from '@/lib/mercadopago';
+import { PaymentProvider, getPaymentSettings } from '@/lib/payments';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -13,6 +15,7 @@ const checkoutSchema = z.object({
   customerName: z.string().min(2),
   customerPhone: z.string().min(9),
   deliveryMethod: z.enum(['PICKUP_POINT', 'LOCAL_DELIVERY', 'NATIONAL_COURIER']),
+  paymentProvider: z.enum(['STRIPE', 'MERCADO_PAGO']).optional(),
   pickupLocationId: z.string().optional(),
   shippingAddress: z.string().optional(),
   shippingCity: z.string().optional(),
@@ -28,10 +31,6 @@ const checkoutSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-02-24.acacia',
-  });
-
   try {
     // 1. Verificar time-gating
     const { enabled, service } = await getTimeGatingRuntime();
@@ -46,6 +45,22 @@ export async function POST(request: NextRequest) {
     // 2. Validar datos
     const body = await request.json();
     const data = checkoutSchema.parse(body);
+    const paymentSettings = await getPaymentSettings();
+    const selectedProvider = (data.paymentProvider as PaymentProvider | undefined) ?? paymentSettings.defaultProvider;
+
+    if (!paymentSettings.enabledProviders.length) {
+      return NextResponse.json(
+        { error: 'No hay medios de pago configurados en el servidor' },
+        { status: 503 }
+      );
+    }
+
+    if (!paymentSettings.enabledProviders.includes(selectedProvider)) {
+      return NextResponse.json(
+        { error: 'El medio de pago seleccionado no está disponible' },
+        { status: 400 }
+      );
+    }
 
     // 3. Verificar stock para todos los productos
     const weekId = service.getCurrentWeekId();
@@ -139,6 +154,7 @@ export async function POST(request: NextRequest) {
         total,
         status: 'PENDING',
         paymentStatus: 'PENDING',
+        paymentMethod: selectedProvider === 'MERCADO_PAGO' ? 'mercadopago' : 'stripe',
         deliveryMethod: data.deliveryMethod,
         pickupLocation: pickupDetails?.name,
         pickupAddress: pickupDetails?.address,
@@ -167,61 +183,97 @@ export async function POST(request: NextRequest) {
       )
     );
 
-    // 11. Crear sesión de pago en Stripe
-    const lineItems = order.items.map((item) => ({
-      price_data: {
-        currency: 'ars',
-        product_data: {
-          name: item.productName,
-          description: item.sliced ? 'Rebanado' : 'Sin rebanar',
-        },
-        unit_amount: Math.round(Number(item.unitPrice) * 100), // Centavos
-      },
-      quantity: item.quantity,
-    }));
+    let checkoutUrl: string | null = null;
 
-    // Agregar shipping como línea adicional si existe
-    if (shippingCost > 0) {
-      lineItems.push({
+    if (selectedProvider === 'STRIPE') {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+        apiVersion: '2025-02-24.acacia',
+      });
+
+      const lineItems = order.items.map((item) => ({
         price_data: {
           currency: 'ars',
           product_data: {
-            name: 'Gastos de envío',
-            description:
-              data.deliveryMethod === 'NATIONAL_COURIER'
-                ? 'Mensajería nacional'
-                : 'Envío local',
+            name: item.productName,
+            description: item.sliced ? 'Rebanado' : 'Sin rebanar',
           },
-          unit_amount: Math.round(shippingCost * 100),
+          unit_amount: Math.round(Number(item.unitPrice) * 100),
         },
-        quantity: 1,
+        quantity: item.quantity,
+      }));
+
+      if (shippingCost > 0) {
+        lineItems.push({
+          price_data: {
+            currency: 'ars',
+            product_data: {
+              name: 'Gastos de envío',
+              description:
+                data.deliveryMethod === 'NATIONAL_COURIER'
+                  ? 'Mensajería nacional'
+                  : 'Envío local',
+            },
+            unit_amount: Math.round(shippingCost * 100),
+          },
+          quantity: 1,
+        });
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: lineItems,
+        mode: 'payment',
+        success_url: `${process.env.NEXT_PUBLIC_URL}/pedido/${order.id}/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_URL}/checkout?cancelled=true`,
+        customer_email: data.customerEmail,
+        metadata: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+        },
+      });
+
+      checkoutUrl = session.url;
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { stripePaymentId: session.id },
       });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_URL}/pedido/${order.id}/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/checkout?cancelled=true`,
-      customer_email: data.customerEmail,
-      metadata: {
+    if (selectedProvider === 'MERCADO_PAGO') {
+      const preference = await createMercadoPagoPreference({
         orderId: order.id,
         orderNumber: order.orderNumber,
-      },
-    });
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        customerPhone: data.customerPhone,
+        deliveryMethod: data.deliveryMethod,
+        shippingAddress: data.shippingAddress,
+        shippingPostal: data.shippingPostal,
+        items: order.items.map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+          sliced: item.sliced,
+        })),
+        shippingCost,
+      });
 
-    // 12. Actualizar orden con ID de Stripe
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { stripePaymentId: session.id },
-    });
+      checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { mercadopagoPaymentId: preference.id },
+      });
+    }
 
     return NextResponse.json({
       success: true,
       orderId: order.id,
       orderNumber: order.orderNumber,
-      checkoutUrl: session.url,
+      checkoutUrl,
+      paymentProvider: selectedProvider,
     });
   } catch (error) {
     console.error('Checkout error:', error);

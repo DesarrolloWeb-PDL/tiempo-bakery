@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
-import { DeliveryMethod, type ShippingCosts } from '@/types/checkout';
+import { DeliveryMethod, PaymentProvider, type PaymentMethodOption, type ShippingCosts } from '@/types/checkout';
 import type { CartItem } from '@/types/cart';
 
 function formatCurrency(amount: number) {
@@ -33,6 +33,9 @@ interface ReviewStepProps {
     city?: string;
     postalCode?: string;
   };
+  paymentOptions: PaymentMethodOption[];
+  selectedPaymentProvider: PaymentProvider;
+  onPaymentProviderChange: (provider: PaymentProvider) => void;
   pickupPoints: Array<{
     id: string;
     name: string;
@@ -52,6 +55,9 @@ export function ReviewStep({
   shippingCosts,
   customerData,
   deliveryData,
+  paymentOptions,
+  selectedPaymentProvider,
+  onPaymentProviderChange,
   pickupPoints,
   customerNotes,
   onNotesChange,
@@ -163,6 +169,35 @@ export function ReviewStep({
                 </p>
               </div>
             )}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-semibold text-gray-900 mb-3">Pago</h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {paymentOptions.map((option) => {
+              const selected = option.value === selectedPaymentProvider;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onPaymentProviderChange(option.value)}
+                  className={`rounded-lg border p-4 text-left transition-colors ${
+                    selected
+                      ? 'border-amber-600 bg-amber-50 ring-1 ring-amber-200'
+                      : 'border-gray-200 bg-white hover:border-amber-300'
+                  }`}
+                >
+                  <p className="text-sm font-medium text-gray-900">{option.label}</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {option.value === PaymentProvider.MERCADO_PAGO
+                      ? 'Checkout Pro con billetera, tarjetas y medios locales.'
+                      : 'Pago con tarjeta redirigido a Stripe Checkout.'}
+                  </p>
+                </button>
+              );
+            })}
           </div>
         </div>
 

@@ -34,6 +34,7 @@ interface OrderDetail {
   paymentStatus: string
   paymentMethod: string
   stripePaymentId: string | null
+  mercadopagoPaymentId: string | null
   deliveryMethod: string
   pickupLocation: string | null
   pickupAddress: string | null
@@ -446,6 +447,9 @@ export default function AdminOrderDetailPage() {
               <Field label="Método" value={order.paymentMethod} />
               {order.stripePaymentId && (
                 <Field label="ID de Stripe" value={order.stripePaymentId} mono />
+              )}
+              {order.mercadopagoPaymentId && (
+                <Field label="ID de Mercado Pago" value={order.mercadopagoPaymentId} mono />
               )}
               <Field label="Semana de producción" value={order.weekId} mono />
             </div>
