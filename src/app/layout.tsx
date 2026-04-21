@@ -4,28 +4,31 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { CartSidebar } from "@/components/cart-sidebar";
+import { getSiteContent } from "@/lib/site-content";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Tiempo Bakery - Panadería Artesanal",
-  description: "Panadería artesanal con preventa semanal. Panes y dulces elaborados con masa madre y harinas de calidad.",
+  description: "Micropanadería artesanal por encargo semanal. Panes y dulces elaborados en tandas pequeñas con fermentaciones lentas y producto real.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteContent = await getSiteContent();
+
   return (
     <html lang="es">
       <body className={inter.className}>
         <div className="flex flex-col min-h-screen">
-          <Header />
+          <Header siteContent={siteContent} />
           <main className="flex-1">
             {children}
           </main>
-          <Footer />
+          <Footer siteContent={siteContent} />
           <CartSidebar />
         </div>
       </body>

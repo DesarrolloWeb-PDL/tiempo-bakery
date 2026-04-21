@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import type { SiteContent } from '@/lib/site-content';
 
 // Inyector de CSS de tema - integrado en Header para evitar error #418
 function ThemeStyleInjector() {
@@ -52,7 +53,11 @@ function ThemeStyleInjector() {
   return null
 }
 
-export function Header() {
+interface HeaderProps {
+  siteContent: SiteContent
+}
+
+export function Header({ siteContent }: HeaderProps) {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const toggleCart = useCartStore((state) => state.toggleCart);
   const { theme } = useAppTheme();
@@ -99,21 +104,21 @@ export function Header() {
               className="text-sm font-medium text-gray-700 transition-colors hover:opacity-75"
               style={{ color: theme.primaryColor }}
             >
-              Productos
+              {siteContent.navProductsLabel}
             </Link>
             <Link
               href="/sobre-nosotros"
               className="text-sm font-medium text-gray-700 transition-colors hover:opacity-75"
               style={{ color: theme.primaryColor }}
             >
-              Sobre Nosotros
+              {siteContent.navAboutLabel}
             </Link>
             <Link
               href="/contacto"
               className="text-sm font-medium text-gray-700 transition-colors hover:opacity-75"
               style={{ color: theme.primaryColor }}
             >
-              Contacto
+              {siteContent.navContactLabel}
             </Link>
           </nav>
 

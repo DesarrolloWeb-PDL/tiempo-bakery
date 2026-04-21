@@ -2,8 +2,13 @@
 
 import { useAppTheme } from '@/hooks/useAppTheme'
 import Image from 'next/image'
+import type { SiteContent } from '@/lib/site-content'
 
-export default function Footer() {
+interface FooterProps {
+  siteContent: SiteContent
+}
+
+export default function Footer({ siteContent }: FooterProps) {
   const { theme } = useAppTheme()
 
   return (
@@ -31,9 +36,7 @@ export default function Footer() {
               {theme.appTitle}
             </h3>
             <p className="text-sm text-gray-600">
-              {theme.appSubtitle}
-              <br />
-              Horneado fresco cada semana.
+              {siteContent.footerDescription}
             </p>
           </div>
 
@@ -43,13 +46,13 @@ export default function Footer() {
               className="font-semibold mb-3"
               style={{ color: theme.primaryColor }}
             >
-              Horario de Pedidos
+              {siteContent.footerScheduleTitle}
             </h3>
             <p className="text-sm text-gray-600">
-              Miércoles 18:00 - Domingo 20:00
+              {siteContent.footerScheduleText}
               <br />
               <span className="text-xs text-gray-500">
-                Entregas: Viernes y Sábado
+                {siteContent.footerDeliveryText}
               </span>
             </p>
           </div>
@@ -60,12 +63,14 @@ export default function Footer() {
               className="font-semibold mb-3"
               style={{ color: theme.primaryColor }}
             >
-              Contacto
+              {siteContent.footerContactTitle}
             </h3>
             <p className="text-sm text-gray-600">
-              Email: contacto@tiempobakery.com
+              Email: {siteContent.contactEmail}
               <br />
-              Tel: +34 XXX XXX XXX
+              Tel: {siteContent.contactPhone}
+              <br />
+              {siteContent.contactAddress}
             </p>
           </div>
         </div>
@@ -75,7 +80,7 @@ export default function Footer() {
           style={{ borderColor: theme.primaryColor + '30' }}
         >
           <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} {theme.appTitle}. Todos los derechos reservados.
+            © {new Date().getFullYear()} {theme.appTitle}. {siteContent.footerLegalNote}
           </p>
         </div>
       </div>

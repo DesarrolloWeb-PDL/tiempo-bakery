@@ -48,7 +48,7 @@ type ThemeConfig = z.infer<typeof themeSchema>
 
 const DEFAULT_THEME: ThemeConfig = {
   appTitle: 'Tiempo Bakery',
-  appSubtitle: 'Panadería artesanal con preventa semanal',
+  appSubtitle: 'Micropanadería artesanal por encargo semanal',
   logoUrl: '/img/espiga.png',
   primaryColor: '#d89a44',
   secondaryColor: '#2c2c2c',
