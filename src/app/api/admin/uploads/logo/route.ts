@@ -1,79 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { randomBytes, createHash } from 'crypto'
+import { hasAdminSession } from '@/lib/admin-auth'
+import { uploadPublicAsset } from '@/lib/supabase'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
-const ADMIN_COOKIE = 'tbk_admin_auth'
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
 
 export const dynamic = 'force-dynamic'
 
-function isCloudinaryConfigured() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-  )
-}
-
-async function uploadLogoToCloudinary(file: File) {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
-  const apiKey = process.env.CLOUDINARY_API_KEY!
-  const apiSecret = process.env.CLOUDINARY_API_SECRET!
-  const timestamp = Math.floor(Date.now() / 1000)
-  const folder = 'tiempo-bakery/logo'
-  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`
-  const signature = createHash('sha1').update(toSign).digest('hex')
-
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('api_key', apiKey)
-  formData.append('timestamp', String(timestamp))
-  formData.append('signature', signature)
-  formData.append('folder', folder)
-
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-    method: 'POST',
-    body: formData,
-  })
-
-  const data = await response.json().catch(() => ({} as Record<string, unknown>))
-  if (!response.ok || typeof data.secure_url !== 'string') {
-    throw new Error('No se pudo subir el logo a Cloudinary')
-  }
-
-  return data.secure_url
-}
-
 function getUploadDir() {
-  // En producción (Vercel/serverless), usar /tmp que es writable
-  // En desarrollo, usar /public/img para acceso directo
-  if (process.env.NODE_ENV === 'production') {
-    return path.join('/tmp', 'logo-uploads')
-  }
-  return path.join(process.cwd(), 'public', 'img')
-}
-
-function getServeUrl(filename: string) {
-  // En desarrollo, servir desde /public
-  // En producción, servir desde /api endpoint que lee de /tmp
-  if (process.env.NODE_ENV === 'production') {
-    return `/api/admin/uploads/logo-serve?file=${filename}`
-  }
-  return `/img/${filename}`
+  return path.join('/tmp', 'logo-uploads')
 }
 
 export async function POST(req: NextRequest) {
   try {
     console.log('[Logo Upload] Request received')
 
-    // Check auth - verificar cookie correcta
-    const cookieHeader = req.headers.get('cookie')
-    const hasAdminAuth = cookieHeader?.includes(`${ADMIN_COOKIE}=`)
-    
-    if (!hasAdminAuth) {
+    if (!hasAdminSession(req.cookies)) {
       console.log('[Logo Upload] Unauthorized - no admin session')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -106,36 +50,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create upload directory if it doesn't exist
-    const uploadDir = getUploadDir()
-    try {
-      await fs.mkdir(uploadDir, { recursive: true })
-      console.log(`[Logo Upload] Directory ready: ${uploadDir}`)
-    } catch (err) {
-      console.log('[Logo Upload] Error creating directory:', err)
-      throw new Error('Cannot create upload directory')
-    }
-
-    // Generate unique filename
-    const ext = path.extname(file.name)
-    const randomName = randomBytes(8).toString('hex')
-    const filename = `logo-${randomName}${ext}`
-    const filepath = path.join(uploadDir, filename)
-
-    console.log(`[Logo Upload] Saving to: ${filepath}`)
-
-    // Convert file to buffer and write
-    const buffer = Buffer.from(await file.arrayBuffer())
-    await fs.writeFile(filepath, buffer)
-    console.log(`[Logo Upload] File written successfully`)
-
-    // Return accessible URL
-    const url = getServeUrl(filename)
-    console.log(`[Logo Upload] Success, URL: ${url}`)
+    const upload = await uploadPublicAsset(file, 'branding')
+    console.log(`[Logo Upload] Success, URL: ${upload.publicUrl}`)
 
     return NextResponse.json({
-      url,
-      filename,
+      url: upload.publicUrl,
+      filename: upload.filePath,
       size: file.size,
       type: file.type,
     })

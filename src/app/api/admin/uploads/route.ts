@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mkdir, writeFile, readFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import path from 'path'
-import { randomUUID } from 'crypto'
-import { createHash } from 'crypto'
-import FormData from 'form-data';
-import axios from 'axios';
+import { hasAdminSession } from '@/lib/admin-auth'
+import { uploadPublicAsset } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -13,21 +11,7 @@ const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_SIZE = 5 * 1024 * 1024
 
 function getUploadDir() {
-  // En producción (Vercel/serverless), usar /tmp que es writable
-  // En desarrollo, usar /public/uploads que es persistente
-  if (process.env.NODE_ENV === 'production') {
-    return path.join('/tmp', 'producto-uploads')
-  }
-  return path.join(process.cwd(), 'public', 'uploads', 'productos')
-}
-
-function getServeUrl(filename: string) {
-  // En producción, servir desde /api endpoint que lee de /tmp
-  // En desarrollo, servir directamente desde /public
-  if (process.env.NODE_ENV === 'production') {
-    return `/api/admin/uploads/serve?file=${filename}`
-  }
-  return `/uploads/productos/${filename}`
+  return path.join('/tmp', 'producto-uploads')
 }
 
 function getExtension(fileName: string, mimeType: string) {
@@ -44,6 +28,10 @@ function getExtension(fileName: string, mimeType: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!hasAdminSession(req.cookies)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     console.log('Iniciando upload...')
     const formData = await req.formData()
     const file = formData.get('file')
@@ -66,25 +54,12 @@ export async function POST(req: NextRequest) {
     }
 
     const ext = getExtension(file.name, file.type)
-    const fileName = `${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`
+    console.log('Preparando upload persistente:', { name: file.name, ext })
 
-    const uploadDir = getUploadDir()
-    
-    console.log('Directorio de upload:', uploadDir)
+    const upload = await uploadPublicAsset(file, 'productos')
 
-    await mkdir(uploadDir, { recursive: true })
-
-    const fullPath = path.join(uploadDir, fileName)
-    const buffer = Buffer.from(await file.arrayBuffer())
-    
-    console.log('Escribiendo archivo:', { path: fullPath, size: buffer.length })
-    
-    await writeFile(fullPath, buffer)
-
-    console.log('Archivo guardado exitosamente')
-    const url = getServeUrl(fileName)
-    console.log('URL de acceso:', url)
-    return NextResponse.json({ url })
+    console.log('Archivo guardado en storage persistente:', upload.filePath)
+    return NextResponse.json({ url: upload.publicUrl, filePath: upload.filePath })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     console.error('Error uploading file:', errorMsg, error)

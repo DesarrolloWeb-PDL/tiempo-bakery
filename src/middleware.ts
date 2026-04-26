@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Contraseña de admin configurable por variable de entorno
-// Por defecto "admin123" para desarrollo local
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
-const ADMIN_COOKIE = 'tbk_admin_auth'
+import { ADMIN_COOKIE, getAdminPassword, hasAdminSession, isAdminAuthConfigured } from '@/lib/admin-auth'
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -18,9 +14,15 @@ export function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  if (!isAdminAuthConfigured()) {
+    return NextResponse.json(
+      { error: 'Panel de administración deshabilitado: falta ADMIN_PASSWORD' },
+      { status: 503 }
+    )
+  }
+
   // Comprobar cookie de sesión
-  const authCookie = req.cookies.get(ADMIN_COOKIE)
-  if (authCookie?.value === ADMIN_PASSWORD) {
+  if (hasAdminSession(req.cookies)) {
     return NextResponse.next()
   }
 

@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ADMIN_COOKIE, getAdminAuthConfigError, getAdminPassword } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
-const ADMIN_COOKIE = 'tbk_admin_auth'
-
 export async function POST(req: NextRequest) {
   try {
+    const adminPassword = getAdminPassword()
+
+    if (!adminPassword) {
+      return NextResponse.json({ error: getAdminAuthConfigError() }, { status: 503 })
+    }
+
     const { password } = await req.json()
 
-    if (!password || password !== ADMIN_PASSWORD) {
+    if (!password || password !== adminPassword) {
       return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 })
     }
 
     const response = NextResponse.json({ ok: true })
-    response.cookies.set(ADMIN_COOKIE, ADMIN_PASSWORD, {
+    response.cookies.set(ADMIN_COOKIE, adminPassword, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -30,6 +34,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true })
-  response.cookies.delete('tbk_admin_auth')
+  response.cookies.delete(ADMIN_COOKIE)
   return response
 }

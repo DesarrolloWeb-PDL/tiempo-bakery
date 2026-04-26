@@ -9,6 +9,11 @@ export const PAYMENT_PROVIDER_LABELS: Record<PaymentProvider, string> = {
   MERCADO_PAGO: 'Mercado Pago',
 };
 
+interface PaymentSettings {
+  enabledProviders: PaymentProvider[];
+  defaultProvider: PaymentProvider;
+}
+
 const DEFAULT_PROVIDER: PaymentProvider = 'STRIPE';
 const SITE_CONFIG_KEY = 'default_payment_provider';
 
@@ -30,7 +35,7 @@ export function getEnabledPaymentProvidersFromEnv(): PaymentProvider[] {
   return providers;
 }
 
-export async function getPaymentSettings() {
+export async function getPaymentSettings(): Promise<PaymentSettings> {
   const enabledProviders = getEnabledPaymentProvidersFromEnv();
 
   let configuredDefault: string | null = null;
@@ -46,8 +51,12 @@ export async function getPaymentSettings() {
     console.error('Error reading payment settings:', error);
   }
 
-  const defaultProvider = isPaymentProvider(configuredDefault ?? '') && enabledProviders.includes(configuredDefault)
-    ? configuredDefault
+  const configuredProvider: PaymentProvider | null = isPaymentProvider(configuredDefault ?? '')
+    ? (configuredDefault as PaymentProvider)
+    : null;
+
+  const defaultProvider = configuredProvider && enabledProviders.includes(configuredProvider)
+    ? configuredProvider
     : enabledProviders[0] ?? DEFAULT_PROVIDER;
 
   return {
