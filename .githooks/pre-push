@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "[pre-push] Running verify:predeploy"
+npm run verify:predeploy

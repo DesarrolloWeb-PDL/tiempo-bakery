@@ -12,12 +12,22 @@ function getRequiredEnv(name: 'NEXT_PUBLIC_SUPABASE_URL' | 'SUPABASE_URL' | 'SUP
 	return value;
 }
 
-const supabaseUrl =
-	process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || process.env.SUPABASE_URL?.trim() || getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL');
+let supabaseClient: ReturnType<typeof createClient> | null = null;
 
-const supabaseKey = getRequiredEnv('SUPABASE_SERVICE_ROLE_KEY');
+function getSupabaseAdminClient() {
+	if (supabaseClient) {
+		return supabaseClient;
+	}
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+	const supabaseUrl =
+		process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+		process.env.SUPABASE_URL?.trim() ||
+		getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL');
+	const supabaseKey = getRequiredEnv('SUPABASE_SERVICE_ROLE_KEY');
+
+	supabaseClient = createClient(supabaseUrl, supabaseKey);
+	return supabaseClient;
+}
 
 function getExtension(fileName: string, mimeType: string) {
 	const byMime: Record<string, string> = {
@@ -34,6 +44,7 @@ function getExtension(fileName: string, mimeType: string) {
 }
 
 export async function uploadPublicAsset(file: File, folder: string) {
+	const supabase = getSupabaseAdminClient();
 	const ext = getExtension(file.name, file.type);
 	const filePath = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
 

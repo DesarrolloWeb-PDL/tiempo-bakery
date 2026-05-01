@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "hooks:install": "git config core.hooksPath .githooks",
+    "verify:predeploy": "tsc --noEmit && tsx scripts/predeploy-check.ts",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
