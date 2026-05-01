@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react'
 import ImagenUploadAdmin from '@/components/productos/imagen-upload-admin'
 import Image from 'next/image'
 import { ArrowUp, ArrowDown, BarChart2, RefreshCw, Plus, Pencil, Star, Trash2, X, Save } from 'lucide-react'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { cn } from '@/lib/utils'
 
 interface ProductRow {
@@ -779,7 +780,7 @@ export default function AdminProductosPage() {
                   <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start gap-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={localPreviewUrl ?? form.imageUrl}
+                      src={localPreviewUrl ?? normalizePublicAssetUrl(form.imageUrl)}
                       alt={form.imageAlt || 'Preview'}
                       className="h-28 w-28 object-cover rounded-lg border border-gray-200 flex-shrink-0"
                       onError={(e) => {
@@ -820,7 +821,7 @@ export default function AdminProductosPage() {
                     <div key={`${image.url}-${index}`} className="grid grid-cols-1 md:grid-cols-[112px,1fr,auto] gap-3 rounded-lg border border-gray-200 bg-white p-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={image.url}
+                        src={normalizePublicAssetUrl(image.url) || '/img/espiga.png'}
                         alt={image.altText || `Imagen extra ${index + 1}`}
                         className="h-24 w-24 rounded-lg border border-gray-200 object-cover"
                         onError={(e) => {
@@ -976,7 +977,7 @@ export default function AdminProductosPage() {
                   <div className="col-span-4 flex items-center gap-3 min-w-0">
                     {/* Imagen actual */}
                     <Image
-                      src={p.imageUrl}
+                      src={normalizePublicAssetUrl(p.imageUrl) || '/img/espiga.png'}
                       alt={p.name}
                       width={40}
                       height={40}

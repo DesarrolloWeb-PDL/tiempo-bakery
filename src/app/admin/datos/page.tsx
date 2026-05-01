@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { RefreshCw, AlertTriangle, CheckCircle2, Database } from 'lucide-react'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { cn } from '@/lib/utils'
 
 type ProductItem = {
@@ -149,7 +150,7 @@ export default function AdminDatosPage() {
             <div className="pt-1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={data.theme.logoUrl}
+                src={normalizePublicAssetUrl(data.theme.logoUrl) || '/img/espiga.png'}
                 alt="Logo actual"
                 className="h-14 w-14 object-contain border border-gray-200 rounded-lg bg-white"
               />
@@ -239,7 +240,7 @@ export default function AdminDatosPage() {
                 <div key={product.id} className="px-4 py-3 flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={product.imageUrl || '/img/espiga.png'}
+                    src={normalizePublicAssetUrl(product.imageUrl) || '/img/espiga.png'}
                     alt={product.imageAlt || product.name}
                     className="w-12 h-12 object-cover rounded-lg border border-gray-200 bg-gray-50"
                   />

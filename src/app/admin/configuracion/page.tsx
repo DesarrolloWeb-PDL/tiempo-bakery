@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Clock3, Key, Layout, Loader2, LogOut, Mail, MapPin, Info, Palette, Plus, RefreshCw, RotateCcw, Save, Settings, Trash2, Truck } from 'lucide-react'
 import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { DEFAULT_SITE_CONTENT, type SiteContent } from '@/lib/site-content'
 
 function formatCurrency(amount: number) {
@@ -1483,7 +1484,7 @@ export default function AdminConfigPage() {
               <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                 <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
                 <Image
-                  src={theme.logoUrl}
+                  src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
                   alt="Logo preview"
                   width={64}
                   height={64}
