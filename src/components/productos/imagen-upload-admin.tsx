@@ -18,7 +18,7 @@ export default function ImagenUploadAdmin({ onUpload }: { onUpload: (url: string
       formData.append("file", file);
       // Si querés asociar a un producto, agregá productId
       // formData.append("productId", productoId)
-      const res = await fetch("/api/admin/uploads/supabase-upload", {
+      const res = await fetch("/api/admin/uploads", {
         method: "POST",
         body: formData,
       });

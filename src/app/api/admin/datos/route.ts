@@ -13,6 +13,7 @@ type ProductRow = {
   isActive: boolean
   published: boolean
   updatedAt: Date
+  _count: { images: number }
   category: { id: string; name: string; slug: string }
 }
 
@@ -59,6 +60,7 @@ export async function GET() {
           isActive: true,
           published: true,
           updatedAt: true,
+          _count: { select: { images: true } },
           category: { select: { id: true, name: true, slug: true } },
         },
         orderBy: [{ updatedAt: 'desc' }],
@@ -129,6 +131,35 @@ export async function GET() {
       }))
     }
 
+    const productsWithoutImageBankRow = productRows.filter(
+      (product) => product.imageUrl && product.imageUrl.trim() !== '' && product._count.images === 0
+    )
+
+    if (productsWithoutImageBankRow.length > 0) {
+      await db.$transaction(
+        productsWithoutImageBankRow.map((product) =>
+          db.productImage.create({
+            data: {
+              productId: product.id,
+              url: normalizePublicAssetUrl(product.imageUrl),
+              altText: product.imageAlt,
+              order: 0,
+            },
+          })
+        )
+      )
+
+      productRows = productRows.map((product) => ({
+        ...product,
+        _count: {
+          images:
+            product.imageUrl && product.imageUrl.trim() !== '' && product._count.images === 0
+              ? 1
+              : product._count.images,
+        },
+      }))
+    }
+
     const productsWithAbsoluteLocalhostImage = productRows.filter((p) =>
       isAbsoluteLocalhostUrl(p.imageUrl)
     )
@@ -142,13 +173,14 @@ export async function GET() {
         orders: orderCount,
         users: userCount,
         weeklyStockRows: weeklyStockCount,
-        productImageRows: productImageCount,
+        productImageRows: productImageCount + productsWithoutImageBankRow.length,
       },
       theme,
       diagnostics: {
         localhostThemeLogo: isAbsoluteLocalhostUrl(theme.logoUrl),
         productsWithAbsoluteLocalhostImageCount: productsWithAbsoluteLocalhostImage.length,
         productsWithoutImageCount: productsWithoutImage.length,
+        productsWithoutImageBankRowCount: productsWithoutImageBankRow.length,
       },
       flagged: {
         productsWithAbsoluteLocalhostImage: productsWithAbsoluteLocalhostImage.map((p) => ({
@@ -161,6 +193,12 @@ export async function GET() {
           id: p.id,
           name: p.name,
           slug: p.slug,
+        })),
+        productsWithoutImageBankRow: productsWithoutImageBankRow.map((p) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          imageUrl: p.imageUrl,
         })),
       },
       products: productRows,

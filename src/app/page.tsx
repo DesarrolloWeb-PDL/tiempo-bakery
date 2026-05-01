@@ -20,6 +20,10 @@ async function getProducts() {
           where: { isActive: true, published: true },
           orderBy: { name: 'asc' },
           include: {
+            images: {
+              select: { url: true, altText: true, order: true },
+              orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+            },
             weeklyStocks: {
               where: { weekId },
             },
@@ -53,6 +57,7 @@ async function getProducts() {
             weight: p.weight,
             imageUrl: p.imageUrl,
             imageAlt: p.imageAlt,
+            images: p.images,
             allergens,
             stock: {
               available: stockQty,
@@ -176,6 +181,7 @@ export default async function HomePage() {
                     weight={producto.weight}
                     imageUrl={producto.imageUrl}
                     imageAlt={producto.imageAlt}
+                    images={producto.images}
                     allergens={producto.allergens}
                     stock={producto.stock}
                     category={producto.category}

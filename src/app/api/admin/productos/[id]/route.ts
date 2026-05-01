@@ -3,6 +3,7 @@ import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
 import { timeGating } from '@/lib/time-gating'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
+import { getProductExtraImages, syncProductImageGallery } from '@/lib/product-images'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,6 +24,12 @@ const productSchema = z.object({
   isActive: z.boolean(),
   published: z.boolean().default(false),
   categoryId: z.string().min(1),
+  images: z.array(
+    z.object({
+      url: z.string().min(1),
+      altText: z.string().nullable().optional(),
+    })
+  ).default([]),
 })
 
 function buildData(parsed: z.infer<typeof productSchema>) {
@@ -91,6 +98,7 @@ export async function PUT(
     })
 
     await syncWeeklyStockForCurrentWeek(product)
+    await syncProductImageGallery(product, parsed.data.images)
 
     return NextResponse.json(product)
   } catch (error) {
@@ -135,6 +143,8 @@ export async function PATCH(
       where: { id: params.id },
       data,
     });
+    const extraImages = await getProductExtraImages(product.id)
+    await syncProductImageGallery(product, extraImages)
     // Si se publica, sincronizar stock semanal
     if ('published' in data && product.published) {
       await syncWeeklyStockForCurrentWeek(product);

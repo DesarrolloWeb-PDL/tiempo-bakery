@@ -3,10 +3,12 @@
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AddToCartButton } from './add-to-cart-button';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import { cn } from '@/lib/utils';
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -25,6 +27,11 @@ interface ProductCardProps {
   weight?: number;
   imageUrl: string;
   imageAlt: string;
+  images?: Array<{
+    url: string;
+    altText?: string | null;
+    order: number;
+  }>;
   allergens: string[];
   stock: {
     available: number;
@@ -45,6 +52,7 @@ export function ProductCard({
   weight,
   imageUrl,
   imageAlt,
+  images = [],
   allergens,
   stock,
   category,
@@ -63,24 +71,89 @@ export function ProductCard({
     }
   }
 
-  const [cardImageUrl, setCardImageUrl] = React.useState(() => normalizeImageUrl(imageUrl))
+  const galleryImages = React.useMemo(() => {
+    const primary = {
+      url: normalizeImageUrl(imageUrl),
+      altText: imageAlt,
+      order: 0,
+    }
+
+    const extras = images
+      .filter((image) => image.order > 0)
+      .map((image) => ({
+        url: normalizeImageUrl(image.url),
+        altText: image.altText || imageAlt,
+        order: image.order,
+      }))
+
+    return [primary, ...extras]
+  }, [imageAlt, imageUrl, images])
+
+  const [activeImageIndex, setActiveImageIndex] = React.useState(0)
+  const activeImage = galleryImages[activeImageIndex] ?? galleryImages[0]
 
   React.useEffect(() => {
-    setCardImageUrl(normalizeImageUrl(imageUrl))
-  }, [imageUrl])
+    setActiveImageIndex(0)
+  }, [galleryImages])
+
+  const showPreviewImage = (index: number) => {
+    if (!galleryImages[index]) return
+    setActiveImageIndex(index)
+  }
+
+  const showNextMobileImage = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (galleryImages.length <= 1) return
+    setActiveImageIndex((currentIndex) => (currentIndex + 1) % galleryImages.length)
+  }
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="group flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow">
       <Link href={`/productos/${slug}`} className="block">
-        <div className="relative h-48 w-full bg-gray-100">
+        <div
+          className="relative h-48 w-full bg-gray-100"
+          onMouseEnter={() => {
+            if (galleryImages[1]) {
+              showPreviewImage(1)
+            }
+          }}
+          onMouseLeave={() => showPreviewImage(0)}
+        >
           <Image
-            src={cardImageUrl}
-            alt={imageAlt}
+            src={activeImage?.url ?? '/img/espiga.png'}
+            alt={activeImage?.altText || imageAlt}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            onError={() => setCardImageUrl('/img/espiga.png')}
+            onError={() => setActiveImageIndex(0)}
           />
+          {galleryImages.length > 1 && (
+            <>
+              <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] text-white">
+                <span>{galleryImages.length}</span>
+                <span>fotos</span>
+              </div>
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 md:hidden">
+                {galleryImages.map((_, index) => (
+                  <span
+                    key={`dot-${index}`}
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      index === activeImageIndex ? 'bg-amber-600' : 'bg-gray-400'
+                    )}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={showNextMobileImage}
+                className="absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/50 to-transparent px-3 py-2 text-xs font-medium text-white md:hidden"
+              >
+                Ver otra foto
+              </button>
+            </>
+          )}
           {stock.lowStock && stock.hasStock && (
             <Badge
               variant="warning"
@@ -92,77 +165,103 @@ export function ProductCard({
           {!stock.hasStock && (
             <Badge
               variant="destructive"
-              className="absolute top-2 right-2"
+        const shiftMobileImage = (event: React.MouseEvent<HTMLButtonElement>, direction: -1 | 1) => {
             >
               Agotado
             </Badge>
-          )}
+          setActiveImageIndex((currentIndex) => {
+            const nextIndex = currentIndex + direction
+            if (nextIndex < 0) {
+              return galleryImages.length - 1
+            }
+
+            if (nextIndex >= galleryImages.length) {
+              return 0
+            }
+
+            return nextIndex
+          })
         </div>
       </Link>
 
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <Link href={`/productos/${slug}`}>
-            <h3 
-              className="font-semibold text-lg transition-colors hover:opacity-75"
-              style={{ color: theme.primaryColor }}
+            <div
+              className="relative h-48 w-full bg-gray-100"
+              onMouseEnter={() => {
+                if (galleryImages[1]) {
+                  showPreviewImage(1)
+                }
+              }}
+              onMouseLeave={() => showPreviewImage(0)}
             >
-              {name}
-            </h3>
-          </Link>
-          <Badge variant="secondary" className="shrink-0">
-            {category.name}
-          </Badge>
-        </div>
-        {weight && (
-          <p className="text-sm text-gray-500">{weight}g</p>
-        )}
-      </CardHeader>
-
-      <CardContent className="flex-1">
-        <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
-        
-        {allergens.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {allergens.map((allergen) => (
-              <Badge
-                key={allergen}
-                variant="outline"
-                className="text-xs"
-              >
-                {allergen}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </CardContent>
-
-      <CardFooter className="flex flex-col gap-3 pt-0">
-        <div className="flex items-center justify-between w-full">
-          <span 
-            className="text-2xl font-bold"
-            style={{ color: theme.primaryColor }}
-          >
-            {formatCurrency(price)}
-          </span>
-          {stock.hasStock && (
-            <span className="text-sm text-gray-500">
-              {stock.available} disponibles
-            </span>
-          )}
-        </div>
-        
-        <AddToCartButton
-          productId={id}
-          productName={name}
-          productSlug={slug}
-          price={price}
-          imageUrl={imageUrl}
-          weight={weight}
-          maxStock={stock.available}
-          disabled={!stock.hasStock}
-        />
-      </CardFooter>
+              <Link href={`/productos/${slug}`} aria-label={`Ver detalle de ${name}`} className="absolute inset-0 z-10" />
+              <Image
+                src={activeImage?.url ?? '/img/espiga.png'}
+                alt={activeImage?.altText || imageAlt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                onError={() => setActiveImageIndex(0)}
+              />
+              {galleryImages.length > 1 && (
+                <>
+                  <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] text-white">
+                    <span>{galleryImages.length}</span>
+                    <span>fotos</span>
+                  </div>
+                  <div className="absolute bottom-2 right-2 z-20 rounded-full bg-white/90 px-2 py-1 text-[11px] font-medium text-gray-700 md:hidden">
+                    {activeImageIndex + 1} / {galleryImages.length}
+                  </div>
+                  <div className="absolute inset-x-0 bottom-10 z-20 flex justify-center gap-1 md:hidden">
+                    {galleryImages.map((_, index) => (
+                      <span
+                        key={`dot-${index}`}
+                        className={cn(
+                          'h-1.5 w-1.5 rounded-full bg-white/65 transition-all',
+                          index === activeImageIndex ? 'w-4 bg-white' : 'bg-white/65'
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute inset-y-0 left-0 z-20 flex items-center pl-2 md:hidden">
+                    <button
+                      type="button"
+                      onClick={(event) => shiftMobileImage(event, -1)}
+                      className="rounded-full bg-black/35 p-2 text-white backdrop-blur-sm transition hover:bg-black/55"
+                      aria-label={`Ver foto anterior de ${name}`}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="absolute inset-y-0 right-0 z-20 flex items-center pr-2 md:hidden">
+                    <button
+                      type="button"
+                      onClick={(event) => shiftMobileImage(event, 1)}
+                      className="rounded-full bg-black/35 p-2 text-white backdrop-blur-sm transition hover:bg-black/55"
+                      aria-label={`Ver foto siguiente de ${name}`}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </>
+              )}
+              {stock.lowStock && stock.hasStock && (
+                <Badge
+                  variant="warning"
+                  className="absolute top-2 right-2 z-20"
+                >
+                  ¡Últimas unidades!
+                </Badge>
+              )}
+              {!stock.hasStock && (
+                <Badge
+                  variant="destructive"
+                  className="absolute top-2 right-2 z-20"
+                >
+                  Agotado
+                </Badge>
+              )}
+            </div>
     </Card>
   );
 }

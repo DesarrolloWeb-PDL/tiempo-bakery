@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { timeGating } from '@/lib/time-gating'
 import { AddToCartButton } from '@/components/productos/add-to-cart-button'
+import { ProductGallery } from '@/components/productos/product-gallery'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +27,15 @@ export default async function ProductoDetallePage({ params }: { params: { slug: 
     include: {
       category: {
         select: { id: true, name: true, slug: true },
+      },
+      images: {
+        select: {
+          id: true,
+          url: true,
+          altText: true,
+          order: true,
+        },
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
       },
       weeklyStocks: {
         where: { weekId },
@@ -57,18 +66,21 @@ export default async function ProductoDetallePage({ params }: { params: { slug: 
     allergens = []
   }
 
+  const galleryImages = (product.images.length > 0 ? product.images : [{
+    id: `${product.id}-primary`,
+    url: product.imageUrl,
+    altText: product.imageAlt,
+    order: 0,
+  }]).map((image) => ({
+    id: image.id,
+    url: normalizeImageUrl(image.url),
+    altText: image.altText || product.imageAlt || product.name,
+  }))
+
   return (
     <main className="container mx-auto px-4 py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative h-80 md:h-[420px] w-full rounded-xl overflow-hidden bg-gray-100">
-          <Image
-            src={normalizeImageUrl(product.imageUrl)}
-            alt={product.imageAlt || product.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
+        <ProductGallery images={galleryImages} productName={product.name} />
 
         <div className="space-y-4">
           <p className="text-sm text-amber-700 font-medium">{product.category.name}</p>
@@ -94,7 +106,7 @@ export default async function ProductoDetallePage({ params }: { params: { slug: 
               productName={product.name}
               productSlug={product.slug}
               price={product.price}
-              imageUrl={normalizeImageUrl(product.imageUrl)}
+              imageUrl={galleryImages[0]?.url ?? normalizeImageUrl(product.imageUrl)}
               weight={product.weight ?? undefined}
               maxStock={availableStock}
               disabled={availableStock <= 0}

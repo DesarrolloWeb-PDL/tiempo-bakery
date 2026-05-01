@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import ImagenUploadAdmin from '@/components/productos/imagen-upload-admin'
 import Image from 'next/image'
-import { BarChart2, RefreshCw, Plus, Pencil, Trash2, X, Save } from 'lucide-react'
+import { ArrowUp, ArrowDown, BarChart2, RefreshCw, Plus, Pencil, Star, Trash2, X, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ProductRow {
@@ -23,8 +23,17 @@ interface ProductRow {
   imageAlt: string
   weight: number | null
   allowSlicing: boolean
+  images: Array<{ id: string; url: string; altText: string | null; order: number }>
+  currentWeekStock: {
+    weekId: string
+    maxStock: number
+    currentStock: number
+    reservedStock: number
+    available: number
+    sold: number
+  } | null
   category: { id: string; name: string }
-  _count: { orderItems: number }
+  _count: { orderItems: number; images: number }
 }
 
 interface CategoryOption {
@@ -50,6 +59,7 @@ interface ProductFormState {
   isActive: boolean
   published: boolean
   categoryId: string
+  images: Array<{ url: string; altText: string }>
 }
 
 type ProductFormField = keyof ProductFormState
@@ -72,10 +82,15 @@ const EMPTY_FORM: ProductFormState = {
   isActive: true,
   published: false,
   categoryId: '',
+  images: [],
 }
 
 function formatCurrency(n: number) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n)
+}
+
+function formatWeekId(weekId: string) {
+  return weekId.replace('-W', ' / Sem ')
 }
 
 function slugify(value: string) {
@@ -226,6 +241,12 @@ export default function AdminProductosPage() {
     isActive: product.isActive,
     published: product.published,
     categoryId: product.category.id,
+    images: (product.images ?? [])
+      .filter((image) => image.order > 0)
+      .map((image) => ({
+        url: image.url,
+        altText: image.altText ?? '',
+      })),
   })
 
   const handleCreate = () => {
@@ -382,7 +403,94 @@ export default function AdminProductosPage() {
     isActive: form.isActive,
     published: form.published,
     categoryId: form.categoryId,
+    images: form.images
+      .map((image) => ({
+        url: image.url.trim(),
+        altText: image.altText.trim() || form.imageAlt.trim(),
+      }))
+      .filter((image) => image.url && image.url !== form.imageUrl.trim()),
   })
+
+  const handleExtraImageUpload = (url: string) => {
+    setForm((prev) => {
+      const normalizedUrl = url.trim()
+      if (!normalizedUrl || normalizedUrl === prev.imageUrl.trim()) {
+        return prev
+      }
+
+      if (prev.images.some((image) => image.url.trim() === normalizedUrl)) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        images: [
+          ...prev.images,
+          {
+            url: normalizedUrl,
+            altText: prev.imageAlt.trim() || prev.name.trim(),
+          },
+        ],
+      }
+    })
+  }
+
+  const handleExtraImageChange = (index: number, field: 'url' | 'altText', value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.map((image, imageIndex) =>
+        imageIndex === index ? { ...image, [field]: value } : image
+      ),
+    }))
+  }
+
+  const handleRemoveExtraImage = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, imageIndex) => imageIndex !== index),
+    }))
+  }
+
+  const handleMoveExtraImage = (index: number, direction: -1 | 1) => {
+    setForm((prev) => {
+      const nextIndex = index + direction
+      if (nextIndex < 0 || nextIndex >= prev.images.length) {
+        return prev
+      }
+
+      const nextImages = [...prev.images]
+      const [movedImage] = nextImages.splice(index, 1)
+      nextImages.splice(nextIndex, 0, movedImage)
+
+      return {
+        ...prev,
+        images: nextImages,
+      }
+    })
+  }
+
+  const handleSetAsPrimaryImage = (index: number) => {
+    setForm((prev) => {
+      const selectedImage = prev.images[index]
+      if (!selectedImage) {
+        return prev
+      }
+
+      const currentPrimary = {
+        url: prev.imageUrl,
+        altText: prev.imageAlt,
+      }
+
+      return {
+        ...prev,
+        imageUrl: selectedImage.url,
+        imageAlt: selectedImage.altText || prev.imageAlt,
+        images: prev.images
+          .filter((_, imageIndex) => imageIndex !== index)
+          .concat(currentPrimary.url.trim() ? [currentPrimary] : []),
+      }
+    })
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -679,6 +787,7 @@ export default function AdminProductosPage() {
                       }}
                     />
                     <div className="text-xs text-gray-500 space-y-1">
+                      <p className="text-amber-700 font-semibold">Portada actual</p>
                       {localPreviewUrl && !form.imageUrl && (
                         <p className="text-amber-600 font-medium">Vista previa local — subiendo al servidor…</p>
                       )}
@@ -692,6 +801,89 @@ export default function AdminProductosPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="md:col-span-3 rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Banco de imágenes extra</p>
+                  <p className="text-xs text-gray-500">La portada sigue siendo la imagen principal. Acá sumás fotos secundarias para la ficha del producto.</p>
+                </div>
+                <ImagenUploadAdmin onUpload={handleExtraImageUpload} />
+              </div>
+
+              {form.images.length === 0 ? (
+                <p className="text-sm text-gray-500">Todavía no cargaste imágenes extra.</p>
+              ) : (
+                <div className="space-y-3">
+                  {form.images.map((image, index) => (
+                    <div key={`${image.url}-${index}`} className="grid grid-cols-1 md:grid-cols-[112px,1fr,auto] gap-3 rounded-lg border border-gray-200 bg-white p-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={image.url}
+                        alt={image.altText || `Imagen extra ${index + 1}`}
+                        className="h-24 w-24 rounded-lg border border-gray-200 object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-medium text-gray-500">Orden {index + 2}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleSetAsPrimaryImage(index)}
+                            className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800 hover:bg-amber-200"
+                          >
+                            <Star className="w-3 h-3" />
+                            Usar como portada
+                          </button>
+                        </div>
+                        <input
+                          value={image.url}
+                          onChange={(e) => handleExtraImageChange(index, 'url', e.target.value)}
+                          placeholder="URL imagen extra"
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        />
+                        <input
+                          value={image.altText}
+                          onChange={(e) => handleExtraImageChange(index, 'altText', e.target.value)}
+                          placeholder="Alt imagen extra"
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        />
+                      </div>
+                      <div className="flex items-start justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveExtraImage(index, -1)}
+                          disabled={index === 0}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40"
+                          title="Mover arriba"
+                        >
+                          <ArrowUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveExtraImage(index, 1)}
+                          disabled={index === form.images.length - 1}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40"
+                          title="Mover abajo"
+                        >
+                          <ArrowDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExtraImage(index)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                          title="Quitar imagen"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -793,7 +985,14 @@ export default function AdminProductosPage() {
                         (e.currentTarget as HTMLImageElement).src = '/img/espiga.png'
                       }}
                     />
-                    <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {p._count.images > 0
+                          ? `${p._count.images} imagen${p._count.images === 1 ? '' : 'es'} en banco`
+                          : 'Sin imagen en banco'}
+                      </p>
+                    </div>
                     {/* Subida de imagen solo desde el formulario de edición/creación */}
                   </div>
                   <div className="col-span-2 hidden md:block">
@@ -805,9 +1004,21 @@ export default function AdminProductosPage() {
                     <span className="text-sm font-medium text-gray-900">{formatCurrency(p.price)}</span>
                   </div>
                   <div className="col-span-2 hidden md:block">
-                    <span className="text-sm text-gray-600">
-                      {p.stockType === 'WEEKLY' ? `${p.weeklyStock} ud/semana` : '∞ Ilimitado'}
-                    </span>
+                    {p.stockType === 'WEEKLY' ? (
+                      <div className="space-y-1">
+                        <span className="text-sm text-gray-600 block">{p.weeklyStock} ud/semana</span>
+                        {p.currentWeekStock ? (
+                          <div className="text-xs text-gray-500 space-y-0.5">
+                            <p>{formatWeekId(p.currentWeekStock.weekId)}: {p.currentWeekStock.available} libres</p>
+                            <p>{p.currentWeekStock.reservedStock} reservadas, {p.currentWeekStock.sold} vendidas</p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-amber-700">Semana actual sin inicializar</p>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-600">∞ Ilimitado</span>
+                    )}
                   </div>
                   <div className="col-span-1 hidden md:block">
                     <span className="text-sm text-gray-600">{p._count.orderItems}</span>

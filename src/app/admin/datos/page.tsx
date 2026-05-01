@@ -38,6 +38,7 @@ type AdminDataResponse = {
     localhostThemeLogo: boolean
     productsWithAbsoluteLocalhostImageCount: number
     productsWithoutImageCount: number
+    productsWithoutImageBankRowCount: number
   }
   flagged: {
     productsWithAbsoluteLocalhostImage: Array<{
@@ -50,6 +51,12 @@ type AdminDataResponse = {
       id: string
       name: string
       slug: string
+    }>
+    productsWithoutImageBankRow: Array<{
+      id: string
+      name: string
+      slug: string
+      imageUrl: string
     }>
   }
   products: ProductItem[]
@@ -176,6 +183,9 @@ export default function AdminDatosPage() {
               <p className="text-sm text-gray-600">
                 Productos sin imagen: {data.diagnostics.productsWithoutImageCount}
               </p>
+              <p className="text-sm text-gray-600">
+                Productos fuera del banco: {data.diagnostics.productsWithoutImageBankRowCount}
+              </p>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl p-4">
@@ -200,6 +210,19 @@ export default function AdminDatosPage() {
               <div className="space-y-2">
                 {data.flagged.productsWithAbsoluteLocalhostImage.map((p) => (
                   <div key={p.id} className="text-sm text-red-700">
+                    {p.name} ({p.slug}) - {p.imageUrl}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {data.flagged.productsWithoutImageBankRow.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <h3 className="font-semibold text-amber-800 mb-2">Productos con imagen principal fuera del banco</h3>
+              <div className="space-y-2">
+                {data.flagged.productsWithoutImageBankRow.map((p) => (
+                  <div key={p.id} className="text-sm text-amber-700">
                     {p.name} ({p.slug}) - {p.imageUrl}
                   </div>
                 ))}

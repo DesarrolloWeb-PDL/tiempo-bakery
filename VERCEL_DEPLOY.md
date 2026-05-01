@@ -15,16 +15,38 @@ Esta guía te llevará paso a paso para desplegar **Tiempo Bakery** en Vercel.
 
 ## 🗄️ PASO 1: Configurar Base de Datos
 
-### Opción A: Vercel Postgres (Recomendado) ⭐
+El proyecto hoy está preparado para estos dos escenarios:
+
+- Runtime de la app: usa `DATABASE_URL` y, si no existe, intenta con variables automáticas de Vercel como `POSTGRES_PRISMA_URL` o `POSTGRES_URL`.
+- Migraciones de Prisma: priorizan `DIRECT_URL` y, si no existe, usan `POSTGRES_URL_NON_POOLING`, `DATABASE_URL`, `POSTGRES_URL` o `POSTGRES_PRISMA_URL`.
+
+### Opción A: Prisma Postgres o Prisma Accelerate (Recomendado) ⭐
+
+Este es el camino que ya refleja `.env.example`.
+
+1. Crea una base en Prisma Postgres o conecta tu base a Prisma Accelerate
+2. Copia la URL acelerada en `DATABASE_URL`
+3. Copia la URL directa de PostgreSQL en `DIRECT_URL`
+4. En Vercel agrega ambas variables manualmente
+
+Variables esperadas:
+
+```bash
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=..."
+DIRECT_URL="postgres://usuario:password@host:5432/db?sslmode=require"
+```
+
+### Opción B: Vercel Postgres (válida, sin tocar código) 
 
 1. Ve a tu proyecto en Vercel Dashboard
 2. Click en **Storage** > **Create Database**
 3. Selecciona **Postgres** (powered by Neon)
 4. Click **Continue** y acepta los términos
-5. La variable `DATABASE_URL` se agregará automáticamente a tu proyecto
-6. Copia el valor de `DATABASE_URL` para usarlo localmente
+5. Vercel agregará automáticamente variables como `POSTGRES_URL`, `POSTGRES_PRISMA_URL` y `POSTGRES_URL_NON_POOLING`
+6. El proyecto ya sabe leer esas variables, así que no hace falta cambiar código
+7. Si querés replicarlo localmente, copiá esas variables a tu archivo local de entorno
 
-### Opción B: Supabase (Alternativa)
+### Opción C: Supabase (Alternativa)
 
 1. Crea una cuenta en [supabase.com](https://supabase.com)
 2. Crea un nuevo proyecto
@@ -36,7 +58,7 @@ Esta guía te llevará paso a paso para desplegar **Tiempo Bakery** en Vercel.
 postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
 ```
 
-### Opción C: Railway (Alternativa)
+### Opción D: Railway (Alternativa)
 
 1. Crea una cuenta en [railway.app](https://railway.app)
 2. Crea un nuevo proyecto > Add PostgreSQL
@@ -49,18 +71,30 @@ postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
 
 1. **Copia el archivo de ejemplo:**
 ```bash
-cp .env.example .env.local
+copy .env.example .env.local
 ```
 
-2. **Edita `.env.local`** y configura:
+2. **Edita `.env.local`** y configura como mínimo:
 
 ```bash
+# Base de datos con Prisma Accelerate
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=..."
+DIRECT_URL="postgres://usuario:password@host:5432/db?sslmode=require"
+
 # Stripe (obtén desde https://dashboard.stripe.com/test/apikeys)
 STRIPE_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 
 # URL local (cámbialo después a tu dominio de Vercel)
 NEXT_PUBLIC_URL="http://localhost:3000"
+```
+
+Si usás Vercel Postgres en vez de Prisma Accelerate, podés trabajar con estas variables:
+
+```bash
+POSTGRES_PRISMA_URL="postgres://..."
+POSTGRES_URL_NON_POOLING="postgres://..."
+POSTGRES_URL="postgres://..."
 ```
 
 3. **Instala dependencias:**
@@ -114,11 +148,11 @@ git push -u origin main
 3. **Configura el proyecto:**
    - **Framework Preset:** Next.js (se detecta automáticamente)
    - **Root Directory:** `./` (dejar por defecto)
-   - **Build Command:** `npm run build` (por defecto)
+   - **Build Command:** `npm run vercel-build`
    - **Output Directory:** `.next` (por defecto)
 
 4. **Agrega las variables de entorno:**
-   - En la sección **Environment Variables**, agrega:
+   - En la sección **Environment Variables**, agrega manualmente estas variables si usás Prisma Postgres / Accelerate:
 
 ```bash
 DATABASE_URL
@@ -127,7 +161,15 @@ STRIPE_SECRET_KEY
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_WEBHOOK_SECRET
 NEXT_PUBLIC_URL
+ADMIN_PASSWORD
+JWT_SECRET
+MERCADOPAGO_ACCESS_TOKEN
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
 ```
+
+   - Si usás Vercel Postgres, `POSTGRES_URL`, `POSTGRES_PRISMA_URL` y `POSTGRES_URL_NON_POOLING` suelen llegar automáticas desde la integración. Igual tenés que cargar a mano el resto de variables no relacionadas con la base.
 
    - ⚠️ **IMPORTANTE:** Para `NEXT_PUBLIC_URL`, usa tu dominio de Vercel: `https://tiempo-bakery.vercel.app`
 
@@ -164,11 +206,12 @@ Después del primer despliegue, necesitas ejecutar las migraciones:
 ### Opción A: Desde tu máquina local
 
 ```bash
-# Usa la DATABASE_URL de producción temporalmente
-DATABASE_URL="tu-url-de-produccion" npm run db:migrate
+# Prisma CLI usa DIRECT_URL, POSTGRES_URL_NON_POOLING o un fallback equivalente.
+# Si usás Prisma Accelerate, definí DIRECT_URL para migrar.
+DIRECT_URL="postgres://..." npm run db:migrate
 
 # Cargar datos iniciales
-DATABASE_URL="tu-url-de-produccion" npm run db:seed
+DIRECT_URL="postgres://..." npm run db:seed
 ```
 
 ### Opción B: Post-install script (Automático)
@@ -185,6 +228,7 @@ Ya está configurado en `package.json`:
 ```
 
 > ✅ `prisma migrate deploy` aplica migraciones versionadas, recomendado para producción.
+> ✅ En este repo, Vercel ejecuta `npm run vercel-build`, que ya intenta correr migraciones sólo si encuentra una URL válida de datasource.
 
 ---
 
@@ -223,6 +267,7 @@ vercel --prod
 ### Checklist Post-Despliegue:
 
 - [ ] El sitio carga correctamente en tu dominio de Vercel
+- [ ] El panel admin responde sin error de `DATABASE_URL` o conexión a base
 - [ ] Los productos se muestran en el catálogo
 - [ ] El sistema de time-gating funciona (prueba en días/horas diferentes)
 - [ ] Se puede agregar productos al carrito

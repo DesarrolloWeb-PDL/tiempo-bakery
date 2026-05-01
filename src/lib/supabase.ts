@@ -1,19 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
-const FALLBACK_SUPABASE_URL = 'https://gpawfssawmjkwhkqnqjj.supabase.co';
-const FALLBACK_SUPABASE_KEY = 'sb_publishable_SSWH9GUfoZDG6-1Bod8lyg_oAiKr_Ts';
 const STORAGE_BUCKET = 'productos';
 
-const supabaseUrl =
-	process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
-	process.env.SUPABASE_URL?.trim() ||
-	FALLBACK_SUPABASE_URL;
+function getRequiredEnv(name: 'NEXT_PUBLIC_SUPABASE_URL' | 'SUPABASE_URL' | 'SUPABASE_SERVICE_ROLE_KEY') {
+	const value = process.env[name]?.trim();
 
-const supabaseKey =
-	process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
-	process.env.SUPABASE_ANON_KEY?.trim() ||
-	FALLBACK_SUPABASE_KEY;
+	if (!value) {
+		throw new Error(`Falta configurar ${name} para usar Supabase Storage.`);
+	}
+
+	return value;
+}
+
+const supabaseUrl =
+	process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || process.env.SUPABASE_URL?.trim() || getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL');
+
+const supabaseKey = getRequiredEnv('SUPABASE_SERVICE_ROLE_KEY');
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
