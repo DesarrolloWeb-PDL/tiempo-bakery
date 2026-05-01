@@ -25,11 +25,13 @@ function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       })
+
       if (res.ok) {
         router.push(from)
         router.refresh()
       } else {
-        setError('Contraseña incorrecta')
+        const payload = await res.json().catch(() => null)
+        setError(payload?.error || 'Contraseña incorrecta')
       }
     } catch {
       setError('Error al conectar. Inténtalo de nuevo.')
