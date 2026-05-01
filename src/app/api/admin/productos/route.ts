@@ -264,7 +264,7 @@ export async function GET() {
                 }
               })(),
         allergens,
-        },
+      }
     })
 
     return NextResponse.json({ products: normalizedProducts, categories })
