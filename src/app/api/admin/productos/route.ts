@@ -64,8 +64,10 @@ const createProductSchema = z.object({
 })
 
 function buildData(parsed: z.infer<typeof createProductSchema>) {
+  const { images: _images, ...productData } = parsed
+
   return {
-    ...parsed,
+    ...productData,
     imageUrl: normalizePublicAssetUrl(parsed.imageUrl),
     allergens: JSON.stringify(parsed.allergens ?? []),
   }
