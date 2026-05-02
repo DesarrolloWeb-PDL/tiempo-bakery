@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
 import { DeliveryMethod, PaymentProvider, type PaymentMethodOption, type ShippingCosts } from '@/types/checkout';
 import type { CartItem } from '@/types/cart';
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -96,7 +97,7 @@ export function ReviewStep({
               <div key={item.productId} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
                 <div className="relative w-16 h-16 shrink-0 rounded-md overflow-hidden bg-white">
                   <Image
-                    src={item.imageUrl}
+                    src={normalizePublicAssetUrl(item.imageUrl) || '/img/espiga.png'}
                     alt={item.name}
                     fill
                     className="object-cover"

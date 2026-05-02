@@ -2,6 +2,7 @@
 
 import { useAppTheme } from '@/hooks/useAppTheme'
 import Image from 'next/image'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import type { SiteContent } from '@/lib/site-content'
 
 interface FooterProps {
@@ -26,7 +27,7 @@ export default function Footer({ siteContent }: FooterProps) {
             >
               {theme.logoUrl && (
                 <Image
-                  src={theme.logoUrl}
+                  src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
                   alt={theme.appTitle}
                   className="h-6 w-6 inline-block mr-2 object-contain"
                   width={24}

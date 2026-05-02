@@ -55,6 +55,16 @@ function LoginForm() {
         {/* Formulario */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="username"
+              autoComplete="username"
+              value="admin"
+              readOnly
+              tabIndex={-1}
+              aria-hidden="true"
+              className="sr-only"
+            />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Contraseña de acceso

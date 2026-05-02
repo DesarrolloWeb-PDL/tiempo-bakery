@@ -8,6 +8,7 @@ import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package } from 'lucid
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -178,7 +179,7 @@ export default function OrderConfirmationPage() {
                     >
                       <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden bg-gray-100">
                         <Image
-                          src={item.product.imageUrl}
+                          src={normalizePublicAssetUrl(item.product.imageUrl) || '/img/espiga.png'}
                           alt={item.productName}
                           fill
                           className="object-cover"

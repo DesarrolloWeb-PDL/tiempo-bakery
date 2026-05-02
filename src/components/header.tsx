@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 import type { SiteContent } from '@/lib/site-content';
 
 // Inyector de CSS de tema - integrado en Header para evitar error #418
@@ -75,7 +76,7 @@ export function Header({ siteContent }: HeaderProps) {
           <Link href="/" className="flex items-center space-x-3">
             {theme.logoUrl && (
               <Image
-                src={theme.logoUrl}
+                src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
                 alt={theme.appTitle}
                 className="h-10 w-10 object-contain"
                 width={40}

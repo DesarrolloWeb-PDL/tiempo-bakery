@@ -7,6 +7,7 @@ import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 import { cn } from '@/lib/utils';
 
 function formatCurrency(amount: number) {
@@ -88,7 +89,7 @@ export function CartSidebar() {
                   {/* Image */}
                   <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden bg-white">
                     <Image
-                      src={item.imageUrl}
+                      src={normalizePublicAssetUrl(item.imageUrl) || '/img/espiga.png'}
                       alt={item.name}
                       fill
                       className="object-cover"
