@@ -222,13 +222,15 @@ Ya está configurado en `package.json`:
 {
   "scripts": {
     "postinstall": "prisma generate",
-      "vercel-build": "prisma generate && prisma migrate deploy && next build"
+         "vercel-build": "prisma generate && npm run db:migrate:deploy:if-configured && next build"
   }
 }
 ```
 
 > ✅ `prisma migrate deploy` aplica migraciones versionadas, recomendado para producción.
-> ✅ En este repo, Vercel ejecuta `npm run vercel-build`, que ya intenta correr migraciones sólo si encuentra una URL válida de datasource.
+> ⚠️ En este repo, el build de Vercel las saltea por defecto para que el deploy no dependa de conectividad TCP directa al motor durante la compilación.
+> ✅ Si querés ejecutarlas en Vercel, definí `RUN_DB_MIGRATIONS=true`.
+> ✅ También podés correrlas aparte desde CI o desde tu máquina usando `npm run db:migrate:deploy:if-configured` con las variables correctas.
 
 ---
 

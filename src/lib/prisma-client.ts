@@ -1,6 +1,9 @@
+import { loadEnvConfig } from '@next/env'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { withAccelerate } from '@prisma/extension-accelerate'
+
+loadEnvConfig(process.cwd())
 
 function isAccelerateUrl(url: string): boolean {
   return url.startsWith('prisma://') || url.startsWith('prisma+postgres://')

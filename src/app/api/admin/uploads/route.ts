@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { mkdir, writeFile } from 'fs/promises'
+import path from 'path'
 import { hasAdminSession } from '@/lib/admin-auth'
 import { uploadPublicAsset } from '@/lib/supabase'
 
@@ -7,6 +9,43 @@ export const runtime = 'nodejs'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_SIZE = 5 * 1024 * 1024
+
+function getLocalUploadDir() {
+  if (process.env.NODE_ENV === 'production') {
+    return path.join('/tmp', 'producto-uploads')
+  }
+
+  return path.join(process.cwd(), 'public', 'uploads', 'productos')
+}
+
+function getFileExtension(file: File) {
+  const byMime: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  }
+
+  return file.name.split('.').pop()?.toLowerCase() || byMime[file.type] || 'jpg'
+}
+
+function shouldUseLocalFallback(error: unknown) {
+  return error instanceof Error && error.message.includes('para usar Supabase Storage')
+}
+
+async function uploadProductImageLocally(file: File) {
+  const uploadDir = getLocalUploadDir()
+  const extension = getFileExtension(file)
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${extension}`
+  const filepath = path.join(uploadDir, filename)
+
+  await mkdir(uploadDir, { recursive: true })
+  await writeFile(filepath, Buffer.from(await file.arrayBuffer()))
+
+  return {
+    filePath: filename,
+    publicUrl: `/api/admin/uploads/serve?file=${encodeURIComponent(filename)}`,
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,7 +76,17 @@ export async function POST(req: NextRequest) {
 
     console.log('Preparando upload persistente:', { name: file.name, type: file.type })
 
-    const upload = await uploadPublicAsset(file, 'productos')
+    let upload
+    try {
+      upload = await uploadPublicAsset(file, 'productos')
+    } catch (storageError) {
+      if (!shouldUseLocalFallback(storageError)) {
+        throw storageError
+      }
+
+      console.warn('Supabase no configurado; usando fallback local para productos')
+      upload = await uploadProductImageLocally(file)
+    }
 
     console.log('Archivo guardado en storage persistente:', upload.filePath)
     return NextResponse.json({ url: upload.publicUrl, filePath: upload.filePath })
