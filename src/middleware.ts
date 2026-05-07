@@ -1,37 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ADMIN_COOKIE, getAdminPassword, hasAdminSession, isAdminAuthConfigured } from '@/lib/admin-auth'
+import { getAdminAuthConfigError, hasAdminSession, isAdminAuthConfigured } from '@/lib/admin-auth'
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+  const isAdminPage = pathname.startsWith('/admin')
+  const isAdminApi = pathname.startsWith('/api/admin')
 
-  // Solo proteger rutas /admin
-  if (!pathname.startsWith('/admin')) {
+  if (!isAdminPage && !isAdminApi) {
     return NextResponse.next()
   }
 
-  // Permitir la página de login
-  if (pathname === '/admin/login') {
+  if (pathname === '/admin/login' || pathname === '/api/admin/login') {
     return NextResponse.next()
   }
 
   if (!isAdminAuthConfigured()) {
+    const payload = { error: `Panel de administración deshabilitado: ${getAdminAuthConfigError()}` }
+
+    if (isAdminApi) {
+      return NextResponse.json(payload, { status: 503 })
+    }
+
     return NextResponse.json(
-      { error: 'Panel de administración deshabilitado: falta ADMIN_PASSWORD' },
+      payload,
       { status: 503 }
     )
   }
 
-  // Comprobar cookie de sesión
-  if (hasAdminSession(req.cookies)) {
+  if (await hasAdminSession(req.cookies)) {
     return NextResponse.next()
   }
 
-  // Redirigir al login
+  if (isAdminApi) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const loginUrl = new URL('/admin/login', req.url)
   loginUrl.searchParams.set('from', pathname)
   return NextResponse.redirect(loginUrl)
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 }

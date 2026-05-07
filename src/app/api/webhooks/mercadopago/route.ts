@@ -49,36 +49,65 @@ export async function POST(request: NextRequest) {
     const mappedStatus = mapMercadoPagoStatus(payment.status);
 
     if (mappedStatus === 'PAID' && order.paymentStatus !== 'PAID') {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          paymentStatus: 'PAID',
-          status: order.status === 'PENDING' ? 'PAID' : order.status,
-          paymentMethod: 'mercadopago',
-          mercadopagoPaymentId: String(payment.id),
-          paidAt: new Date(),
-        },
-      });
+      await prisma.$transaction(async (tx) => {
+        const freshOrder = await tx.order.findUnique({
+          where: { id: order.id },
+          include: { items: true },
+        })
 
-      for (const item of order.items) {
-        await stockManager.confirmSale(item.productId, item.quantity, order.weekId);
-      }
+        if (!freshOrder || freshOrder.paymentStatus === 'PAID') {
+          return
+        }
+
+        const confirmed = await stockManager.confirmItems(freshOrder.items, freshOrder.weekId, tx)
+        if (!confirmed) {
+          throw new Error(`No se pudo confirmar stock para ${freshOrder.orderNumber}`)
+        }
+
+        await tx.order.update({
+          where: { id: freshOrder.id },
+          data: {
+            paymentStatus: 'PAID',
+            status: freshOrder.status === 'PENDING' ? 'PAID' : freshOrder.status,
+            paymentMethod: 'mercadopago',
+            mercadopagoPaymentId: String(payment.id),
+            paidAt: freshOrder.paidAt ?? new Date(),
+          },
+        })
+      })
     }
 
     if (mappedStatus === 'FAILED' && order.paymentStatus !== 'FAILED' && order.paymentStatus !== 'PAID') {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          paymentStatus: 'FAILED',
-          status: 'CANCELLED',
-          paymentMethod: 'mercadopago',
-          mercadopagoPaymentId: String(payment.id),
-        },
-      });
+      await prisma.$transaction(async (tx) => {
+        const freshOrder = await tx.order.findUnique({
+          where: { id: order.id },
+          include: { items: true },
+        })
 
-      for (const item of order.items) {
-        await stockManager.releaseStock(item.productId, item.quantity, order.weekId);
-      }
+        if (
+          !freshOrder ||
+          freshOrder.paymentStatus === 'FAILED' ||
+          freshOrder.status === 'CANCELLED' ||
+          freshOrder.paymentStatus === 'PAID'
+        ) {
+          return
+        }
+
+        const released = await stockManager.releaseItems(freshOrder.items, freshOrder.weekId, tx)
+        if (!released) {
+          throw new Error(`No se pudo liberar stock para ${freshOrder.orderNumber}`)
+        }
+
+        await tx.order.update({
+          where: { id: freshOrder.id },
+          data: {
+            paymentStatus: 'FAILED',
+            status: 'CANCELLED',
+            paymentMethod: 'mercadopago',
+            mercadopagoPaymentId: String(payment.id),
+          },
+        })
+      })
     }
 
     if (mappedStatus === 'PENDING') {

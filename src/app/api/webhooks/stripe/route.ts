@@ -57,6 +57,12 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case 'payment_intent.canceled': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        await handlePaymentFailed(paymentIntent);
+        break;
+      }
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -73,6 +79,7 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   const orderId = session.metadata?.orderId;
+  const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : null;
 
   if (!orderId) {
     console.error('No orderId in session metadata');
@@ -80,39 +87,52 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   }
 
   try {
-    // Obtener la orden
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        items: true,
-      },
-    });
+    const result = await prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: true,
+        },
+      });
 
-    if (!order) {
+      if (!order) {
+        return { status: 'missing' as const };
+      }
+
+      if (order.paymentStatus === 'PAID') {
+        return { status: 'already-paid' as const, orderNumber: order.orderNumber };
+      }
+
+      const confirmed = await stockManager.confirmItems(order.items, order.weekId, tx)
+      if (!confirmed) {
+        throw new Error(`No se pudo confirmar stock para el pedido ${order.orderNumber}`)
+      }
+
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: 'PAID',
+          status: order.status === 'PENDING' ? 'PAID' : order.status,
+          paymentMethod: 'stripe',
+          paidAt: order.paidAt ?? new Date(),
+          stripePaymentId: paymentIntentId ?? order.stripePaymentId,
+        },
+      })
+
+      return { status: 'paid' as const, orderNumber: updatedOrder.orderNumber }
+    })
+
+    if (result.status === 'missing') {
       console.error('Order not found:', orderId);
       return;
     }
 
-    // Actualizar el estado de la orden
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paymentStatus: 'PAID',
-        status: 'PAID',
-        paidAt: new Date(),
-      },
-    });
-
-    // Confirmar la venta y actualizar el stock
-    for (const item of order.items) {
-      await stockManager.confirmSale(
-        item.productId,
-        item.quantity,
-        order.weekId
-      );
+    if (result.status === 'already-paid') {
+      console.log('Order already confirmed:', result.orderNumber);
+      return;
     }
 
-    console.log('Order completed:', order.orderNumber);
+    console.log('Order completed:', result.orderNumber);
 
     // TODO: Enviar email de confirmación
     // await sendOrderConfirmationEmail(order);
@@ -122,38 +142,62 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 }
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-  // Buscar orden por payment intent
-  const order = await prisma.order.findFirst({
-    where: {
-      stripePaymentId: paymentIntent.id,
-    },
-    include: {
-      items: true,
-    },
-  });
+  const orderId = String(paymentIntent.metadata?.orderId ?? '')
 
-  if (!order) {
+  const result = await prisma.$transaction(async (tx) => {
+    const order = orderId
+      ? await tx.order.findUnique({
+          where: { id: orderId },
+          include: { items: true },
+        })
+      : await tx.order.findFirst({
+          where: {
+            stripePaymentId: paymentIntent.id,
+          },
+          include: {
+            items: true,
+          },
+        })
+
+    if (!order) {
+      return { status: 'missing' as const }
+    }
+
+    if (order.paymentStatus === 'PAID') {
+      return { status: 'already-paid' as const, orderNumber: order.orderNumber }
+    }
+
+    if (order.paymentStatus === 'FAILED' || order.status === 'CANCELLED') {
+      return { status: 'already-failed' as const, orderNumber: order.orderNumber }
+    }
+
+    const released = await stockManager.releaseItems(order.items, order.weekId, tx)
+    if (!released) {
+      throw new Error(`No se pudo liberar stock para el pedido ${order.orderNumber}`)
+    }
+
+    const updatedOrder = await tx.order.update({
+      where: { id: order.id },
+      data: {
+        paymentStatus: 'FAILED',
+        status: 'CANCELLED',
+        paymentMethod: 'stripe',
+        stripePaymentId: paymentIntent.id,
+      },
+    })
+
+    return { status: 'failed' as const, orderNumber: updatedOrder.orderNumber }
+  })
+
+  if (result.status === 'missing') {
     console.error('Order not found for payment intent:', paymentIntent.id);
     return;
   }
 
-  // Actualizar estado
-  await prisma.order.update({
-    where: { id: order.id },
-    data: {
-      paymentStatus: 'FAILED',
-      status: 'CANCELLED',
-    },
-  });
-
-  // Liberar stock reservado
-  for (const item of order.items) {
-    await stockManager.releaseStock(
-      item.productId,
-      item.quantity,
-      order.weekId
-    );
+  if (result.status === 'already-paid' || result.status === 'already-failed') {
+    console.log('Ignoring payment failure for order:', result.orderNumber);
+    return;
   }
 
-  console.log('Payment failed for order:', order.orderNumber);
+  console.log('Payment failed for order:', result.orderNumber);
 }

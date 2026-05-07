@@ -1310,11 +1310,12 @@ export default function AdminConfigPage() {
             <p className="text-sm text-gray-500">
               Configura la variable de entorno{' '}
               <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">ADMIN_PASSWORD</code>{' '}
+              y <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">JWT_SECRET</code>{' '}
               en tu archivo <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">.env.local</code>
             </p>
             <p className="text-xs text-yellow-600 bg-yellow-50 px-3 py-2 rounded-lg mt-2">
-              ⚠️ Si no defines <code>ADMIN_PASSWORD</code>, la contraseña por defecto es <strong>admin123</strong>. 
-              Cámbiala antes de desplegar en producción.
+              ⚠️ La contraseña por defecto <strong>admin123</strong> solo aplica en desarrollo local.
+              En despliegue necesitás definir <code>ADMIN_PASSWORD</code> y <code>JWT_SECRET</code>.
             </p>
           </div>
           <button

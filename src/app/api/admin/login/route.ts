@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ADMIN_COOKIE, getAdminAuthConfigError, getAdminPassword } from '@/lib/admin-auth'
+import {
+  ADMIN_COOKIE,
+  ADMIN_SESSION_MAX_AGE,
+  createAdminSessionToken,
+  getAdminAuthConfigError,
+  getAdminPassword,
+} from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,12 +23,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 })
     }
 
+    const sessionToken = await createAdminSessionToken()
+
+    if (!sessionToken) {
+      return NextResponse.json({ error: getAdminAuthConfigError() }, { status: 503 })
+    }
+
     const response = NextResponse.json({ ok: true })
-    response.cookies.set(ADMIN_COOKIE, adminPassword, {
+    response.cookies.set(ADMIN_COOKIE, sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 días
+      maxAge: ADMIN_SESSION_MAX_AGE,
       path: '/',
     })
 
@@ -34,6 +46,12 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true })
-  response.cookies.delete(ADMIN_COOKIE)
+  response.cookies.set(ADMIN_COOKIE, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/',
+  })
   return response
 }

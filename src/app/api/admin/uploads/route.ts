@@ -10,7 +10,7 @@ const MAX_SIZE = 5 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
   try {
-    if (!hasAdminSession(req.cookies)) {
+    if (!(await hasAdminSession(req.cookies))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

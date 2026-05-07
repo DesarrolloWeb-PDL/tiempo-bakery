@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     console.log('[Logo Upload] Request received')
 
-    if (!hasAdminSession(req.cookies)) {
+    if (!(await hasAdminSession(req.cookies))) {
       console.log('[Logo Upload] Unauthorized - no admin session')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

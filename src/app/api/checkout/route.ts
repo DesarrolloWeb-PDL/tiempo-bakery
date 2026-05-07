@@ -10,6 +10,39 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
+class StockReservationError extends Error {
+  constructor(public readonly productId: string) {
+    super(`No hay stock suficiente para ${productId}`)
+    this.name = 'StockReservationError'
+  }
+}
+
+async function rollbackPendingOrder(orderId: string) {
+  await prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    })
+
+    if (!order || order.paymentStatus === 'PAID') {
+      return
+    }
+
+    const released = await stockManager.releaseItems(order.items, order.weekId, tx)
+    if (!released) {
+      throw new Error(`No se pudo liberar la reserva del pedido ${order.orderNumber}`)
+    }
+
+    await tx.order.update({
+      where: { id: order.id },
+      data: {
+        paymentStatus: 'FAILED',
+        status: 'CANCELLED',
+      },
+    })
+  })
+}
+
 const checkoutSchema = z.object({
   customerEmail: z.string().email(),
   customerName: z.string().min(2),
@@ -111,161 +144,171 @@ export async function POST(request: NextRequest) {
 
     const total = subtotal + shippingCost;
 
-    // 6. Obtener/crear usuario
-    let user = await prisma.user.findUnique({
-      where: { email: data.customerEmail },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
+    const order = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.upsert({
+        where: { email: data.customerEmail },
+        update: {
+          name: data.customerName,
+          phone: data.customerPhone,
+        },
+        create: {
           email: data.customerEmail,
           name: data.customerName,
           phone: data.customerPhone,
         },
-      });
-    }
+      })
 
-    // 7. Generar número de pedido
-    const orderCount = await prisma.order.count();
-    const orderNumber = `TBK-${new Date().getFullYear()}-${String(
-      orderCount + 1
-    ).padStart(4, '0')}`;
+      const orderCount = await tx.order.count();
+      const orderNumber = `TBK-${new Date().getFullYear()}-${String(
+        orderCount + 1
+      ).padStart(4, '0')}`;
 
-    // 8. Obtener detalles del punto de recogida si aplica
-    let pickupDetails = null;
-    if (data.deliveryMethod === 'PICKUP_POINT' && data.pickupLocationId) {
-      pickupDetails = await prisma.pickupPoint.findUnique({
-        where: { id: data.pickupLocationId },
-      });
-    }
-
-    // 9. Crear orden en estado PENDING
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: user.id,
-        customerEmail: data.customerEmail,
-        customerName: data.customerName,
-        customerPhone: data.customerPhone,
-        weekId,
-        subtotal,
-        shippingCost,
-        total,
-        status: 'PENDING',
-        paymentStatus: 'PENDING',
-        paymentMethod: selectedProvider === 'MERCADO_PAGO' ? 'mercadopago' : 'stripe',
-        deliveryMethod: data.deliveryMethod,
-        pickupLocation: pickupDetails?.name,
-        pickupAddress: pickupDetails?.address,
-        pickupSchedule: pickupDetails?.schedule,
-        shippingAddress: data.shippingAddress,
-        shippingCity: data.shippingCity,
-        shippingPostal: data.shippingPostal,
-        customerNotes: data.customerNotes,
-        items: {
-          create: orderItems,
-        },
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-    // 10. Reservar stock
-    await Promise.all(
-      data.items.map((item) =>
-        stockManager.reserveStock(item.productId, item.quantity, weekId)
-      )
-    );
-
-    let checkoutUrl: string | null = null;
-
-    if (selectedProvider === 'STRIPE') {
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: '2025-02-24.acacia',
-      });
-
-      const lineItems = order.items.map((item) => ({
-        price_data: {
-          currency: 'ars',
-          product_data: {
-            name: item.productName,
-            description: item.sliced ? 'Rebanado' : 'Sin rebanar',
-          },
-          unit_amount: Math.round(Number(item.unitPrice) * 100),
-        },
-        quantity: item.quantity,
-      }));
-
-      if (shippingCost > 0) {
-        lineItems.push({
-          price_data: {
-            currency: 'ars',
-            product_data: {
-              name: 'Gastos de envío',
-              description:
-                data.deliveryMethod === 'NATIONAL_COURIER'
-                  ? 'Mensajería nacional'
-                  : 'Envío local',
-            },
-            unit_amount: Math.round(shippingCost * 100),
-          },
-          quantity: 1,
+      let pickupDetails = null;
+      if (data.deliveryMethod === 'PICKUP_POINT' && data.pickupLocationId) {
+        pickupDetails = await tx.pickupPoint.findUnique({
+          where: { id: data.pickupLocationId },
         });
       }
 
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: lineItems,
-        mode: 'payment',
-        success_url: `${process.env.NEXT_PUBLIC_URL}/pedido/${order.id}/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_URL}/checkout?cancelled=true`,
-        customer_email: data.customerEmail,
-        metadata: {
+      const reservation = await stockManager.reserveItems(data.items, weekId, tx)
+      if (!reservation.success) {
+        throw new StockReservationError(reservation.failedProductId)
+      }
+
+      return tx.order.create({
+        data: {
+          orderNumber,
+          userId: user.id,
+          customerEmail: data.customerEmail,
+          customerName: data.customerName,
+          customerPhone: data.customerPhone,
+          weekId,
+          subtotal,
+          shippingCost,
+          total,
+          status: 'PENDING',
+          paymentStatus: 'PENDING',
+          paymentMethod: selectedProvider === 'MERCADO_PAGO' ? 'mercadopago' : 'stripe',
+          deliveryMethod: data.deliveryMethod,
+          pickupLocation: pickupDetails?.name,
+          pickupAddress: pickupDetails?.address,
+          pickupSchedule: pickupDetails?.schedule,
+          shippingAddress: data.shippingAddress,
+          shippingCity: data.shippingCity,
+          shippingPostal: data.shippingPostal,
+          customerNotes: data.customerNotes,
+          items: {
+            create: orderItems,
+          },
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      })
+    });
+
+    let checkoutUrl: string | null = null;
+
+    try {
+      if (selectedProvider === 'STRIPE') {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+          apiVersion: '2025-02-24.acacia',
+        });
+
+        const lineItems = order.items.map((item) => ({
+          price_data: {
+            currency: 'ars',
+            product_data: {
+              name: item.productName,
+              description: item.sliced ? 'Rebanado' : 'Sin rebanar',
+            },
+            unit_amount: Math.round(Number(item.unitPrice) * 100),
+          },
+          quantity: item.quantity,
+        }));
+
+        if (shippingCost > 0) {
+          lineItems.push({
+            price_data: {
+              currency: 'ars',
+              product_data: {
+                name: 'Gastos de envío',
+                description:
+                  data.deliveryMethod === 'NATIONAL_COURIER'
+                    ? 'Mensajería nacional'
+                    : 'Envío local',
+              },
+              unit_amount: Math.round(shippingCost * 100),
+            },
+            quantity: 1,
+          });
+        }
+
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: lineItems,
+          mode: 'payment',
+          success_url: `${process.env.NEXT_PUBLIC_URL}/pedido/${order.id}/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${process.env.NEXT_PUBLIC_URL}/checkout?cancelled=true`,
+          customer_email: data.customerEmail,
+          client_reference_id: order.id,
+          metadata: {
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+          },
+          payment_intent_data: {
+            metadata: {
+              orderId: order.id,
+              orderNumber: order.orderNumber,
+            },
+          },
+        });
+
+        checkoutUrl = session.url;
+
+        await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            stripePaymentId:
+              typeof session.payment_intent === 'string' ? session.payment_intent : session.id,
+          },
+        });
+      }
+
+      if (selectedProvider === 'MERCADO_PAGO') {
+        const preference = await createMercadoPagoPreference({
           orderId: order.id,
           orderNumber: order.orderNumber,
-        },
-      });
+          customerName: data.customerName,
+          customerEmail: data.customerEmail,
+          customerPhone: data.customerPhone,
+          deliveryMethod: data.deliveryMethod,
+          shippingAddress: data.shippingAddress,
+          shippingPostal: data.shippingPostal,
+          items: order.items.map((item) => ({
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            unitPrice: Number(item.unitPrice),
+            sliced: item.sliced,
+          })),
+          shippingCost,
+        });
 
-      checkoutUrl = session.url;
+        checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
 
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { stripePaymentId: session.id },
-      });
-    }
-
-    if (selectedProvider === 'MERCADO_PAGO') {
-      const preference = await createMercadoPagoPreference({
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        customerName: data.customerName,
-        customerEmail: data.customerEmail,
-        customerPhone: data.customerPhone,
-        deliveryMethod: data.deliveryMethod,
-        shippingAddress: data.shippingAddress,
-        shippingPostal: data.shippingPostal,
-        items: order.items.map((item) => ({
-          productId: item.productId,
-          productName: item.productName,
-          quantity: item.quantity,
-          unitPrice: Number(item.unitPrice),
-          sliced: item.sliced,
-        })),
-        shippingCost,
-      });
-
-      checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
-
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { mercadopagoPaymentId: preference.id },
-      });
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { mercadopagoPaymentId: preference.id },
+        });
+      }
+    } catch (paymentError) {
+      await rollbackPendingOrder(order.id)
+      throw paymentError
     }
 
     return NextResponse.json({
@@ -283,6 +326,16 @@ export async function POST(request: NextRequest) {
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
+    }
+
+    if (error instanceof StockReservationError) {
+      return NextResponse.json(
+        {
+          error: 'Algunos productos no tienen stock suficiente',
+          outOfStockItems: [{ productId: error.productId }],
+        },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json(

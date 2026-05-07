@@ -75,17 +75,17 @@ createdb tiempo_bakery
 ### 3. Configurar variables de entorno
 
 ```bash
-# Copiar archivo de ejemplo
-cp .env.example .env
-
-# Editar .env con tus credenciales
+# Copiar archivo de ejemplo para Next.js y Prisma CLI
+copy .env.example .env.local
 ```
 
 Configuración mínima necesaria:
 
 ```env
 # Base de datos
-DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/tiempo_bakery"
+# Si usás Prisma Accelerate en producción, mantené ambas URLs también en local.
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=..."
+DIRECT_URL="postgres://usuario:password@host:5432/tiempo_bakery?sslmode=require"
 
 # Stripe (usar claves de test)
 STRIPE_SECRET_KEY="sk_test_..."
@@ -103,7 +103,7 @@ NEXT_PUBLIC_URL="http://localhost:3000"
 npm run db:generate
 
 # Aplicar migraciones (crear tablas)
-npm run db:push
+npm run db:migrate
 
 # Poblar con datos de ejemplo
 npm run db:seed

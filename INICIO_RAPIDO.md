@@ -82,7 +82,11 @@ CREATE DATABASE tiempo_bakery;
 
 3. **Editar `.env.local`**:
 ```bash
+# Opción simple: conexión directa local/remota
 DATABASE_URL="postgresql://postgres:password@localhost:5432/tiempo_bakery?schema=public"
+
+# Si usás Prisma Accelerate, además define la conexión directa para migraciones/seed
+DIRECT_URL="postgresql://postgres:password@localhost:5432/tiempo_bakery?schema=public"
 ```
 
 ### Opción B: Vercel Postgres (Para deploy)
@@ -91,7 +95,8 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/tiempo_bakery?schema
 2. Crea tu proyecto
 3. Ve a **Storage** > **Create Database** > **Postgres**
 4. Copia el `DATABASE_URL` que te proporciona
-5. Pégalo en `.env.local`
+5. Si el proveedor también da una URL no pool o directa, guárdala como `DIRECT_URL` en `.env.local`
+6. Pega ambas en `.env.local`
 
 ### Opción C: Supabase (Gratis hasta 500MB)
 
@@ -99,7 +104,7 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/tiempo_bakery?schema
 2. Crea un proyecto nuevo
 3. Ve a **Settings** > **Database** > **Connection string (URI)**
 4. Copia la URL (reemplaza `[YOUR-PASSWORD]` con tu contraseña)
-5. Pégala en `.env.local`
+5. Pégala en `.env.local` como `DATABASE_URL` o `DIRECT_URL` según cómo vayas a trabajar
 
 ---
 

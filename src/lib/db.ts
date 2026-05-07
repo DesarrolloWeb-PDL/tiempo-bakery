@@ -1,27 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import { withAccelerate } from '@prisma/extension-accelerate';
-
-function resolveAccelerateUrl(): string | undefined {
-  return (
-    process.env.DATABASE_URL ??
-    process.env.POSTGRES_PRISMA_URL ??
-    process.env.POSTGRES_URL ??
-    process.env.DIRECT_URL
-  );
-}
+import { createConfiguredPrismaClient } from './prisma-client';
 
 // Casteamos a PrismaClient para que TypeScript infiera correctamente los tipos
 // de include/select. En runtime, el valor real es el cliente extendido con Accelerate.
 function createPrismaClient(): PrismaClient {
-  const accelerateUrl = resolveAccelerateUrl();
-
-  if (!accelerateUrl) {
-    return new PrismaClient();
-  }
-
-  return new PrismaClient({
-    accelerateUrl,
-  }).$extends(withAccelerate()) as unknown as PrismaClient;
+  return createConfiguredPrismaClient();
 }
 
 const globalForPrisma = globalThis as unknown as {

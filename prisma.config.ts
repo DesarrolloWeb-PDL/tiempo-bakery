@@ -1,5 +1,9 @@
-import "dotenv/config";
+import nextEnv from '@next/env';
 import { defineConfig } from 'prisma/config';
+
+const { loadEnvConfig } = nextEnv;
+
+loadEnvConfig(process.cwd());
 
 function resolveDatasourceUrl(): string | undefined {
   return (

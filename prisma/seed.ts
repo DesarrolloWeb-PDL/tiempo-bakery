@@ -1,10 +1,11 @@
-import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import { withAccelerate } from '@prisma/extension-accelerate';
+import nextEnv from '@next/env';
+import { createConfiguredPrismaClient } from '../src/lib/prisma-client';
 
-const prisma = new PrismaClient({
-  accelerateUrl: process.env.DATABASE_URL,
-}).$extends(withAccelerate());
+const { loadEnvConfig } = nextEnv;
+
+loadEnvConfig(process.cwd());
+
+const prisma = createConfiguredPrismaClient();
 
 async function main() {
   console.log('🌱 Iniciando seed de la base de datos...');
@@ -190,6 +191,9 @@ main()
   .catch((e) => {
     console.error('❌ Error durante el seed:', e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   })
   .finally(async () => {
     await prisma.$disconnect();

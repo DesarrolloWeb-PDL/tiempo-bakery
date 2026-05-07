@@ -1,9 +1,17 @@
+import type { Prisma } from '@prisma/client';
 import { prisma } from './db';
 import { timeGating } from './time-gating';
 
+type PrismaExecutor = typeof prisma | Prisma.TransactionClient
+
+type StockItemInput = {
+  productId: string
+  quantity: number
+}
+
 export class StockManager {
-  private async getProductMeta(productId: string) {
-    return prisma.product.findUnique({
+  private async getProductMeta(productId: string, client: PrismaExecutor = prisma) {
+    return client.product.findUnique({
       where: { id: productId },
       select: {
         id: true,
@@ -15,27 +23,29 @@ export class StockManager {
     })
   }
 
-  private async ensureWeeklyStockRecord(productId: string, weekId: string) {
-    const existing = await prisma.weeklyStock.findUnique({
-      where: {
-        productId_weekId: { productId, weekId },
-      },
-    })
-
-    if (existing) return existing
-
-    const product = await this.getProductMeta(productId)
+  private async ensureWeeklyStockRecord(
+    productId: string,
+    weekId: string,
+    client: PrismaExecutor = prisma
+  ) {
+    const product = await this.getProductMeta(productId, client)
     if (!product || product.stockType !== 'WEEKLY' || !product.isActive) {
       return null
     }
 
-    return prisma.weeklyStock.create({
-      data: {
+    return client.weeklyStock.upsert({
+      where: {
+        productId_weekId: { productId, weekId },
+      },
+      create: {
         productId,
         weekId,
         maxStock: product.weeklyStock,
         currentStock: product.weeklyStock,
         reservedStock: 0,
+      },
+      update: {
+        maxStock: product.weeklyStock,
       },
     })
   }
@@ -176,39 +186,29 @@ export class StockManager {
   async reserveStock(
     productId: string,
     quantity: number,
-    weekId?: string
+    weekId?: string,
+    client: PrismaExecutor = prisma
   ): Promise<boolean> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
 
-    const product = await this.getProductMeta(productId)
+    const product = await this.getProductMeta(productId, client)
     if (!product || !product.isActive || !product.published) return false
     if (product.stockType === 'UNLIMITED') return true
 
-    await this.ensureWeeklyStockRecord(productId, currentWeekId)
+    await this.ensureWeeklyStockRecord(productId, currentWeekId, client)
 
     try {
-      const stock = await prisma.weeklyStock.update({
-        where: {
-          productId_weekId: {
-            productId,
-            weekId: currentWeekId,
-          },
-        },
-        data: {
-          reservedStock: {
-            increment: quantity,
-          },
-        },
-      });
+      const rows = await client.$queryRaw<Array<{ id: string }>>`
+        UPDATE "WeeklyStock"
+        SET "reservedStock" = "reservedStock" + ${quantity},
+            "updatedAt" = NOW()
+        WHERE "productId" = ${productId}
+          AND "weekId" = ${currentWeekId}
+          AND ("currentStock" - "reservedStock") >= ${quantity}
+        RETURNING "id"
+      `
 
-      // Verificar que no sobrepasamos el stock disponible
-      if (stock.reservedStock > stock.currentStock) {
-        // Revertir reserva
-        await this.releaseStock(productId, quantity, weekId);
-        return false;
-      }
-
-      return true;
+      return rows.length > 0
     } catch (error) {
       console.error('Error reserving stock:', error);
       return false;
@@ -221,28 +221,28 @@ export class StockManager {
   async releaseStock(
     productId: string,
     quantity: number,
-    weekId?: string
-  ): Promise<void> {
+    weekId?: string,
+    client: PrismaExecutor = prisma
+  ): Promise<boolean> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
 
-    const product = await this.getProductMeta(productId)
-    if (!product || product.stockType === 'UNLIMITED') return
+    const product = await this.getProductMeta(productId, client)
+    if (!product) return false
+    if (product.stockType === 'UNLIMITED') return true
 
-    await this.ensureWeeklyStockRecord(productId, currentWeekId)
+    await this.ensureWeeklyStockRecord(productId, currentWeekId, client)
 
-    await prisma.weeklyStock.update({
-      where: {
-        productId_weekId: {
-          productId,
-          weekId: currentWeekId,
-        },
-      },
-      data: {
-        reservedStock: {
-          decrement: quantity,
-        },
-      },
-    });
+    const rows = await client.$queryRaw<Array<{ id: string }>>`
+      UPDATE "WeeklyStock"
+      SET "reservedStock" = "reservedStock" - ${quantity},
+          "updatedAt" = NOW()
+      WHERE "productId" = ${productId}
+        AND "weekId" = ${currentWeekId}
+        AND "reservedStock" >= ${quantity}
+      RETURNING "id"
+    `
+
+    return rows.length > 0
   }
 
   /**
@@ -251,31 +251,75 @@ export class StockManager {
   async confirmSale(
     productId: string,
     quantity: number,
-    weekId?: string
-  ): Promise<void> {
+    weekId?: string,
+    client: PrismaExecutor = prisma
+  ): Promise<boolean> {
     const currentWeekId = weekId || timeGating.getCurrentWeekId();
 
-    const product = await this.getProductMeta(productId)
-    if (!product || product.stockType === 'UNLIMITED') return
+    const product = await this.getProductMeta(productId, client)
+    if (!product) return false
+    if (product.stockType === 'UNLIMITED') return true
 
-    await this.ensureWeeklyStockRecord(productId, currentWeekId)
+    await this.ensureWeeklyStockRecord(productId, currentWeekId, client)
 
-    await prisma.weeklyStock.update({
-      where: {
-        productId_weekId: {
-          productId,
-          weekId: currentWeekId,
-        },
-      },
-      data: {
-        currentStock: {
-          decrement: quantity,
-        },
-        reservedStock: {
-          decrement: quantity,
-        },
-      },
-    });
+    const rows = await client.$queryRaw<Array<{ id: string }>>`
+      UPDATE "WeeklyStock"
+      SET "currentStock" = "currentStock" - ${quantity},
+          "reservedStock" = "reservedStock" - ${quantity},
+          "updatedAt" = NOW()
+      WHERE "productId" = ${productId}
+        AND "weekId" = ${currentWeekId}
+        AND "currentStock" >= ${quantity}
+        AND "reservedStock" >= ${quantity}
+      RETURNING "id"
+    `
+
+    return rows.length > 0
+  }
+
+  async reserveItems(
+    items: StockItemInput[],
+    weekId?: string,
+    client: PrismaExecutor = prisma
+  ): Promise<{ success: true } | { success: false; failedProductId: string }> {
+    for (const item of items) {
+      const reserved = await this.reserveStock(item.productId, item.quantity, weekId, client)
+      if (!reserved) {
+        return { success: false, failedProductId: item.productId }
+      }
+    }
+
+    return { success: true }
+  }
+
+  async releaseItems(
+    items: StockItemInput[],
+    weekId?: string,
+    client: PrismaExecutor = prisma
+  ): Promise<boolean> {
+    for (const item of items) {
+      const released = await this.releaseStock(item.productId, item.quantity, weekId, client)
+      if (!released) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  async confirmItems(
+    items: StockItemInput[],
+    weekId?: string,
+    client: PrismaExecutor = prisma
+  ): Promise<boolean> {
+    for (const item of items) {
+      const confirmed = await this.confirmSale(item.productId, item.quantity, weekId, client)
+      if (!confirmed) {
+        return false
+      }
+    }
+
+    return true
   }
 
   /**

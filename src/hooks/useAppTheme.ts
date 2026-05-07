@@ -57,7 +57,7 @@ export function useAppTheme() {
       try {
         setLoading(true)
         setError(null)
-        const res = await fetch('/api/admin/tema', { 
+        const res = await fetch('/api/tema', { 
           cache: 'no-store',
           next: { revalidate: 60 } 
         })

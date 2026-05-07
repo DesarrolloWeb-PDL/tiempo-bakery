@@ -302,7 +302,7 @@ npm run db:migrate
 
 ### Error: Environment variable not found
 ```bash
-# Verifica que .env.local exista y tenga DATABASE_URL
+# Verifica que .env.local exista y tenga DATABASE_URL; si usás Prisma Accelerate, también DIRECT_URL
 cat .env.local
 ```
 

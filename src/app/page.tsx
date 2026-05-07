@@ -6,6 +6,8 @@ import { getTimeGatingRuntime } from '@/lib/time-gating';
 
 export const dynamic = 'force-dynamic';
 
+const DAY_LABELS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
 // Obtener productos directamente desde la DB
 async function getProducts() {
   try {
@@ -82,12 +84,19 @@ async function getProducts() {
 async function getTimeGatingData() {
   try {
     const { enabled, service } = await getTimeGatingRuntime();
+    const config = service.getConfig()
 
     if (!enabled) {
       return {
         isOpen: true,
         timeRemaining: undefined,
         nextOpening: undefined,
+        openingDayLabel: DAY_LABELS[config.openingDay] ?? DAY_LABELS[3],
+        openingHour: config.openingHour,
+        openingMinute: config.openingMinute,
+        closingDayLabel: DAY_LABELS[config.closingDay] ?? DAY_LABELS[0],
+        closingHour: config.closingHour,
+        closingMinute: config.closingMinute,
       };
     }
 
@@ -100,10 +109,26 @@ async function getTimeGatingData() {
       nextOpening: status.nextOpening
         ? (status.nextOpening.toISO() ?? undefined)
         : undefined,
+      openingDayLabel: DAY_LABELS[config.openingDay] ?? DAY_LABELS[3],
+      openingHour: config.openingHour,
+      openingMinute: config.openingMinute,
+      closingDayLabel: DAY_LABELS[config.closingDay] ?? DAY_LABELS[0],
+      closingHour: config.closingHour,
+      closingMinute: config.closingMinute,
     };
   } catch (error) {
     console.error('Error fetching time-gating:', error);
-    return { isOpen: true, timeRemaining: undefined, nextOpening: undefined };
+    return {
+      isOpen: true,
+      timeRemaining: undefined,
+      nextOpening: undefined,
+      openingDayLabel: DAY_LABELS[3],
+      openingHour: 18,
+      openingMinute: 0,
+      closingDayLabel: DAY_LABELS[0],
+      closingHour: 20,
+      closingMinute: 0,
+    };
   }
 }
 
@@ -131,6 +156,12 @@ export default async function HomePage() {
               isOpen={timeGatingData.isOpen}
               timeRemaining={timeGatingData.timeRemaining}
               nextOpening={timeGatingData.nextOpening}
+              openingDayLabel={timeGatingData.openingDayLabel}
+              openingHour={timeGatingData.openingHour}
+              openingMinute={timeGatingData.openingMinute}
+              closingDayLabel={timeGatingData.closingDayLabel}
+              closingHour={timeGatingData.closingHour}
+              closingMinute={timeGatingData.closingMinute}
             />
           </div>
         </div>

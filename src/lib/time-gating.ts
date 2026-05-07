@@ -28,6 +28,10 @@ export class TimeGatingService {
     this.config = config;
   }
 
+  getConfig(): TimeGatingConfig {
+    return this.config;
+  }
+
   /**
    * Verifica si el sitio está abierto para pedidos
    */

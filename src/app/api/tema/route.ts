@@ -1,0 +1,1 @@
+export { GET, dynamic } from '../admin/tema/route'

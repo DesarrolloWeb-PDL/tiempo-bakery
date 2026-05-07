@@ -106,8 +106,8 @@ function LoginForm() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-4">
-          Contraseña configurable en{' '}
-          <code className="bg-gray-100 px-1 rounded">ADMIN_PASSWORD</code>
+          Configura <code className="bg-gray-100 px-1 rounded">ADMIN_PASSWORD</code> y{' '}
+          <code className="bg-gray-100 px-1 rounded">JWT_SECRET</code> en .env.local
         </p>
       </div>
     </div>
