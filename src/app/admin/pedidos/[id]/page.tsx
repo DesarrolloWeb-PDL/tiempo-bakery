@@ -335,9 +335,13 @@ export default function AdminOrderDetailPage() {
                 <div key={item.id} className="flex items-center gap-4 px-5 py-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={item.product.imageUrl}
+                    src={normalizePublicAssetUrl(item.product.imageUrl) || '/img/espiga.png'}
                     alt={item.product.imageAlt}
                     className="w-12 h-12 rounded-lg object-cover bg-gray-100"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src = '/img/espiga.png'
+                    }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>

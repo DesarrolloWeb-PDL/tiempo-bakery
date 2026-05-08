@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,16 @@ export async function GET(
       return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
     }
 
-    return NextResponse.json(order)
+    return NextResponse.json({
+      ...order,
+      items: order.items.map((item) => ({
+        ...item,
+        product: {
+          ...item.product,
+          imageUrl: normalizePublicAssetUrl(item.product.imageUrl),
+        },
+      })),
+    })
   } catch (error) {
     console.error('Error fetching order:', error)
     return NextResponse.json({ error: 'Error al obtener el pedido' }, { status: 500 })
