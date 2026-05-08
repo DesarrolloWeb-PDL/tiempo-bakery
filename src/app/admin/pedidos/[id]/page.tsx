@@ -18,6 +18,7 @@ import {
   Truck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 
 // ─────────────────────────────────────────────
 // Tipos
@@ -71,7 +72,6 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; co
   PENDING:   { label: 'Pendiente',  icon: Clock,         color: 'text-yellow-600', bg: 'bg-yellow-100' },
   PAID:      { label: 'Pagado',     icon: CreditCard,    color: 'text-blue-600',   bg: 'bg-blue-100' },
   BAKING:    { label: 'En horno',   icon: ChefHat,       color: 'text-orange-600', bg: 'bg-orange-100' },
-  READY:     { label: 'Listo',      icon: CheckCircle2,  color: 'text-green-600',  bg: 'bg-green-100' },
   DELIVERED: { label: 'Entregado',  icon: Truck,         color: 'text-gray-600',   bg: 'bg-gray-100' },
   CANCELLED: { label: 'Cancelado',  icon: XCircle,       color: 'text-red-600',    bg: 'bg-red-100' },
 }
