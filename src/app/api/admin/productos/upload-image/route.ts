@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { POST as uploadAssetPost, dynamic, runtime } from '../../uploads/route'
+import { POST as uploadAssetPost, dynamic } from '../../uploads/route'
 
-export { dynamic, runtime }
+export { dynamic }
+export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   const clonedRequest = req.clone()
