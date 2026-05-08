@@ -1,8 +1,9 @@
-import { loadEnvConfig } from '@next/env'
+import nextEnv from '@next/env'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { withAccelerate } from '@prisma/extension-accelerate'
 
+const { loadEnvConfig } = nextEnv
 loadEnvConfig(process.cwd())
 
 function isAccelerateUrl(url: string): boolean {
