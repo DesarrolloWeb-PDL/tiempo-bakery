@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
-import type { SiteContent } from '@/lib/site-content';
+import type { SiteContent } from '@/lib/site-content.shared';
 
 // Inyector de CSS de tema - integrado en Header para evitar error #418
 function ThemeStyleInjector() {

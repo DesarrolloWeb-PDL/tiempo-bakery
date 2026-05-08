@@ -3,7 +3,7 @@
 import { useAppTheme } from '@/hooks/useAppTheme'
 import Image from 'next/image'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
-import type { SiteContent } from '@/lib/site-content'
+import type { SiteContent } from '@/lib/site-content.shared'
 
 interface FooterProps {
   siteContent: SiteContent

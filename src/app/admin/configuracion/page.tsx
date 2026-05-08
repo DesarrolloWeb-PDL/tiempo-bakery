@@ -7,7 +7,7 @@ import { Clock3, Key, Layout, Loader2, LogOut, Mail, MapPin, Info, Palette, Plus
 import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
-import { DEFAULT_SITE_CONTENT, type SiteContent } from '@/lib/site-content'
+import { DEFAULT_SITE_CONTENT, type SiteContent } from '@/lib/site-content.shared'
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('es-AR', {

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma as db } from '@/lib/db'
-import { DEFAULT_SITE_CONTENT, getSiteContent, getSiteContentKeys } from '@/lib/site-content'
+import { getSiteContent } from '@/lib/site-content'
+import { DEFAULT_SITE_CONTENT, SITE_CONTENT_KEYS } from '@/lib/site-content.shared'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,7 +71,7 @@ export async function PUT(req: NextRequest) {
     }
 
     await db.$transaction(
-      getSiteContentKeys().map((key) =>
+      SITE_CONTENT_KEYS.map((key) =>
         db.siteConfig.upsert({
           where: { key: `content_${key}` },
           create: { key: `content_${key}`, value: parsed.data[key] },
@@ -90,7 +91,7 @@ export async function PUT(req: NextRequest) {
 export async function DELETE() {
   try {
     await db.$transaction(
-      getSiteContentKeys().map((key) =>
+      SITE_CONTENT_KEYS.map((key) =>
         db.siteConfig.upsert({
           where: { key: `content_${key}` },
           create: { key: `content_${key}`, value: DEFAULT_SITE_CONTENT[key] },
