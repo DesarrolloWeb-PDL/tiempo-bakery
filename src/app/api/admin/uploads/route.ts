@@ -29,7 +29,15 @@ function getFileExtension(file: File) {
 }
 
 function shouldUseLocalFallback(error: unknown) {
-  return error instanceof Error && error.message.includes('para usar Supabase Storage')
+  if (!(error instanceof Error)) {
+    return false
+  }
+
+  if (error.message.includes('para usar Supabase Storage')) {
+    return true
+  }
+
+  return process.env.NODE_ENV !== 'production'
 }
 
 async function uploadProductImageLocally(file: File) {
@@ -43,7 +51,7 @@ async function uploadProductImageLocally(file: File) {
 
   return {
     filePath: filename,
-    publicUrl: `/api/admin/uploads/serve?file=${encodeURIComponent(filename)}`,
+    publicUrl: `/uploads/productos/${encodeURIComponent(filename)}`,
   }
 }
 

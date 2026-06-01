@@ -12,6 +12,17 @@ describe('admin auth session', () => {
     vi.unstubAllEnvs()
   })
 
+  it('requiere variables de entorno explícitas para habilitar auth admin', async () => {
+    vi.unstubAllEnvs()
+    vi.stubEnv('NODE_ENV', 'development')
+
+    const { createAdminSessionToken, getAdminAuthConfigError, isAdminAuthConfigured } = await import('@/lib/admin-auth')
+
+    expect(isAdminAuthConfigured()).toBe(false)
+    expect(getAdminAuthConfigError()).toContain('ADMIN_PASSWORD')
+    await expect(createAdminSessionToken()).resolves.toBeNull()
+  })
+
   it('crea una sesión válida verificable por cookie', async () => {
     const { ADMIN_COOKIE, createAdminSessionToken, hasAdminSession } = await import('@/lib/admin-auth')
 

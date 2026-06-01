@@ -1,7 +1,5 @@
 export const ADMIN_COOKIE = 'tbk_admin_auth'
 
-const DEV_ADMIN_PASSWORD = 'admin123'
-const DEV_JWT_SECRET = 'tbk-dev-session-secret'
 export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7
 
 type CookieReader = {
@@ -46,10 +44,6 @@ function getAdminSessionSecret(): string | null {
 
   if (configuredSecret) {
     return configuredSecret
-  }
-
-  if (process.env.NODE_ENV !== 'production') {
-    return DEV_JWT_SECRET
   }
 
   return null
@@ -106,10 +100,6 @@ export function getAdminPassword(): string | null {
 
   if (configuredPassword) {
     return configuredPassword
-  }
-
-  if (process.env.NODE_ENV !== 'production') {
-    return DEV_ADMIN_PASSWORD
   }
 
   return null

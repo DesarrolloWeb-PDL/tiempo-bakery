@@ -92,6 +92,10 @@ STRIPE_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..." # Dejar vacío por ahora
 
+# Admin
+ADMIN_PASSWORD="una_clave_larga_y_unica"
+JWT_SECRET="un_secreto_largo_y_unico"
+
 # URL del sitio
 NEXT_PUBLIC_URL="http://localhost:3000"
 ```

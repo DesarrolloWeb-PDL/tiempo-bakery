@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import ImagenUploadAdmin from '@/components/productos/imagen-upload-admin'
-import Image from 'next/image'
 import { ArrowUp, ArrowDown, BarChart2, RefreshCw, Plus, Pencil, Star, Trash2, X, Save } from 'lucide-react'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { cn } from '@/lib/utils'
@@ -760,9 +759,28 @@ export default function AdminProductosPage() {
             </div>
 
             <div className="md:col-span-2 space-y-2">
-              <ImagenUploadAdmin
-                onUpload={(url) => setFieldValue('imageUrl', url)}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  e.currentTarget.value = ''
+
+                  if (file) {
+                    void handleImageSelected(file)
+                  }
+                }}
               />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {uploadingImage ? 'Subiendo portada...' : 'Subir portada'}
+              </button>
               <input value={form.imageUrl} onChange={(e) => setFieldValue('imageUrl', e.target.value)} placeholder="URL imagen" className={cn(inputClass('imageUrl'), 'w-full')} required />
               {fieldErrors.imageUrl && <p className="mt-1 text-xs text-red-600">{fieldErrors.imageUrl}</p>}
             </div>
@@ -976,14 +994,14 @@ export default function AdminProductosPage() {
                 <div key={p.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50/50">
                   <div className="col-span-4 flex items-center gap-3 min-w-0">
                     {/* Imagen actual */}
-                    <Image
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       src={normalizePublicAssetUrl(p.imageUrl) || '/img/espiga.png'}
                       alt={p.name}
-                      width={40}
-                      height={40}
                       className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '/img/espiga.png'
+                        e.currentTarget.onerror = null
+                        e.currentTarget.src = '/img/espiga.png'
                       }}
                     />
                     <div className="min-w-0">
