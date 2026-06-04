@@ -49,9 +49,14 @@ async function uploadProductImageLocally(file: File) {
   await mkdir(uploadDir, { recursive: true })
   await writeFile(filepath, Buffer.from(await file.arrayBuffer()))
 
+  const isProduction = process.env.NODE_ENV === 'production'
+  const publicUrl = isProduction
+    ? `/api/admin/uploads/serve?file=${encodeURIComponent(filename)}`
+    : `/uploads/productos/${encodeURIComponent(filename)}`
+
   return {
     filePath: filename,
-    publicUrl: `/uploads/productos/${encodeURIComponent(filename)}`,
+    publicUrl,
   }
 }
 

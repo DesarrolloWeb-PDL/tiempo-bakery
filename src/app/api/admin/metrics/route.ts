@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
+import { getTimeGatingRuntime } from '@/lib/time-gating'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,14 +37,9 @@ function mapDbError(error: unknown, fallback: string) {
 
 export async function GET() {
   try {
+    const { service } = await getTimeGatingRuntime()
     const now = new Date()
-
-    // Semana actual en formato ISO (YYYY-Www)
-    const startOfYear = new Date(now.getFullYear(), 0, 1)
-    const weekNum = Math.ceil(
-      ((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
-    )
-    const currentWeekId = `${now.getFullYear()}-W${String(weekNum).padStart(2, '0')}`
+    const currentWeekId = service.getCurrentWeekId()
 
     // Inicio de la semana actual (lunes)
     const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1

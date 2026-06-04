@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
+import { sendOrderPaidEmails } from '@/lib/order-email';
 import { stockManager } from '@/lib/stock-manager';
 import Stripe from 'stripe';
 
@@ -119,7 +120,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         },
       })
 
-      return { status: 'paid' as const, orderNumber: updatedOrder.orderNumber }
+      return {
+        status: 'paid' as const,
+        order: {
+          ...order,
+          orderNumber: updatedOrder.orderNumber,
+          paymentStatus: updatedOrder.paymentStatus,
+          status: updatedOrder.status,
+          paymentMethod: updatedOrder.paymentMethod,
+          paidAt: updatedOrder.paidAt,
+          stripePaymentId: updatedOrder.stripePaymentId,
+        },
+      }
     })
 
     if (result.status === 'missing') {
@@ -132,10 +144,12 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       return;
     }
 
-    console.log('Order completed:', result.orderNumber);
+    console.log('Order completed:', result.order.orderNumber);
 
-    // TODO: Enviar email de confirmación
-    // await sendOrderConfirmationEmail(order);
+    const emailResult = await sendOrderPaidEmails(result.order)
+    if (emailResult.skipped) {
+      console.log('Order email skipped: RESEND_API_KEY no configurada')
+    }
   } catch (error) {
     console.error('Error handling checkout session completed:', error);
   }

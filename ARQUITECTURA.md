@@ -1,8 +1,8 @@
 # 🏗️ Arquitectura Técnica - Tiempo Backery E-commerce
 
-**Versión:** 1.0  
-**Fecha:** 11 de noviembre de 2025  
-**Stack:** Next.js 14+ | PostgreSQL | Prisma | Tailwind CSS
+**Versión:** 1.1  
+**Fecha:** 2 de junio de 2026  
+**Stack:** Next.js 14 | PostgreSQL | Prisma 7 | Tailwind CSS
 
 ---
 
@@ -50,7 +50,7 @@
 Framework: Next.js 14 (App Router)
 Lenguaje: TypeScript 5.x
 Estilos: Tailwind CSS 3.x
-Estado: Zustand + React Query
+Estado: Zustand
 UI Components: shadcn/ui (Radix UI)
 Validación: Zod
 ```
@@ -58,29 +58,28 @@ Validación: Zod
 ### Backend
 ```yaml
 Runtime: Node.js 20.x LTS
-API: Next.js API Routes + Server Actions
-ORM: Prisma 5.x
+API: Route Handlers de Next.js
+ORM: Prisma 7.x
 Base de Datos: PostgreSQL 16
-Cache: Redis (opcional para MVP)
+Emails: Resend (opcional)
 ```
 
 ### Infraestructura
 ```yaml
 Hosting: Vercel (Frontend + API)
-Database: Supabase o Railway
-Storage: Cloudinary (imágenes de productos)
-Pagos: Stripe
-Email: Resend o SendGrid
-Monitoreo: Vercel Analytics + Sentry
+Database: Prisma Postgres / Supabase / Railway / Vercel Postgres
+Storage: Supabase Storage con fallback local en desarrollo
+Pagos: Stripe + Mercado Pago
+Email: Resend (opcional, disparado desde webhooks)
+Monitoreo: Logs de Vercel + chequeos predeploy
 ```
 
 ### Desarrollo
 ```yaml
 IDE: VS Code
-Linter: ESLint + Prettier
-Git Hooks: Husky + lint-staged
-Testing: Vitest + React Testing Library
-CI/CD: GitHub Actions
+Linter: ESLint
+Testing: Vitest
+CI/CD: Vercel + scripts de verificación
 ```
 
 ---
@@ -92,46 +91,48 @@ CI/CD: GitHub Actions
 ```
 tiempo-bakery/
 ├── src/
-│   ├── app/                          # Next.js App Router
-│   │   ├── (storefront)/            # Rutas públicas (e-commerce)
-│   │   │   ├── page.tsx             # Homepage / Catálogo
-│   │   │   ├── productos/
-│   │   │   │   └── [slug]/page.tsx  # Detalle de producto
-│   │   │   ├── carrito/page.tsx     # Carrito de compras
-│   │   │   └── checkout/page.tsx    # Proceso de pago
-│   │   ├── (admin)/                 # Panel de administración
-│   │   │   ├── dashboard/
+│   ├── app/                          # App Router
+│   │   ├── page.tsx                 # Home / catálogo
+│   │   ├── checkout/page.tsx        # Checkout storefront
+│   │   ├── pedido/[id]/             # Confirmación pública
+│   │   ├── productos/[slug]/        # Detalle de producto
+│   │   ├── admin/                   # Panel de administración
+│   │   │   ├── login/
 │   │   │   ├── pedidos/
-│   │   │   └── productos/
-│   │   ├── api/                     # API Routes
 │   │   │   ├── productos/
-│   │   │   ├── pedidos/
+│   │   │   ├── stock/
+│   │   │   └── configuracion/
+│   │   ├── api/                     # Route handlers
 │   │   │   ├── checkout/
+│   │   │   ├── productos/
+│   │   │   ├── pedidos/
+│   │   │   ├── admin/
+│   │   │   ├── payment-methods/
 │   │   │   └── webhooks/
 │   │   └── layout.tsx
-│   ├── components/                   # Componentes React
-│   │   ├── ui/                      # Componentes base (shadcn)
-│   │   ├── productos/               # Relacionados a productos
-│   │   ├── carrito/                 # Relacionados al carrito
-│   │   └── admin/                   # Componentes del admin
-│   ├── lib/                         # Utilidades y configuración
+│   ├── components/
+│   │   ├── checkout/
+│   │   ├── productos/
+│   │   └── ui/
+│   ├── hooks/
+│   │   └── useAppTheme.ts
+│   ├── lib/
+│   │   ├── admin-auth.ts            # Auth admin por JWT en cookie
 │   │   ├── db.ts                    # Cliente Prisma
-│   │   ├── time-gating.ts           # Lógica de apertura/cierre
-│   │   ├── stock-manager.ts         # Gestión de stock
-│   │   ├── cart.ts                  # Lógica del carrito
-│   │   └── utils.ts                 # Helpers generales
-│   ├── hooks/                       # Custom React Hooks
-│   │   ├── useTimeGating.ts
-│   │   ├── useCart.ts
-│   │   └── useCheckout.ts
-│   ├── stores/                      # Zustand stores
-│   │   ├── cartStore.ts
-│   │   └── uiStore.ts
-│   ├── types/                       # TypeScript types
-│   │   ├── product.ts
-│   │   ├── order.ts
-│   │   └── cart.ts
-│   └── middleware.ts                # Next.js middleware
+│   │   ├── mercadopago.ts           # Integración Mercado Pago
+│   │   ├── order-email.ts           # Emails postpago opcionales
+│   │   ├── payments.ts              # Config de proveedores de pago
+│   │   ├── shipping-costs.ts        # Costos de envío configurables
+│   │   ├── site-content.ts          # Config contenido editable
+│   │   ├── stock-manager.ts         # Reservas/liberación de stock
+│   │   ├── time-gating.ts           # Horarios de apertura/cierre
+│   │   └── utils.ts
+│   ├── stores/
+│   │   └── cart-store.ts
+│   ├── types/
+│   │   ├── cart.ts
+│   │   └── checkout.ts
+│   └── middleware.ts                # Protección admin + headers + rate limiting
 ├── prisma/
 │   ├── schema.prisma                # Modelo de datos
 │   ├── migrations/                  # Migraciones
@@ -150,16 +151,13 @@ tiempo-bakery/
 ```mermaid
 graph TB
     A[Cliente/Browser] -->|HTTP Request| B[Next.js Middleware]
-    B -->|Valida Time-Gating| C{¿Sitio Abierto?}
-    C -->|No| D[Retorna mensaje de cierre]
-    C -->|Sí| E[Next.js App Router]
+  B -->|Headers seguridad + auth admin + rate limit sensible| E[Next.js App Router]
     E --> F[Server Components]
-    E --> G[API Routes]
-    F -->|Server Actions| H[Prisma ORM]
+  E --> G[Route Handlers]
     G -->|Query/Mutation| H
     H --> I[PostgreSQL]
-    G -->|Procesar Pago| J[Stripe API]
-    G -->|Enviar Email| K[Resend/SendGrid]
+  G -->|Procesar Pago| J[Stripe / Mercado Pago]
+  G -->|Emails postpago opcionales| K[Resend]
 ```
 
 ---
@@ -1104,23 +1102,22 @@ async function handleConcurrentPurchase(productId: string, quantity: number) {
 ### Rate Limiting
 
 ```typescript
-// src/lib/rate-limit.ts
+// Estado actual: limitador en memoria por IP aplicado desde middleware
+// a POST /api/admin/login y POST /api/checkout.
+// Es suficiente como barrera básica, pero NO distribuido.
 
-import { Redis } from '@upstash/redis';
-
-const redis = Redis.fromEnv();
-
-export async function rateLimit(identifier: string, limit: number = 10) {
-  const key = `rate_limit:${identifier}`;
-  const current = await redis.incr(key);
-  
-  if (current === 1) {
-    await redis.expire(key, 60); // 1 minuto
-  }
-  
-  return current <= limit;
-}
+const SENSITIVE_RATE_LIMITS = [
+  { path: '/api/admin/login', method: 'POST', limit: 5, windowMs: 15 * 60 * 1000 },
+  { path: '/api/checkout', method: 'POST', limit: 10, windowMs: 5 * 60 * 1000 },
+]
 ```
+
+### Headers y autenticación
+
+- El middleware aplica `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` y `Cross-Origin-Opener-Policy` sobre `/admin` y `/api`.
+- Si la request llega por HTTPS también se agrega `Strict-Transport-Security`.
+- El panel admin usa cookie httpOnly firmada con JWT y depende de `ADMIN_PASSWORD` + `JWT_SECRET`.
+- Cuando esas variables no existen, el admin queda deshabilitado de forma explícita.
 
 ---
 
@@ -1134,18 +1131,27 @@ GET    /api/productos                    // Listar productos con stock
 GET    /api/productos/[slug]             // Detalle de producto
 GET    /api/time-gating                  // Estado apertura/cierre
 POST   /api/checkout                     // Crear orden y sesión de pago
-GET    /api/pedido/[id]                  // Detalle de pedido (con auth)
+GET    /api/pedidos/[id]                 // Detalle público del pedido
 GET    /api/puntos-recogida              // Listar puntos de recogida
+GET    /api/payment-methods              // Proveedores habilitados
+GET    /api/shipping-costs               // Costos runtime de envío
 
 // WEBHOOKS
 POST   /api/webhooks/stripe              // Confirmar pagos
+POST   /api/webhooks/mercadopago         // Confirmar pagos
 
 // ADMIN (Protegidos)
+POST   /api/admin/login                  // Login admin
 GET    /api/admin/pedidos                // Listar pedidos
-PATCH  /api/admin/pedidos/[id]           // Actualizar estado
+GET    /api/admin/pedidos/[id]           // Detalle de pedido
 GET    /api/admin/productos              // Gestión de productos
-POST   /api/admin/stock/initialize       // Inicializar semana
-GET    /api/admin/stats                  // Dashboard analytics
+POST   /api/admin/productos              // Alta de productos
+GET    /api/admin/stock                  // Stock semanal
+POST   /api/admin/stock                  // Ajustes manuales / upsert
+POST   /api/admin/stock/resync           // Resincronización
+GET    /api/admin/metrics                // Dashboard analytics
+GET    /api/admin/site-content           // Config contenido editable
+POST   /api/admin/uploads                // Upload de imágenes
 ```
 
 ---
@@ -1158,27 +1164,33 @@ GET    /api/admin/stats                  // Dashboard analytics
 # .env.local
 
 # Database
-DATABASE_URL="postgresql://user:password@host:5432/tiempo_bakery"
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=..."
+DIRECT_URL="postgres://user:password@host:5432/tiempo_bakery?sslmode=require"
 
 # Stripe
 STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_PUBLISHABLE_KEY="pk_test_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# Mercado Pago
+MERCADOPAGO_ACCESS_TOKEN="APP_USR-..."
 
 # Next.js
 NEXT_PUBLIC_URL="https://tiempobakery.com"
 
-# Email
+# Email opcional
 RESEND_API_KEY="re_..."
+ORDER_EMAIL_FROM="Tiempo Bakery <onboarding@resend.dev>"
+ORDER_NOTIFICATION_EMAILS="pedidos@tiempobakery.com"
 
-# Auth (NextAuth.js)
-NEXTAUTH_SECRET="..."
-NEXTAUTH_URL="https://tiempobakery.com"
+# Admin auth
+ADMIN_PASSWORD="una_clave_larga_y_unica"
+JWT_SECRET="un_secreto_largo_y_unico"
 
-# Cloudinary
-CLOUDINARY_CLOUD_NAME="..."
-CLOUDINARY_API_KEY="..."
-CLOUDINARY_API_SECRET="..."
+# Storage persistente opcional
+NEXT_PUBLIC_SUPABASE_URL="https://tu-proyecto.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_..."
+SUPABASE_SERVICE_ROLE_KEY="sb_secret_..."
 ```
 
 ### Checklist de Deployment
@@ -1187,15 +1199,14 @@ CLOUDINARY_API_SECRET="..."
 ✅ Base de datos PostgreSQL configurada
 ✅ Prisma migrations ejecutadas
 ✅ Stripe configurado y webhooks activos
+✅ Mercado Pago configurado si se usa como proveedor
 ✅ Variables de entorno en Vercel
-✅ Dominio personalizado configurado
 ✅ SSL activo
-✅ Emails transaccionales funcionando
+✅ Emails transaccionales funcionando si Resend está configurado
 ✅ Datos de productos iniciales (seed)
 ✅ Puntos de recogida configurados
-✅ Monitoreo de errores (Sentry)
-✅ Analytics configurado
-✅ Backup automático de DB
+✅ Panel admin habilitado con credenciales seguras
+✅ Seguridad HTTP base aplicada por middleware
 ```
 
 ---

@@ -18,6 +18,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "images:audit": "tsx scripts/audit-product-images.ts",
     "images:repair": "tsx scripts/repair-product-images.ts",
+    "health:supabase": "tsx scripts/check-supabase-storage.ts",
     "postinstall": "prisma generate",
     "db:migrate:deploy:if-configured": "tsx scripts/prisma-migrate-deploy.ts",
     "vercel-build": "prisma generate && npm run db:migrate:deploy:if-configured && next build"
@@ -51,6 +52,7 @@
     "prisma": "^7.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "resend": "^6.12.4",
     "stripe": "^17.3.1",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",

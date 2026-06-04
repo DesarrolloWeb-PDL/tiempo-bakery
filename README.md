@@ -6,9 +6,9 @@ Sistema de e-commerce especializado para micropanadería artesanal con modelo de
 
 **Fase 1 (MVP Básico)**: ✅ Completada  
 **Fase 2 (Checkout y Pagos)**: ✅ Completada  
-**Fase 3 (Emails y Admin)**: ⏳ Pendiente
+**Fase 3 (Operación y Admin)**: 🟡 En curso, con piezas principales implementadas
 
-El proyecto está **funcional** con catálogo de productos, carrito de compras, checkout multi-paso, integración con Stripe y confirmación de pedidos.
+El proyecto está **funcional** con catálogo de productos, carrito de compras, checkout multi-paso, integración con Stripe y Mercado Pago, panel admin protegido, uploads de imágenes y emails transaccionales opcionales vía Resend.
 
 ## ✨ Características Implementadas
 
@@ -16,11 +16,12 @@ El proyecto está **funcional** con catálogo de productos, carrito de compras, 
 - ✅ **📦 Stock Semanal**: Control de inventario por ciclo de producción
 - ✅ **🛒 Carrito Inteligente**: Persistencia en localStorage con ajuste de cantidades
 - ✅ **🚚 Múltiples Entregas**: Recogida en punto, envío local (5€) y nacional (10€)
-- ✅ **💳 Pago Seguro**: Integración completa con Stripe (checkout + webhooks)
+- ✅ **💳 Pago Seguro**: Integración completa con Stripe y Mercado Pago (checkout + webhooks)
 - ✅ **🧾 Gestión de Pedidos**: Creación automática con número único (TBK-YYYY-NNNN)
 - ✅ **📄 Página de Confirmación**: Resumen completo del pedido postpago
-- ⏳ **📧 Emails**: Pendiente (Fase 3)
-- ⏳ **👨‍💼 Panel Admin**: Pendiente (Fase 3)
+- ✅ **📧 Emails Transaccionales**: Confirmación opcional al cliente y aviso interno con Resend
+- ✅ **👨‍💼 Panel Admin**: Login protegido, métricas, productos, stock, pedidos, configuración y uploads
+- ✅ **🔒 Seguridad Base**: Middleware con headers HTTP de seguridad y rate limiting en login admin y checkout
 
 ## 🛠️ Stack Tecnológico
 
@@ -29,14 +30,15 @@ El proyecto está **funcional** con catálogo de productos, carrito de compras, 
 - **Base de Datos**: PostgreSQL + Prisma ORM
 - **Estado**: Zustand
 - **Validación**: Zod
-- **Pagos**: Stripe
+- **Pagos**: Stripe + Mercado Pago
+- **Emails**: Resend (opcional)
 - **Fecha/Hora**: Luxon
 
 ## 📋 Requisitos Previos
 
 - Node.js 20.x o superior
 - PostgreSQL 14+ (o cuenta en Supabase/Railway)
-- Cuenta de Stripe (modo test para desarrollo)
+- Cuenta de Stripe y/o Mercado Pago (modo test para desarrollo)
 - npm o yarn
 
 ## 🚀 Instalación
@@ -92,9 +94,17 @@ STRIPE_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..." # Dejar vacío por ahora
 
+# Mercado Pago (opcional, si lo vas a habilitar)
+MERCADOPAGO_ACCESS_TOKEN="APP_USR-..."
+
 # Admin
 ADMIN_PASSWORD="una_clave_larga_y_unica"
 JWT_SECRET="un_secreto_largo_y_unico"
+
+# Emails transaccionales (opcional)
+RESEND_API_KEY="re_..."
+ORDER_EMAIL_FROM="Tiempo Bakery <onboarding@resend.dev>"
+ORDER_NOTIFICATION_EMAILS="pedidos@tiempobakery.com"
 
 # URL del sitio
 NEXT_PUBLIC_URL="http://localhost:3000"
@@ -149,9 +159,10 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 1. **Agregar productos al carrito** en la homepage
 2. **Hacer checkout** (clic en el botón del carrito)
 3. **Completar formulario** de checkout (3 pasos)
-4. **Pagar con tarjeta de test**: `4242 4242 4242 4242`
+4. **Pagar con Stripe o Mercado Pago** según la configuración activa
 5. **Ver página de confirmación** con el resumen del pedido
 6. **Verificar en Prisma Studio**: `npm run db:studio`
+7. **Si configuraste Resend**, comprobar que el webhook dispare la confirmación por email
 
 📖 **Ver guía detallada**: [INICIO_RAPIDO.md](INICIO_RAPIDO.md)
 
@@ -163,6 +174,8 @@ npm run dev              # Iniciar servidor de desarrollo
 npm run build            # Compilar para producción
 npm run start            # Iniciar servidor de producción
 npm run lint             # Ejecutar linter
+npm run test             # Ejecutar suite de Vitest
+npm run verify:predeploy # Typecheck + chequeos previos a deploy
 
 # Base de datos
 npm run db:generate      # Generar cliente Prisma
@@ -297,7 +310,7 @@ Este proyecto incluye documentación exhaustiva:
 
 - **[INICIO_RAPIDO.md](./INICIO_RAPIDO.md)**: Guía de inicio en 10 minutos
   - Instalación paso a paso
-  - Configuración de Stripe
+  - Configuración de Stripe, Mercado Pago y Resend
   - Testing del flujo completo
   - Solución de problemas comunes
 
@@ -323,13 +336,13 @@ Este proyecto incluye documentación exhaustiva:
 - **[VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md)**: Guía de despliegue en Vercel
   - Configuración de base de datos
   - Variables de entorno
-  - Webhooks de Stripe en producción
+  - Webhooks de Stripe y Mercado Pago en producción
   - Troubleshooting
 
 - **[COMANDOS.md](./COMANDOS.md)**: Referencia rápida de comandos
   - Scripts de npm
   - Comandos de Prisma
-  - Utilidades de Stripe CLI
+  - Utilidades operativas y chequeos de despliegue
 
 ## 🚀 Despliegue a Producción
 
@@ -412,19 +425,18 @@ timezone: 'Europe/Madrid'  // Ajustar según tu ubicación
 - [x] Página de confirmación de pedido
 - [x] Gestión automática de estados de pedido
 
-### ⏳ Fase 3: Emails y Administración (Próxima)
-- [ ] Integración con servicio de emails (Resend/SendGrid)
-- [ ] Template de confirmación de pedido
-- [ ] Notificaciones de cambio de estado
-- [ ] Panel de administración básico
-  - [ ] Dashboard con métricas
-  - [ ] Lista de pedidos con filtros
-  - [ ] Gestión de estados de pedido
-  - [ ] Gestión manual de stock
+### 🟡 Fase 3: Operación y Administración (En curso)
+- [x] Integración opcional con Resend para confirmación al cliente y aviso interno
+- [x] Template HTML de confirmación de pedido pagado
+- [x] Panel de administración con autenticación por cookie firmada
+- [x] Dashboard con métricas, pedidos, productos, stock y configuración
+- [x] Uploads admin con fallback local y soporte para storage persistente
+- [ ] Notificaciones adicionales por cambio de estado
 - [ ] Exportación de pedidos (CSV/Excel)
+- [ ] Rate limiting distribuido para despliegues multi-instancia
 
 ### 🚀 Fase 4: Optimización y Producción (Futura)
-- [ ] Tests automatizados (Jest + Playwright)
+- [ ] Más cobertura automatizada en checkout, stock-manager y time-gating
 - [ ] Optimización de imágenes
 - [ ] Mejoras de SEO (metadata, sitemap)
 - [ ] Analytics (Vercel Analytics / Google Analytics)

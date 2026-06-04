@@ -155,9 +155,8 @@ export default function OrderConfirmationPage() {
         <Card className="mb-6 bg-blue-50 border-blue-200">
           <CardContent className="p-4">
             <p className="text-sm text-blue-800">
-              📧 Hemos enviado un email de confirmación a{' '}
-              <strong>{order.customerEmail}</strong> con todos los detalles de tu
-              pedido.
+              📧 Si el email está bien ingresado, recibirás la confirmación en{' '}
+              <strong>{order.customerEmail}</strong> con los detalles de tu pedido.
             </p>
           </CardContent>
         </Card>

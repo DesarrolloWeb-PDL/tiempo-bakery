@@ -39,9 +39,10 @@ Esta guía te ayudará a poner en marcha el proyecto en **menos de 10 minutos**.
    - Paso 2: Método de entrega (recogida/envío local/nacional)
    - Paso 3: Revisión del pedido
 2. **APIs de checkout**:
-   - `/api/checkout` - Procesamiento de pedidos con Stripe
+   - `/api/checkout` - Procesamiento de pedidos con Stripe o Mercado Pago
    - `/api/pedidos/[id]` - Obtener detalles de pedido
    - `/api/webhooks/stripe` - Webhook para confirmación de pagos
+   - `/api/webhooks/mercadopago` - Webhook para confirmación de pagos
 3. **Integración Stripe**:
    - Sesiones de checkout
    - Webhooks para eventos de pago
@@ -51,12 +52,18 @@ Esta guía te ayudará a poner en marcha el proyecto en **menos de 10 minutos**.
    - Resumen completo del pedido
    - Información de entrega
 
-### ⏳ Pendiente (Fase 3)
+### 🟡 Fase 3: Operación y Admin (Implementado en gran parte)
 
-- Emails de confirmación (Resend/SendGrid)
-- Panel de administración
-- Tests automatizados
-- Deploy a producción
+- Panel admin protegido con login por cookie firmada
+- Gestión de productos, stock, pedidos, configuración y uploads
+- Emails transaccionales opcionales con Resend desde webhooks de pago
+- Cobertura puntual en webhooks, auth admin, emails y utilidades críticas
+
+### 🔜 Pendiente de cierre fino
+
+- Más cobertura en checkout, time-gating y stock-manager
+- Documentación y hardening final de producción
+- Rate limiting distribuido si se despliega en múltiples instancias
 
 ---
 
@@ -131,9 +138,9 @@ Abre [http://localhost:3000](http://localhost:3000) 🎉
 
 ---
 
-## 💳 Paso 3: Configurar Stripe (Opcional para checkout)
+## 💳 Paso 3: Configurar Pagos y Emails (Opcional para checkout completo)
 
-Si quieres probar el flujo completo de checkout y pagos:
+Si quieres probar el flujo completo de checkout y postpago:
 
 ### 1. Crear cuenta en Stripe
 
@@ -151,8 +158,16 @@ Agrega a tu `.env.local`:
 STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
+# Mercado Pago (opcional)
+MERCADOPAGO_ACCESS_TOKEN=APP_USR-...
+
 # URL de tu aplicación
 NEXT_PUBLIC_URL=http://localhost:3000
+
+# Emails transaccionales (opcional)
+RESEND_API_KEY=re_...
+ORDER_EMAIL_FROM="Tiempo Bakery <onboarding@resend.dev>"
+ORDER_NOTIFICATION_EMAILS=pedidos@tiempobakery.com
 ```
 
 ### 3. Configurar webhook local
@@ -209,7 +224,7 @@ npm run db:studio
 - Puedes ver todos los datos de la BD
 - Editar productos, stock, etc.
 
-### Probar el checkout completo (si configuraste Stripe)
+### Probar el checkout completo (si configuraste Stripe o Mercado Pago)
 
 1. **Agregar productos al carrito**:
    - Haz clic en "Agregar al carrito" en 2-3 productos
@@ -240,12 +255,10 @@ npm run db:studio
    - (Opcional) Agrega notas
    - Clic en "Proceder al pago"
 
-6. **Stripe Checkout**:
-   - Tarjeta: `4242 4242 4242 4242`
-   - Fecha: cualquier fecha futura (ej: 12/25)
-   - CVC: cualquier 3 dígitos (ej: 123)
-   - Nombre: cualquier nombre
-   - Clic en "Pay"
+6. **Checkout del proveedor**:
+   - Si usas Stripe: tarjeta `4242 4242 4242 4242`, fecha futura y CVC cualquiera
+   - Si usas Mercado Pago: completa el flujo sandbox/test correspondiente
+   - Confirma el pago y espera el webhook
 
 7. **Página de confirmación**:
    - Deberías ver el mensaje de éxito ✅
@@ -258,6 +271,10 @@ npm run db:studio
    - Ve a la tabla `Order`
    - Deberías ver tu pedido con status PAID
    - Verifica también `OrderItem` y `WeeklyStock`
+
+9. **Verificar email postpago** (si configuraste Resend):
+   - Revisa el buzón del cliente de prueba
+   - Revisa también la casilla interna definida en `ORDER_NOTIFICATION_EMAILS`
 
 ### Tarjetas de test de Stripe
 
@@ -310,17 +327,14 @@ export const DEFAULT_CONFIG: TimeGatingConfig = {
 
 ### Agregar imágenes de productos
 
-Por ahora, los productos tienen URLs de placeholder. Para agregar imágenes reales:
+El proyecto ya soporta imágenes locales en `public/images/productos/`, uploads admin persistentes vía storage y fallback local en desarrollo.
 
-1. **Opción temporal**: Usar URLs externas (Imgur, Unsplash, etc.)
-2. **Opción local**: Poner imágenes en `public/images/productos/`
-3. **Opción producción**: Configurar Vercel Blob
+Si quieres ajustar imágenes existentes:
 
-Luego ejecuta:
 ```bash
+npm run images:audit
 npm run db:studio
 ```
-Y edita el campo `imageUrl` de cada producto.
 
 ---
 
@@ -416,8 +430,9 @@ npm run db:migrate
    - Verificar comportamiento de webhooks
    - Probar diferentes métodos de pago
 
-2. **Emails de Confirmación**:
-   - Integrar Resend o SendGrid
+2. **Cierre de producción**:
+   - Revisar variables reales de pagos, admin y emails
+   - Endurecer rate limiting distribuido si el deploy no será single-instance
    - Template HTML de confirmación
    - Notificaciones de cambio de estado
    - Email al administrador cuando hay nuevo pedido

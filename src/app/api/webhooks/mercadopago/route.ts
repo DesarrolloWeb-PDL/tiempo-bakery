@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getMercadoPagoPayment } from '@/lib/mercadopago';
+import { sendOrderPaidEmails } from '@/lib/order-email';
 import { stockManager } from '@/lib/stock-manager';
 
 export const dynamic = 'force-dynamic';
@@ -49,14 +50,14 @@ export async function POST(request: NextRequest) {
     const mappedStatus = mapMercadoPagoStatus(payment.status);
 
     if (mappedStatus === 'PAID' && order.paymentStatus !== 'PAID') {
-      await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx) => {
         const freshOrder = await tx.order.findUnique({
           where: { id: order.id },
           include: { items: true },
         })
 
         if (!freshOrder || freshOrder.paymentStatus === 'PAID') {
-          return
+          return { status: 'already-paid' as const }
         }
 
         const confirmed = await stockManager.confirmItems(freshOrder.items, freshOrder.weekId, tx)
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
           throw new Error(`No se pudo confirmar stock para ${freshOrder.orderNumber}`)
         }
 
-        await tx.order.update({
+        const updatedOrder = await tx.order.update({
           where: { id: freshOrder.id },
           data: {
             paymentStatus: 'PAID',
@@ -74,7 +75,26 @@ export async function POST(request: NextRequest) {
             paidAt: freshOrder.paidAt ?? new Date(),
           },
         })
+
+        return {
+          status: 'paid' as const,
+          order: {
+            ...freshOrder,
+            paymentStatus: updatedOrder.paymentStatus,
+            status: updatedOrder.status,
+            paymentMethod: updatedOrder.paymentMethod,
+            mercadopagoPaymentId: updatedOrder.mercadopagoPaymentId,
+            paidAt: updatedOrder.paidAt,
+          },
+        }
       })
+
+      if (result.status === 'paid') {
+        const emailResult = await sendOrderPaidEmails(result.order)
+        if (emailResult.skipped) {
+          console.log('Order email skipped: RESEND_API_KEY no configurada')
+        }
+      }
     }
 
     if (mappedStatus === 'FAILED' && order.paymentStatus !== 'FAILED' && order.paymentStatus !== 'PAID') {

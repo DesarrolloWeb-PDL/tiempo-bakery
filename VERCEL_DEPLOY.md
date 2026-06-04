@@ -85,6 +85,18 @@ DIRECT_URL="postgres://usuario:password@host:5432/db?sslmode=require"
 STRIPE_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 
+# Mercado Pago (opcional)
+MERCADOPAGO_ACCESS_TOKEN="APP_USR-..."
+
+# Admin
+ADMIN_PASSWORD="una_clave_larga_y_unica"
+JWT_SECRET="un_secreto_largo_y_unico"
+
+# Emails transaccionales (opcional)
+RESEND_API_KEY="re_..."
+ORDER_EMAIL_FROM="Tiempo Bakery <onboarding@resend.dev>"
+ORDER_NOTIFICATION_EMAILS="pedidos@tiempobakery.com"
+
 # URL local (cámbialo después a tu dominio de Vercel)
 NEXT_PUBLIC_URL="http://localhost:3000"
 ```
@@ -164,6 +176,9 @@ NEXT_PUBLIC_URL
 ADMIN_PASSWORD
 JWT_SECRET
 MERCADOPAGO_ACCESS_TOKEN
+RESEND_API_KEY
+ORDER_EMAIL_FROM
+ORDER_NOTIFICATION_EMAILS
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
@@ -275,6 +290,8 @@ vercel --prod
 - [ ] Se puede agregar productos al carrito
 - [ ] El checkout redirige a Stripe
 - [ ] Los webhooks de Stripe funcionan (revisa logs en Stripe Dashboard)
+- [ ] Si Mercado Pago está habilitado, el webhook confirma pagos y actualiza pedidos
+- [ ] Si Resend está configurado, el email de confirmación sale después del webhook de pago
 - [ ] Las imágenes se cargan correctamente
 
 ### Ver Logs en Vercel:
@@ -296,6 +313,13 @@ https://vercel.com/tu-usuario/tiempo-bakery/deployments
 - ✅ Todas las variables están en Vercel (no en el código)
 - ✅ `.env.local` está en `.gitignore`
 - ✅ Usa las claves de **producción** de Stripe cuando estés listo
+- ✅ Usa credenciales reales de Mercado Pago y un remitente verificado en Resend si vas a operar emails reales
+
+### 4. Headers y rate limiting:
+
+- ✅ El middleware ya agrega headers de seguridad HTTP en `/admin` y `/api`
+- ✅ Existe rate limiting básico en `POST /api/admin/login` y `POST /api/checkout`
+- ⚠️ Si vas a desplegar en varias instancias o serverless con mucho tráfico, conviene mover ese rate limit a Redis o al edge provider
 
 ### 2. Dominio personalizado:
 
@@ -322,9 +346,9 @@ Cada semana (o la primera vez), debes inicializar el stock:
 DATABASE_URL="tu-url-de-produccion" npx prisma studio
 ```
 
-### Opción B: Crear un endpoint admin
+### Opción B: Desde el panel admin
 
-Ve a `/api/admin/stock/initialize` (lo crearemos más adelante)
+Usa la gestión de stock disponible en `/admin/stock` para revisar o resincronizar inventario semanal.
 
 ---
 
@@ -360,6 +384,21 @@ vercel --prod
 - Los eventos están configurados en Stripe Dashboard
 - Revisa los logs en Stripe Dashboard > Webhooks > Endpoints
 
+### Webhook de Mercado Pago no confirma pagos
+
+**Verificar:**
+- `MERCADOPAGO_ACCESS_TOKEN` cargado correctamente
+- El webhook apunta a `/api/webhooks/mercadopago`
+- El pedido quedó creado con `paymentProvider` configurado para Mercado Pago
+
+### Emails de confirmación no salen
+
+**Verificar:**
+- `RESEND_API_KEY` cargada en Vercel
+- `ORDER_EMAIL_FROM` usa un remitente verificado
+- `ORDER_NOTIFICATION_EMAILS` tiene al menos una casilla válida
+- El webhook de pago realmente llegó a estado `PAID`
+
 ### Imágenes no cargan
 
 **Para MVP:**
@@ -376,7 +415,7 @@ Tu aplicación está desplegada en Vercel.
 - Configura un dominio personalizado
 - Agrega Google Analytics
 - Configura Sentry para monitoreo de errores
-- Implementa el panel de administración
+- Reemplaza el rate limiting en memoria por uno distribuido si tu tráfico lo requiere
 
 ---
 
