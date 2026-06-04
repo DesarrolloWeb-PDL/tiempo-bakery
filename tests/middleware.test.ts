@@ -31,6 +31,9 @@ describe('middleware', () => {
     expect(response.headers.get('X-Frame-Options')).toBe('DENY')
     expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
     expect(response.headers.get('Strict-Transport-Security')).toContain('max-age=63072000')
+    expect(response.headers.get('Content-Security-Policy')).toContain("script-src 'self' 'unsafe-inline'")
+    expect(response.headers.get('Content-Security-Policy')).toContain("style-src 'self' 'unsafe-inline'")
+    expect(response.headers.get('Content-Security-Policy')).toContain("img-src 'self' data: blob: https:")
   })
 
   it('limita intentos repetidos sobre login admin', async () => {
