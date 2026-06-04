@@ -10,6 +10,7 @@ const CONTENT_SECURITY_POLICY = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https:",
+  "frame-src 'self' https://vercel.live",
   "connect-src 'self' https: wss:",
 ].join('; ')
 
