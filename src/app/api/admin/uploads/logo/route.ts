@@ -13,6 +13,59 @@ function getUploadDir() {
   return path.join('/tmp', 'logo-uploads')
 }
 
+function getPublicOrigin(req: NextRequest) {
+  const configured = process.env.NEXT_PUBLIC_URL?.trim()
+  if (configured && /^https?:\/\//i.test(configured) && !configured.includes('localhost')) {
+    return configured
+  }
+
+  const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
+  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? req.nextUrl.host
+  return `${proto}://${host}`
+}
+
+function shouldUseLocalFallback(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false
+  }
+
+  if (error.message.includes('para usar Supabase Storage')) {
+    return true
+  }
+
+  return process.env.NODE_ENV !== 'production'
+}
+
+function getFileExtension(file: File) {
+  const byMime: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+    'image/svg+xml': 'svg',
+  }
+
+  return file.name.split('.').pop()?.toLowerCase() || byMime[file.type] || 'png'
+}
+
+async function uploadLogoLocally(file: File, req: NextRequest) {
+  const uploadDir = getUploadDir()
+  const ext = getFileExtension(file)
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
+  const filepath = path.join(uploadDir, filename)
+
+  await fs.mkdir(uploadDir, { recursive: true })
+  await fs.writeFile(filepath, Buffer.from(await file.arrayBuffer()))
+
+  const origin = getPublicOrigin(req)
+  const url = `${origin}/api/admin/uploads/logo?file=${encodeURIComponent(filename)}`
+
+  return {
+    filePath: filename,
+    publicUrl: url,
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     console.log('[Logo Upload] Request received')
@@ -50,7 +103,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const upload = await uploadPublicAsset(file, 'branding')
+    let upload
+    try {
+      upload = await uploadPublicAsset(file, 'branding')
+    } catch (storageError) {
+      if (!shouldUseLocalFallback(storageError)) {
+        throw storageError
+      }
+
+      console.warn('[Logo Upload] Supabase no configurado; usando fallback local')
+      upload = await uploadLogoLocally(file, req)
+    }
+
     console.log(`[Logo Upload] Success, URL: ${upload.publicUrl}`)
 
     return NextResponse.json({
@@ -71,12 +135,6 @@ export async function POST(req: NextRequest) {
 }
 
 // GET endpoint para servir archivos de /tmp en producción
-function getPublicOrigin(req: NextRequest) {
-  const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
-  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? req.nextUrl.host
-  return `${proto}://${host}`
-}
-
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
