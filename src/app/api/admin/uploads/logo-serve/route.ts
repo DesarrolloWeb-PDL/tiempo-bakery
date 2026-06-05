@@ -5,17 +5,6 @@ import path from 'path'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-function getPublicOrigin(req: NextRequest) {
-  const configured = process.env.NEXT_PUBLIC_URL?.trim()
-  if (configured && /^https?:\/\//i.test(configured) && !configured.includes('localhost')) {
-    return configured
-  }
-
-  const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
-  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? req.nextUrl.host
-  return `${proto}://${host}`
-}
-
 function getUploadDir() {
   // En producción (Vercel/serverless), usar /tmp que es writable
   // En desarrollo, usar /public/img que es persistente
@@ -23,6 +12,18 @@ function getUploadDir() {
     return path.join('/tmp', 'logo-uploads')
   }
   return path.join(process.cwd(), 'public', 'img')
+}
+
+async function readFallbackLogo() {
+  const fallbackPath = path.join(process.cwd(), 'public', 'img', 'espiga.png')
+  const buffer = await readFile(fallbackPath)
+
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400',
+    },
+  })
 }
 
 export async function GET(req: NextRequest) {
@@ -59,6 +60,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Logo Serve] Error:', error)
-    return NextResponse.redirect(new URL('/img/espiga.png', getPublicOrigin(req)), 307)
+    return readFallbackLogo()
   }
 }

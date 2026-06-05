@@ -13,15 +13,24 @@ function getUploadDir() {
   return path.join('/tmp', 'logo-uploads')
 }
 
-function getPublicOrigin(req: NextRequest) {
-  const configured = process.env.NEXT_PUBLIC_URL?.trim()
-  if (configured && /^https?:\/\//i.test(configured) && !configured.includes('localhost')) {
-    return configured
-  }
+function getContentType(fileName: string) {
+  if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) return 'image/jpeg'
+  if (fileName.endsWith('.gif')) return 'image/gif'
+  if (fileName.endsWith('.webp')) return 'image/webp'
+  if (fileName.endsWith('.svg')) return 'image/svg+xml'
+  return 'image/png'
+}
 
-  const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
-  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? req.nextUrl.host
-  return `${proto}://${host}`
+async function readFallbackLogo() {
+  const fallbackPath = path.join(process.cwd(), 'public', 'img', 'espiga.png')
+  const buffer = await fs.readFile(fallbackPath)
+
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400',
+    },
+  })
 }
 
 function shouldUseLocalFallback(error: unknown) {
@@ -153,15 +162,15 @@ export async function GET(req: NextRequest) {
     }
 
     const buffer = await fs.readFile(filepath)
-    
+
     return new NextResponse(buffer, {
       headers: {
-        'Content-Type': 'image/*',
-        'Cache-Control': 'public, max-age=3600',
+        'Content-Type': getContentType(filename),
+        'Cache-Control': 'public, max-age=86400',
       },
     })
   } catch (error) {
     console.error('[Logo Serve] Error:', error)
-    return NextResponse.redirect(new URL('/img/espiga.png', getPublicOrigin(req)), 307)
+    return readFallbackLogo()
   }
 }
