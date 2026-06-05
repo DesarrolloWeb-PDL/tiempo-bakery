@@ -15,6 +15,12 @@ const SENSITIVE_RATE_LIMITS: SensitiveRateLimit[] = [
   { path: '/api/checkout', method: 'POST', limit: 10, windowMs: 5 * 60 * 1000 },
 ]
 
+const PUBLIC_ADMIN_API_PATHS = new Set([
+  '/api/admin/uploads/logo',
+  '/api/admin/uploads/logo-serve',
+  '/api/admin/uploads/serve',
+])
+
 function getClientIp(req: NextRequest) {
   const forwardedFor = req.headers.get('x-forwarded-for')
   if (forwardedFor) {
@@ -70,6 +76,10 @@ export async function middleware(req: NextRequest) {
   }
 
   if (pathname === '/admin/login' || pathname === '/api/admin/login') {
+    return finalizeResponse(req, NextResponse.next())
+  }
+
+  if (PUBLIC_ADMIN_API_PATHS.has(pathname)) {
     return finalizeResponse(req, NextResponse.next())
   }
 

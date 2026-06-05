@@ -54,4 +54,13 @@ describe('middleware', () => {
     expect(response?.headers.get('Retry-After')).toBeTruthy()
     expect(response?.headers.get('X-RateLimit-Limit')).toBe('5')
   })
+
+  it('permite endpoints públicos de logo sin sesión admin', async () => {
+    hasAdminSessionMock.mockResolvedValue(false)
+
+    const { middleware } = await import('@/middleware')
+    const response = await middleware(new NextRequest('https://localhost/api/admin/uploads/logo?file=test.png'))
+
+    expect(response.status).toBe(200)
+  })
 })
