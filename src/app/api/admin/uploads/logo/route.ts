@@ -71,6 +71,12 @@ export async function POST(req: NextRequest) {
 }
 
 // GET endpoint para servir archivos de /tmp en producción
+function getPublicOrigin(req: NextRequest) {
+  const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
+  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? req.nextUrl.host
+  return `${proto}://${host}`
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -99,6 +105,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Logo Serve] Error:', error)
-    return NextResponse.redirect(new URL('/img/espiga.png', req.url), 307)
+    return NextResponse.redirect(new URL('/img/espiga.png', getPublicOrigin(req)), 307)
   }
 }

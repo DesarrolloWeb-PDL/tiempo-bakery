@@ -5,6 +5,12 @@ import path from 'path'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+function getPublicOrigin(req: NextRequest) {
+  const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
+  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? req.nextUrl.host
+  return `${proto}://${host}`
+}
+
 function getUploadDir() {
   // En producción (Vercel/serverless), usar /tmp que es writable
   // En desarrollo, usar /public/img que es persistente
@@ -48,6 +54,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Logo Serve] Error:', error)
-    return NextResponse.redirect(new URL('/img/espiga.png', req.url), 307)
+    return NextResponse.redirect(new URL('/img/espiga.png', getPublicOrigin(req)), 307)
   }
 }
