@@ -13,9 +13,29 @@ export function normalizePublicAssetUrl(value?: string | null): string {
     return assetPath
   }
 
+  const isSameOriginHost = (hostname: string) => {
+    const configured = process.env.NEXT_PUBLIC_URL?.trim()
+
+    if (configured) {
+      try {
+        if (new URL(configured).hostname === hostname) {
+          return true
+        }
+      } catch {
+        // noop
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      return window.location.hostname === hostname
+    }
+
+    return false
+  }
+
   try {
     const parsed = new URL(raw)
-    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || isSameOriginHost(parsed.hostname)) {
       const normalized = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/'
       return applyLegacyFallback(normalized)
     }

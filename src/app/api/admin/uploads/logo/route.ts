@@ -57,8 +57,7 @@ async function uploadLogoLocally(file: File, req: NextRequest) {
   await fs.mkdir(uploadDir, { recursive: true })
   await fs.writeFile(filepath, Buffer.from(await file.arrayBuffer()))
 
-  const origin = getPublicOrigin(req)
-  const url = `${origin}/api/admin/uploads/logo?file=${encodeURIComponent(filename)}`
+  const url = `/api/admin/uploads/logo?file=${encodeURIComponent(filename)}`
 
   return {
     filePath: filename,

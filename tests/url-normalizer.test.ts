@@ -23,4 +23,12 @@ describe('normalizePublicAssetUrl', () => {
     expect(normalizePublicAssetUrl('/uploads/productos/archivo-inexistente.jpg')).toBe('/img/espiga.png')
     expect(normalizePublicAssetUrl('http://localhost:3000/uploads/productos/archivo-inexistente.jpg')).toBe('/img/espiga.png')
   })
+
+  it('convierte URLs absolutas del mismo dominio en rutas relativas', () => {
+    vi.stubEnv('NEXT_PUBLIC_URL', 'https://tiempo-bakery.vercel.app')
+
+    expect(
+      normalizePublicAssetUrl('https://tiempo-bakery.vercel.app/api/admin/uploads/logo?file=logo.png')
+    ).toBe('/api/admin/uploads/logo?file=logo.png')
+  })
 })
