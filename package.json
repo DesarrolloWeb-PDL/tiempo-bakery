@@ -18,6 +18,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "images:audit": "tsx scripts/audit-product-images.ts",
     "images:repair": "tsx scripts/repair-product-images.ts",
+    "images:repair:legacy-urls": "tsx scripts/repair-legacy-product-image-urls.ts",
     "health:supabase": "tsx scripts/check-supabase-storage.ts",
     "postinstall": "prisma generate",
     "db:migrate:deploy:if-configured": "tsx scripts/prisma-migrate-deploy.ts",

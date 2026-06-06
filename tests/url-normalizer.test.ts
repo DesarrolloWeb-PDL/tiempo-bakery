@@ -6,7 +6,7 @@ describe('normalizePublicAssetUrl', () => {
     vi.unstubAllEnvs()
   })
 
-  it('mantiene rutas de serve para uploads temporales y normaliza localhost', () => {
+  it('mantiene rutas de serve para uploads temporales fuera de producción y normaliza localhost', () => {
     expect(normalizePublicAssetUrl('/api/admin/uploads/serve?file=pan-campo.jpg')).toBe('/api/admin/uploads/serve?file=pan-campo.jpg')
     expect(normalizePublicAssetUrl('http://localhost:3000/api/admin/uploads/serve?file=hogaza.webp')).toBe('/api/admin/uploads/serve?file=hogaza.webp')
   })
@@ -22,6 +22,8 @@ describe('normalizePublicAssetUrl', () => {
     expect(normalizePublicAssetUrl(" 'http://localhost:3000/img/espiga.png' ")).toBe('/img/espiga.png')
     expect(normalizePublicAssetUrl('/uploads/productos/archivo-inexistente.jpg')).toBe('/img/espiga.png')
     expect(normalizePublicAssetUrl('http://localhost:3000/uploads/productos/archivo-inexistente.jpg')).toBe('/img/espiga.png')
+    expect(normalizePublicAssetUrl('/api/admin/uploads/serve?file=archivo-inexistente.jpg')).toBe('/img/espiga.png')
+    expect(normalizePublicAssetUrl('http://localhost:3000/api/admin/uploads/serve?file=archivo-inexistente.jpg')).toBe('/img/espiga.png')
   })
 
   it('convierte URLs absolutas del mismo dominio en rutas relativas', () => {

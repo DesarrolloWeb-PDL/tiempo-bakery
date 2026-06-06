@@ -14,13 +14,30 @@ function getUploadDir() {
   return path.join(process.cwd(), 'public', 'uploads', 'productos')
 }
 
+async function readFallbackImage() {
+  const fallbackPath = path.join(process.cwd(), 'public', 'img', 'espiga.png')
+  const buffer = await readFile(fallbackPath)
+
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=3600',
+    },
+  })
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
-    const filename = searchParams.get('file')
+    const requestedFile = searchParams.get('file')
     
-    if (!filename) {
+    if (!requestedFile) {
       return NextResponse.json({ error: 'No file specified' }, { status: 400 })
+    }
+
+    const filename = path.basename(requestedFile)
+    if (!filename) {
+      return NextResponse.json({ error: 'Invalid file name' }, { status: 400 })
     }
 
     const uploadDir = getUploadDir()
@@ -46,6 +63,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('[Upload Serve] Error:', error)
-    return NextResponse.json({ error: 'File not found' }, { status: 404 })
+    return readFallbackImage()
   }
 }

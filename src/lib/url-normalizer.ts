@@ -6,7 +6,12 @@ export function normalizePublicAssetUrl(value?: string | null): string {
 
   const applyLegacyFallback = (assetPath: string) => {
     // En producción, los uploads locales legacy no existen en el filesystem de Vercel.
-    if (process.env.NODE_ENV === 'production' && assetPath.startsWith('/uploads/productos/')) {
+    const isLegacyLocalProductUpload =
+      assetPath.startsWith('/uploads/productos/') ||
+      assetPath === '/api/admin/uploads/serve' ||
+      assetPath.startsWith('/api/admin/uploads/serve?')
+
+    if (process.env.NODE_ENV === 'production' && isLegacyLocalProductUpload) {
       return '/img/espiga.png'
     }
 
