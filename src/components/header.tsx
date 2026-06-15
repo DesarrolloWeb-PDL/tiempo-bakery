@@ -62,6 +62,7 @@ export function Header({ siteContent }: HeaderProps) {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const toggleCart = useCartStore((state) => state.toggleCart);
   const { theme } = useAppTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
     <>
@@ -73,25 +74,25 @@ export function Header({ siteContent }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-2 min-w-0">
             {theme.logoUrl && (
               <Image
                 src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
                 alt={theme.appTitle}
-                className="h-10 w-10 object-contain"
-                width={40}
-                height={40}
+                className="h-9 w-9 shrink-0 object-contain"
+                width={36}
+                height={36}
               />
             )}
-            <div>
+            <div className="min-w-0">
               <span 
-                className="text-xl font-bold block leading-tight"
+                className="text-base md:text-xl font-bold block leading-tight truncate"
                 style={{ color: theme.primaryColor }}
               >
                 {theme.appTitle}
               </span>
               {theme.appSubtitle && (
-                <span className="text-xs text-gray-500 block">
+                <span className="hidden sm:block text-xs text-gray-500 truncate">
                   {theme.appSubtitle}
                 </span>
               )}
@@ -149,11 +150,43 @@ export function Header({ siteContent }: HeaderProps) {
               variant="ghost"
               size="icon"
               className="md:hidden"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
             >
               <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
+
+        {/* Mobile Nav Panel */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden border-t py-4 flex flex-col gap-3" style={{ borderColor: theme.primaryColor + '20' }}>
+            <Link
+              href="/"
+              className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75"
+              style={{ color: theme.primaryColor }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {siteContent.navProductsLabel}
+            </Link>
+            <Link
+              href="/sobre-nosotros"
+              className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75"
+              style={{ color: theme.primaryColor }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {siteContent.navAboutLabel}
+            </Link>
+            <Link
+              href="/contacto"
+              className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75"
+              style={{ color: theme.primaryColor }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {siteContent.navContactLabel}
+            </Link>
+          </nav>
+        )}
       </div>
     </header>
     </>

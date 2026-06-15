@@ -3,6 +3,10 @@
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+
+function shouldSkipOptimization(url: string) {
+  return url.includes('.supabase.co/storage/v1/object/public/');
+}
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -93,6 +97,7 @@ export function CartSidebar() {
                       alt={item.name}
                       fill
                       className="object-cover"
+                      unoptimized={shouldSkipOptimization(normalizePublicAssetUrl(item.imageUrl) || '')}
                     />
                   </div>
 
