@@ -59,15 +59,7 @@ function normalizeUrl(rawUrl: string) {
 function isLegacyProductImageUrl(url: string) {
   const normalized = normalizeUrl(url)
 
-  if (normalized.startsWith('/uploads/productos/')) {
-    return true
-  }
-
-  if (normalized === '/api/admin/uploads/serve') {
-    return true
-  }
-
-  return normalized.startsWith('/api/admin/uploads/serve?')
+  return normalized.startsWith('/uploads/productos/')
 }
 
 async function loadAvailableAssets() {

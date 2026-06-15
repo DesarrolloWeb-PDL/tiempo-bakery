@@ -34,15 +34,15 @@ async function readFallbackLogo() {
 }
 
 function shouldUseLocalFallback(error: unknown) {
-  if (!(error instanceof Error)) {
-    return false
-  }
-
-  if (error.message.includes('para usar Supabase Storage')) {
-    return true
-  }
-
   return process.env.NODE_ENV !== 'production'
+}
+
+function toStorageErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message.includes('para usar Supabase Storage')) {
+    return 'Supabase Storage no está configurado en producción. Configurá NEXT_PUBLIC_SUPABASE_URL (o SUPABASE_URL) y SUPABASE_SERVICE_ROLE_KEY.'
+  }
+
+  return error instanceof Error ? error.message : String(error)
 }
 
 function getFileExtension(file: File) {
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       upload = await uploadPublicAsset(file, 'branding')
     } catch (storageError) {
       if (!shouldUseLocalFallback(storageError)) {
-        throw storageError
+        throw new Error(toStorageErrorMessage(storageError))
       }
 
       console.warn('[Logo Upload] Supabase no configurado; usando fallback local')

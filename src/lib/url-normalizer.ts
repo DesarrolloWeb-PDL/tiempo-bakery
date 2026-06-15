@@ -5,11 +5,9 @@ export function normalizePublicAssetUrl(value?: string | null): string {
   if (!raw) return ''
 
   const applyLegacyFallback = (assetPath: string) => {
-    // En producción, los uploads locales legacy no existen en el filesystem de Vercel.
-    const isLegacyLocalProductUpload =
-      assetPath.startsWith('/uploads/productos/') ||
-      assetPath === '/api/admin/uploads/serve' ||
-      assetPath.startsWith('/api/admin/uploads/serve?')
+    // En producción, los uploads legacy bajo /uploads/productos no existen en el filesystem de Vercel.
+    // Las rutas /api/admin/uploads/serve se mantienen porque representan el flujo actual de fallback.
+    const isLegacyLocalProductUpload = assetPath.startsWith('/uploads/productos/')
 
     if (process.env.NODE_ENV === 'production' && isLegacyLocalProductUpload) {
       return '/img/espiga.png'

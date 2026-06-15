@@ -22,8 +22,8 @@ describe('normalizePublicAssetUrl', () => {
     expect(normalizePublicAssetUrl(" 'http://localhost:3000/img/espiga.png' ")).toBe('/img/espiga.png')
     expect(normalizePublicAssetUrl('/uploads/productos/archivo-inexistente.jpg')).toBe('/img/espiga.png')
     expect(normalizePublicAssetUrl('http://localhost:3000/uploads/productos/archivo-inexistente.jpg')).toBe('/img/espiga.png')
-    expect(normalizePublicAssetUrl('/api/admin/uploads/serve?file=archivo-inexistente.jpg')).toBe('/img/espiga.png')
-    expect(normalizePublicAssetUrl('http://localhost:3000/api/admin/uploads/serve?file=archivo-inexistente.jpg')).toBe('/img/espiga.png')
+    expect(normalizePublicAssetUrl('/api/admin/uploads/serve?file=archivo-inexistente.jpg')).toBe('/api/admin/uploads/serve?file=archivo-inexistente.jpg')
+    expect(normalizePublicAssetUrl('http://localhost:3000/api/admin/uploads/serve?file=archivo-inexistente.jpg')).toBe('/api/admin/uploads/serve?file=archivo-inexistente.jpg')
   })
 
   it('convierte URLs absolutas del mismo dominio en rutas relativas', () => {
