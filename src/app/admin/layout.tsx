@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   ShoppingBag,
+  CreditCard,
   Package,
   BarChart2,
   Database,
@@ -49,6 +50,11 @@ const navItems = [
     label: 'Preventa',
     href: '/admin/preventa',
     icon: Clock3,
+  },
+  {
+    label: 'Pagos',
+    href: '/admin/pagos',
+    icon: CreditCard,
   },
   {
     label: 'Configuración',
