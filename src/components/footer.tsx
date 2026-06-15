@@ -2,6 +2,7 @@
 
 import { useAppTheme } from '@/hooks/useAppTheme'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import type { SiteContent } from '@/lib/site-content.shared'
 
@@ -10,7 +11,12 @@ interface FooterProps {
 }
 
 export default function Footer({ siteContent }: FooterProps) {
+  const pathname = usePathname()
   const { theme } = useAppTheme()
+
+  if (pathname.startsWith('/admin')) {
+    return null
+  }
 
   return (
     <footer 

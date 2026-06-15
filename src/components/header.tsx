@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { ShoppingCart, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,10 +60,22 @@ interface HeaderProps {
 }
 
 export function Header({ siteContent }: HeaderProps) {
+  const pathname = usePathname();
   const totalItems = useCartStore((state) => state.getTotalItems());
   const toggleCart = useCartStore((state) => state.toggleCart);
   const { theme } = useAppTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [isHydrated, setIsHydrated] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const safeTotalItems = isHydrated ? totalItems : 0;
+
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <>
@@ -135,12 +148,12 @@ export function Header({ siteContent }: HeaderProps) {
               style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}
             >
               <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
+              {safeTotalItems > 0 && (
                 <Badge
                   variant="default"
                   className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 >
-                  {totalItems}
+                  {safeTotalItems}
                 </Badge>
               )}
             </Button>
