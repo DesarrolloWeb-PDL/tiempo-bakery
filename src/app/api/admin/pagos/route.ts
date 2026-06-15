@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   PAYMENT_PROVIDER_LABELS,
   PAYMENT_PROVIDERS,
+  type PaymentProvider,
   getPaymentSettings,
   isPaymentProvider,
   setBankTransferSettings,
@@ -60,8 +61,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const nextEnabledProviders = settings.enabledProviders.filter((provider) => provider !== 'BANK_TRANSFER');
-    if (bankTransferWillBeEnabled) {
+    const nextEnabledProviders: PaymentProvider[] = [...settings.enabledProviders];
+
+    if (bankTransferWillBeEnabled && !nextEnabledProviders.includes('BANK_TRANSFER')) {
       nextEnabledProviders.push('BANK_TRANSFER');
     }
 

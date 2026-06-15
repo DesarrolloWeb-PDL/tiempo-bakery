@@ -838,6 +838,22 @@ export default function AdminConfigPage() {
   const [pickupDraft, setPickupDraft] = useState<PickupPointDraft>(EMPTY_PICKUP_POINT)
   const [editingPickupId, setEditingPickupId] = useState<string | null>(null)
 
+  const bankTransferConfigured =
+    paymentSettings.bankTransfer.enabled &&
+    Boolean(
+      paymentSettings.bankTransfer.bankName.trim() ||
+      paymentSettings.bankTransfer.accountHolder.trim() ||
+      paymentSettings.bankTransfer.alias.trim() ||
+      paymentSettings.bankTransfer.cbu.trim()
+    )
+
+  const effectivePaymentProviders = Array.from(
+    new Set([
+      ...paymentSettings.enabledProviders.filter((provider) => provider !== 'BANK_TRANSFER'),
+      ...(bankTransferConfigured ? ['BANK_TRANSFER'] : []),
+    ])
+  ) as Array<'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'>
+
   const fetchShippingCosts = async () => {
     setLoadingShipping(true)
     setShippingMsg(null)
@@ -1381,15 +1397,15 @@ export default function AdminConfigPage() {
                   <p className="text-sm font-medium text-gray-800">{option.label}</p>
                   <p className="text-xs text-gray-500">
                     {option.value === 'BANK_TRANSFER'
-                      ? (option.enabled ? 'Configurado manualmente en el panel' : 'Completá los datos para habilitarlo')
+                      ? (bankTransferConfigured ? 'Configurado manualmente en el panel' : 'Completá los datos para habilitarlo')
                       : (option.enabled ? 'Configurado en variables de entorno' : 'Falta credencial en variables de entorno')}
                   </p>
                   {option.description && (
                     <p className="text-[11px] text-gray-400 mt-1">{option.description}</p>
                   )}
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${option.enabled ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                  {option.enabled ? 'Disponible' : 'Inactivo'}
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${((option.value === 'BANK_TRANSFER' ? bankTransferConfigured : option.enabled) ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500')}`}>
+                  {(option.value === 'BANK_TRANSFER' ? bankTransferConfigured : option.enabled) ? 'Disponible' : 'Inactivo'}
                 </span>
               </div>
             ))}
@@ -1409,8 +1425,12 @@ export default function AdminConfigPage() {
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
             >
               {paymentSettings.options.map((option) => (
-                <option key={option.value} value={option.value} disabled={!option.enabled}>
-                  {option.label}{!option.enabled ? ' (no disponible)' : ''}
+                <option
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.value === 'BANK_TRANSFER' ? !bankTransferConfigured : !option.enabled}
+                >
+                  {option.label}{(option.value === 'BANK_TRANSFER' ? !bankTransferConfigured : !option.enabled) ? ' (no disponible)' : ''}
                 </option>
               ))}
             </select>
@@ -1542,7 +1562,7 @@ export default function AdminConfigPage() {
 
           <button
             onClick={handleSavePayments}
-            disabled={loadingPayments || savingPayments || !paymentSettings.enabledProviders.length}
+            disabled={loadingPayments || savingPayments || !effectivePaymentProviders.length}
             className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50"
           >
             {savingPayments ? 'Guardando...' : 'Guardar pagos'}
