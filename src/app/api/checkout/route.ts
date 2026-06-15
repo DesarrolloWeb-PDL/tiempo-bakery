@@ -48,7 +48,7 @@ const checkoutSchema = z.object({
   customerName: z.string().min(2),
   customerPhone: z.string().min(9),
   deliveryMethod: z.enum(['PICKUP_POINT', 'LOCAL_DELIVERY', 'NATIONAL_COURIER']),
-  paymentProvider: z.enum(['STRIPE', 'MERCADO_PAGO']).optional(),
+  paymentProvider: z.enum(['STRIPE', 'MERCADO_PAGO', 'BANK_TRANSFER']).optional(),
   pickupLocationId: z.string().optional(),
   shippingAddress: z.string().optional(),
   shippingCity: z.string().optional(),
@@ -188,7 +188,12 @@ export async function POST(request: NextRequest) {
           total,
           status: 'PENDING',
           paymentStatus: 'PENDING',
-          paymentMethod: selectedProvider === 'MERCADO_PAGO' ? 'mercadopago' : 'stripe',
+          paymentMethod:
+            selectedProvider === 'MERCADO_PAGO'
+              ? 'mercadopago'
+              : selectedProvider === 'BANK_TRANSFER'
+                ? 'bank_transfer'
+                : 'stripe',
           deliveryMethod: data.deliveryMethod,
           pickupLocation: pickupDetails?.name,
           pickupAddress: pickupDetails?.address,
@@ -304,6 +309,13 @@ export async function POST(request: NextRequest) {
         await prisma.order.update({
           where: { id: order.id },
           data: { mercadopagoPaymentId: preference.id },
+        });
+      }
+
+      if (selectedProvider === 'BANK_TRANSFER') {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { paymentMethod: 'bank_transfer' },
         });
       }
     } catch (paymentError) {

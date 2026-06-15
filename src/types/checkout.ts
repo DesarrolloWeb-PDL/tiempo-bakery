@@ -10,6 +10,7 @@ export enum DeliveryMethod {
 export enum PaymentProvider {
   STRIPE = 'STRIPE',
   MERCADO_PAGO = 'MERCADO_PAGO',
+  BANK_TRANSFER = 'BANK_TRANSFER',
 }
 
 // Schemas de validación
@@ -96,4 +97,5 @@ export interface CheckoutResponse {
 export interface PaymentMethodOption {
   value: PaymentProvider;
   label: string;
+  description?: string;
 }

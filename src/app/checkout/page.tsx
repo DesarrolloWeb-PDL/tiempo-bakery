@@ -330,8 +330,10 @@ export default function CheckoutPage() {
 
               <div className="mt-6 p-4 bg-amber-50 rounded-lg">
                 <p className="text-xs text-amber-800">
-                  <strong>Nota:</strong> Serás redirigido a {selectedPaymentProvider === PaymentProvider.MERCADO_PAGO ? 'Mercado Pago' : 'Stripe'} para completar el pago
-                  de forma segura.
+                  <strong>Nota:</strong>{' '}
+                  {selectedPaymentProvider === PaymentProvider.BANK_TRANSFER
+                    ? 'No vas a ser redirigido: vas a recibir los datos para hacer la transferencia al confirmar el pedido.'
+                    : `Serás redirigido a ${selectedPaymentProvider === PaymentProvider.MERCADO_PAGO ? 'Mercado Pago' : 'Stripe'} para completar el pago de forma segura.`}
                 </p>
               </div>
             </div>

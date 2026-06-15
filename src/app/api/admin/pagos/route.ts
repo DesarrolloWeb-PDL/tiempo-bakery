@@ -4,6 +4,7 @@ import {
   PAYMENT_PROVIDERS,
   getPaymentSettings,
   isPaymentProvider,
+  setBankTransferSettings,
   setDefaultPaymentProvider,
 } from '@/lib/payments';
 import { z } from 'zod';
@@ -12,6 +13,15 @@ export const dynamic = 'force-dynamic';
 
 const updateSchema = z.object({
   defaultProvider: z.enum(PAYMENT_PROVIDERS),
+  bankTransfer: z.object({
+    enabled: z.boolean(),
+    bankName: z.string().max(120),
+    accountHolder: z.string().max(120),
+    alias: z.string().max(120),
+    cbu: z.string().max(80),
+    cuit: z.string().max(30),
+    notes: z.string().max(500),
+  }),
 });
 
 export async function GET() {
@@ -37,14 +47,32 @@ export async function PUT(request: NextRequest) {
     }
 
     const settings = await getPaymentSettings();
-    const { defaultProvider } = parsed.data;
+    const { defaultProvider, bankTransfer } = parsed.data;
 
-    if (!isPaymentProvider(defaultProvider) || !settings.enabledProviders.includes(defaultProvider)) {
+    const bankTransferWillBeEnabled =
+      bankTransfer.enabled &&
+      (bankTransfer.alias.trim() || bankTransfer.cbu.trim() || bankTransfer.bankName.trim());
+
+    if (bankTransfer.enabled && !bankTransferWillBeEnabled) {
+      return NextResponse.json(
+        { error: 'Completá al menos banco, alias o CBU para habilitar la transferencia bancaria' },
+        { status: 400 }
+      );
+    }
+
+    const nextEnabledProviders = settings.enabledProviders.filter((provider) => provider !== 'BANK_TRANSFER');
+    if (bankTransferWillBeEnabled) {
+      nextEnabledProviders.push('BANK_TRANSFER');
+    }
+
+    if (!isPaymentProvider(defaultProvider) || !nextEnabledProviders.includes(defaultProvider)) {
       return NextResponse.json(
         { error: 'El proveedor seleccionado no está habilitado en el entorno' },
         { status: 400 }
       );
     }
+
+    await setBankTransferSettings(bankTransfer);
 
     await setDefaultPaymentProvider(defaultProvider);
 

@@ -37,6 +37,7 @@ interface Order {
   orderNumber: string;
   status: string;
   paymentStatus: string;
+  paymentMethod: string;
   createdAt: string;
   paidAt?: string;
   customerName: string;
@@ -56,6 +57,16 @@ interface Order {
   items: OrderItem[];
 }
 
+interface BankTransferSettings {
+  enabled: boolean;
+  bankName: string;
+  accountHolder: string;
+  alias: string;
+  cbu: string;
+  cuit: string;
+  notes: string;
+}
+
 export default function OrderConfirmationPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -63,19 +74,26 @@ export default function OrderConfirmationPage() {
   const sessionId = searchParams.get('session_id');
 
   const [order, setOrder] = React.useState<Order | null>(null);
+  const [bankTransfer, setBankTransfer] = React.useState<BankTransferSettings | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!orderId) return;
 
-    fetch(`/api/pedidos/${orderId}`)
-      .then((res) => {
+    Promise.all([
+      fetch(`/api/pedidos/${orderId}`).then((res) => {
         if (!res.ok) throw new Error('No se pudo cargar el pedido');
         return res.json();
-      })
-      .then((data) => {
-        setOrder(data);
+      }),
+      fetch('/api/payment-methods').then((res) => {
+        if (!res.ok) throw new Error('No se pudieron cargar los medios de pago');
+        return res.json();
+      }),
+    ])
+      .then(([orderData, paymentData]) => {
+        setOrder(orderData);
+        setBankTransfer(paymentData.bankTransfer ?? null);
         setLoading(false);
       })
       .catch((err) => {
@@ -131,6 +149,7 @@ export default function OrderConfirmationPage() {
   };
 
   const DeliveryIcon = deliveryIcons[order.deliveryMethod as keyof typeof deliveryIcons];
+  const isBankTransfer = order.paymentMethod === 'bank_transfer';
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -318,6 +337,31 @@ export default function OrderConfirmationPage() {
                     <Badge variant="default">{order.status}</Badge>
                   </div>
                 </div>
+
+                {isBankTransfer && bankTransfer?.enabled && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-2">
+                    <p className="text-sm font-semibold text-amber-900">Datos para transferir</p>
+                    {bankTransfer.bankName && (
+                      <p className="text-sm text-amber-900"><span className="font-medium">Banco:</span> {bankTransfer.bankName}</p>
+                    )}
+                    {bankTransfer.accountHolder && (
+                      <p className="text-sm text-amber-900"><span className="font-medium">Titular:</span> {bankTransfer.accountHolder}</p>
+                    )}
+                    {bankTransfer.alias && (
+                      <p className="text-sm text-amber-900"><span className="font-medium">Alias:</span> {bankTransfer.alias}</p>
+                    )}
+                    {bankTransfer.cbu && (
+                      <p className="text-sm text-amber-900 break-all"><span className="font-medium">CBU:</span> {bankTransfer.cbu}</p>
+                    )}
+                    {bankTransfer.cuit && (
+                      <p className="text-sm text-amber-900"><span className="font-medium">CUIT:</span> {bankTransfer.cuit}</p>
+                    )}
+                    {bankTransfer.notes && (
+                      <p className="text-sm text-amber-800 whitespace-pre-line">{bankTransfer.notes}</p>
+                    )}
+                    <p className="text-xs text-amber-800">Subí o enviá el comprobante para agilizar la confirmación.</p>
+                  </div>
+                )}
 
                 <div className="pt-4 border-t">
                   <Link href="/">

@@ -82,6 +82,16 @@ const PAYMENT_CONFIG: Record<string, { label: string; color: string }> = {
   FAILED:  { label: 'Pago fallido',   color: 'text-red-600' },
 }
 
+function formatOrderPaymentMethod(value: string) {
+  const labels: Record<string, string> = {
+    stripe: 'Tarjeta con Stripe',
+    mercadopago: 'Mercado Pago',
+    bank_transfer: 'Transferencia bancaria',
+  }
+
+  return labels[value] ?? value
+}
+
 const DELIVERY_LABELS: Record<string, string> = {
   PICKUP_POINT:     'Recogida en punto',
   LOCAL_DELIVERY:   'Envío local',
@@ -448,7 +458,7 @@ export default function AdminOrderDetailPage() {
                   {PAYMENT_CONFIG[order.paymentStatus]?.label ?? order.paymentStatus}
                 </span>
               } />
-              <Field label="Método" value={order.paymentMethod} />
+              <Field label="Método" value={formatOrderPaymentMethod(order.paymentMethod)} />
               {order.stripePaymentId && (
                 <Field label="ID de Stripe" value={order.stripePaymentId} mono />
               )}

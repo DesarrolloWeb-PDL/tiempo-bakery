@@ -797,13 +797,31 @@ export default function AdminConfigPage() {
   const [savingPayments, setSavingPayments] = useState(false)
   const [paymentMsg, setPaymentMsg] = useState<string | null>(null)
   const [paymentSettings, setPaymentSettings] = useState<{
-    defaultProvider: 'STRIPE' | 'MERCADO_PAGO'
-    enabledProviders: string[]
-    options: Array<{ value: 'STRIPE' | 'MERCADO_PAGO'; label: string; enabled: boolean }>
+    defaultProvider: 'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'
+    enabledProviders: Array<'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'>
+    options: Array<{ value: 'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'; label: string; enabled: boolean; description?: string }>
+    bankTransfer: {
+      enabled: boolean
+      bankName: string
+      accountHolder: string
+      alias: string
+      cbu: string
+      cuit: string
+      notes: string
+    }
   }>({
     defaultProvider: 'STRIPE',
     enabledProviders: [],
     options: [],
+    bankTransfer: {
+      enabled: false,
+      bankName: '',
+      accountHolder: '',
+      alias: '',
+      cbu: '',
+      cuit: '',
+      notes: '',
+    },
   })
   const [loadingSiteContent, setLoadingSiteContent] = useState(true)
   const [savingSiteContent, setSavingSiteContent] = useState(false)
@@ -1014,7 +1032,7 @@ export default function AdminConfigPage() {
       const res = await fetch('/api/admin/pagos', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ defaultProvider: paymentSettings.defaultProvider }),
+        body: JSON.stringify(paymentSettings),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'No se pudo guardar la configuración')
@@ -1362,8 +1380,13 @@ export default function AdminConfigPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-800">{option.label}</p>
                   <p className="text-xs text-gray-500">
-                    {option.enabled ? 'Configurado en variables de entorno' : 'Falta credencial en variables de entorno'}
+                    {option.value === 'BANK_TRANSFER'
+                      ? (option.enabled ? 'Configurado manualmente en el panel' : 'Completá los datos para habilitarlo')
+                      : (option.enabled ? 'Configurado en variables de entorno' : 'Falta credencial en variables de entorno')}
                   </p>
+                  {option.description && (
+                    <p className="text-[11px] text-gray-400 mt-1">{option.description}</p>
+                  )}
                 </div>
                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${option.enabled ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                   {option.enabled ? 'Disponible' : 'Inactivo'}
@@ -1380,7 +1403,7 @@ export default function AdminConfigPage() {
               onChange={(e) =>
                 setPaymentSettings((prev) => ({
                   ...prev,
-                  defaultProvider: e.target.value as 'STRIPE' | 'MERCADO_PAGO',
+                  defaultProvider: e.target.value as 'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER',
                 }))
               }
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
@@ -1393,8 +1416,126 @@ export default function AdminConfigPage() {
             </select>
           </div>
 
+          <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-4 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Transferencia bancaria</p>
+                <p className="text-xs text-gray-500">Se muestra como opción manual en checkout y en la confirmación del pedido.</p>
+              </div>
+              <label className="flex items-center gap-2 text-sm text-gray-700 shrink-0">
+                <input
+                  type="checkbox"
+                  checked={paymentSettings.bankTransfer.enabled}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      bankTransfer: {
+                        ...prev.bankTransfer,
+                        enabled: e.target.checked,
+                      },
+                    }))
+                  }
+                />
+                Habilitada
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Banco</label>
+                <input
+                  type="text"
+                  value={paymentSettings.bankTransfer.bankName}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      bankTransfer: { ...prev.bankTransfer, bankName: e.target.value },
+                    }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  placeholder="Banco Nación, Galicia, etc."
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Titular</label>
+                <input
+                  type="text"
+                  value={paymentSettings.bankTransfer.accountHolder}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      bankTransfer: { ...prev.bankTransfer, accountHolder: e.target.value },
+                    }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  placeholder="Nombre del titular"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Alias</label>
+                <input
+                  type="text"
+                  value={paymentSettings.bankTransfer.alias}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      bankTransfer: { ...prev.bankTransfer, alias: e.target.value },
+                    }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  placeholder="alias.tiempo.bakery"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">CBU</label>
+                <input
+                  type="text"
+                  value={paymentSettings.bankTransfer.cbu}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      bankTransfer: { ...prev.bankTransfer, cbu: e.target.value },
+                    }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  placeholder="22 dígitos"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">CUIT</label>
+                <input
+                  type="text"
+                  value={paymentSettings.bankTransfer.cuit}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      bankTransfer: { ...prev.bankTransfer, cuit: e.target.value },
+                    }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  placeholder="20-12345678-9"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs text-gray-500 mb-1">Notas / instrucciones</label>
+                <textarea
+                  value={paymentSettings.bankTransfer.notes}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      bankTransfer: { ...prev.bankTransfer, notes: e.target.value },
+                    }))
+                  }
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  placeholder="Indicá cuándo enviar comprobante, horarios de confirmación, etc."
+                />
+              </div>
+            </div>
+          </div>
+
           <p className="text-xs text-gray-500">
-            Credenciales requeridas: STRIPE_SECRET_KEY para Stripe y MERCADOPAGO_ACCESS_TOKEN para Mercado Pago. Ambas usan NEXT_PUBLIC_URL para retornos y webhooks.
+            Credenciales requeridas: STRIPE_SECRET_KEY para Stripe y MERCADOPAGO_ACCESS_TOKEN para Mercado Pago. La transferencia bancaria no usa credenciales externas, pero sí requiere completar los datos manuales arriba.
           </p>
 
           {paymentMsg && <p className="text-sm text-gray-600">{paymentMsg}</p>}

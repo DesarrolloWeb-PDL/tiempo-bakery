@@ -192,9 +192,11 @@ export function ReviewStep({
                 >
                   <p className="text-sm font-medium text-gray-900">{option.label}</p>
                   <p className="mt-1 text-xs text-gray-500">
-                    {option.value === PaymentProvider.MERCADO_PAGO
-                      ? 'Checkout Pro con billetera, tarjetas y medios locales.'
-                      : 'Pago con tarjeta redirigido a Stripe Checkout.'}
+                      {option.description ?? (option.value === PaymentProvider.MERCADO_PAGO
+                        ? 'Checkout Pro con billetera, tarjetas y medios locales.'
+                        : option.value === PaymentProvider.BANK_TRANSFER
+                          ? 'Transferencia manual con los datos configurados en el panel.'
+                          : 'Pago con tarjeta redirigido a Stripe Checkout.')}
                   </p>
                 </button>
               );

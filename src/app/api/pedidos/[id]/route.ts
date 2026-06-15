@@ -59,6 +59,7 @@ export async function GET(
       shippingCost: Number(order.shippingCost),
       total: Number(order.total),
       customerNotes: order.customerNotes,
+      paymentMethod: order.paymentMethod,
       items: order.items.map((item) => ({
         id: item.id,
         productName: item.productName,
