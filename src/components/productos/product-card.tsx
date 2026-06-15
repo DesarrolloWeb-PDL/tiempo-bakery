@@ -32,6 +32,10 @@ function normalizeImageUrl(value: string) {
   }
 }
 
+function shouldSkipOptimization(url: string) {
+  return url.includes('.supabase.co/storage/v1/object/public/');
+}
+
 interface ProductCardProps {
   id: string;
   name: string;
@@ -91,6 +95,7 @@ export function ProductCard({
 
   const [activeImageIndex, setActiveImageIndex] = React.useState(0);
   const activeImage = galleryImages[activeImageIndex] ?? galleryImages[0];
+  const activeImageSrc = activeImage?.url ?? '/img/espiga.png';
 
   React.useEffect(() => {
     setActiveImageIndex(0);
@@ -144,11 +149,12 @@ export function ProductCard({
         </Link>
 
         <Image
-          src={activeImage?.url ?? '/img/espiga.png'}
+          src={activeImageSrc}
           alt={activeImage?.altText || imageAlt}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized={shouldSkipOptimization(activeImageSrc)}
           onError={() => setActiveImageIndex(0)}
         />
 

@@ -10,6 +10,10 @@ interface ProductGalleryImage {
   altText: string
 }
 
+function shouldSkipOptimization(url: string) {
+  return url.includes('.supabase.co/storage/v1/object/public/')
+}
+
 function buildProductPlaceholder(productName: string) {
   const label = (productName || 'Producto artesanal').slice(0, 36)
   const svg = `
@@ -52,15 +56,18 @@ export function ProductGallery({ images, productName }: { images: ProductGallery
     return brokenUrls[url] ? placeholderSrc : url
   }
 
+  const selectedSrc = resolveImageSrc(selectedImage.url)
+
   return (
     <div className="space-y-3">
       <div className="relative h-80 md:h-[420px] w-full rounded-xl overflow-hidden bg-gray-100">
         <Image
-          src={resolveImageSrc(selectedImage.url)}
+          src={selectedSrc}
           alt={selectedImage.altText || productName}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
+          unoptimized={shouldSkipOptimization(selectedSrc)}
           onError={() => markAsBroken(selectedImage.url)}
           onLoadingComplete={(img) => {
             if (img.naturalWidth <= 1 || img.naturalHeight <= 1) {
@@ -89,6 +96,7 @@ export function ProductGallery({ images, productName }: { images: ProductGallery
                 fill
                 className="object-cover"
                 sizes="120px"
+                unoptimized={shouldSkipOptimization(resolveImageSrc(image.url))}
                 onError={() => markAsBroken(image.url)}
                 onLoadingComplete={(img) => {
                   if (img.naturalWidth <= 1 || img.naturalHeight <= 1) {
