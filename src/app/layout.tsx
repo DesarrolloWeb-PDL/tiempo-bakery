@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   description: "Micropanadería artesanal por encargo semanal. Panes y dulces elaborados en tandas pequeñas con fermentaciones lentas y producto real.",
   icons: {
     icon: [
-      { url: '/img/espiga.png', type: 'image/png' },
+      { url: '/favicon.png', type: 'image/png' },
     ],
-    shortcut: ['/img/espiga.png'],
+    shortcut: ['/favicon.png'],
     apple: [
-      { url: '/img/espiga.png', type: 'image/png' },
+      { url: '/favicon.png', type: 'image/png' },
     ],
   },
 };
