@@ -11,6 +11,15 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Tiempo Bakery - Panadería Artesanal",
   description: "Micropanadería artesanal por encargo semanal. Panes y dulces elaborados en tandas pequeñas con fermentaciones lentas y producto real.",
+  icons: {
+    icon: [
+      { url: '/img/espiga.png', type: 'image/png' },
+    ],
+    shortcut: ['/img/espiga.png'],
+    apple: [
+      { url: '/img/espiga.png', type: 'image/png' },
+    ],
+  },
 };
 
 export default async function RootLayout({
