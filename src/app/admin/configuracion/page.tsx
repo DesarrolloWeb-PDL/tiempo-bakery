@@ -1457,6 +1457,7 @@ export default function AdminConfigPage() {
                   height={64}
                   className="h-16 object-contain"
                   priority
+                  unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
                 />
               </div>
             )}

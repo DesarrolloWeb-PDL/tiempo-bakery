@@ -64,6 +64,8 @@ export function Header({ siteContent }: HeaderProps) {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const toggleCart = useCartStore((state) => state.toggleCart);
   const { theme } = useAppTheme();
+  const logoSrc = normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png';
+  const logoIsExternal = /^https?:\/\//i.test(logoSrc);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isHydrated, setIsHydrated] = React.useState(false);
 
@@ -90,11 +92,12 @@ export function Header({ siteContent }: HeaderProps) {
           <Link href="/" className="flex items-center space-x-2 min-w-0">
             {theme.logoUrl && (
               <Image
-                src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
+                src={logoSrc}
                 alt={theme.appTitle}
                 className="h-9 w-9 shrink-0 object-contain"
                 width={36}
                 height={36}
+                unoptimized={logoIsExternal}
               />
             )}
             <div className="min-w-0">

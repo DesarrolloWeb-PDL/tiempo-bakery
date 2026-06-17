@@ -13,6 +13,8 @@ interface FooterProps {
 export default function Footer({ siteContent }: FooterProps) {
   const pathname = usePathname()
   const { theme } = useAppTheme()
+  const logoSrc = normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'
+  const logoIsExternal = /^https?:\/\//i.test(logoSrc)
 
   if (pathname.startsWith('/admin')) {
     return null
@@ -33,11 +35,12 @@ export default function Footer({ siteContent }: FooterProps) {
             >
               {theme.logoUrl && (
                 <Image
-                  src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
+                  src={logoSrc}
                   alt={theme.appTitle}
                   className="h-6 w-6 inline-block mr-2 object-contain"
                   width={24}
                   height={24}
+                  unoptimized={logoIsExternal}
                 />
               )}
               {theme.appTitle}
