@@ -55,11 +55,13 @@ function ThemeStyleInjector() {
   return null
 }
 
-interface HeaderProps {
+interface HeaderProps { // Se añade la prop showCart
+  showCart?: boolean;
+  showMobileMenu?: boolean;
   siteContent: SiteContent
 }
 
-export function Header({ siteContent }: HeaderProps) {
+export function Header({ siteContent, showCart = true }: HeaderProps) {
   const pathname = usePathname();
   const totalItems = useCartStore((state) => state.getTotalItems());
   const toggleCart = useCartStore((state) => state.toggleCart);
@@ -67,17 +69,10 @@ export function Header({ siteContent }: HeaderProps) {
   const logoSrc = normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png';
   const logoIsExternal = /^https?:\/\//i.test(logoSrc);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [isHydrated, setIsHydrated] = React.useState(false);
+  const [isHydrated, setIsHydrated] = React.useState(false); // Mantener para el carrito
 
-  React.useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  const safeTotalItems = isHydrated ? totalItems : 0;
-
-  if (pathname.startsWith('/admin')) {
-    return null;
-  }
+  React.useEffect(() => { setIsHydrated(true); }, []); // Mantener para el carrito
+  const safeTotalItems = isHydrated ? totalItems : 0; // Mantener para el carrito
 
   return (
     <>
@@ -89,7 +84,7 @@ export function Header({ siteContent }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 min-w-0">
+          <Link href="/" className="flex items-center space-x-2 min-w-0"> {/* Se mantiene el logo */}
             {theme.logoUrl && (
               <Image
                 src={logoSrc}
@@ -141,25 +136,26 @@ export function Header({ siteContent }: HeaderProps) {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Cart Button */}
-            <Button
-              variant="outline"
-              size="icon"
-              className="relative"
-              onClick={toggleCart}
-              style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {safeTotalItems > 0 && (
-                <Badge
-                  variant="default"
-                  className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                >
-                  {safeTotalItems}
-                </Badge>
-              )}
-            </Button>
+          <div className="flex items-center space-x-4"> {/* Se mantiene el contenedor de acciones */}
+            {showCart && ( // Renderizado condicional del carrito
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative"
+                onClick={toggleCart}
+                style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {safeTotalItems > 0 && (
+                  <Badge
+                    variant="default"
+                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                  >
+                    {safeTotalItems}
+                  </Badge>
+                )}
+              </Button>
+            )}
 
             {/* Mobile Menu */}
             <Button

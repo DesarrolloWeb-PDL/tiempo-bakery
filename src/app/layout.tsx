@@ -33,7 +33,7 @@ export default async function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <div className="flex flex-col min-h-screen">
-          <Header siteContent={siteContent} />
+          <Header siteContent={siteContent} showCart={true} /> {/* Aseguramos que el carrito se muestre en el cliente */}
           <main className="flex-1">
             {children}
           </main>
