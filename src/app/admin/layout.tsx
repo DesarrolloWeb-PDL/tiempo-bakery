@@ -17,9 +17,7 @@ import {
   LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Header } from '@/components/header'
 import Image from 'next/image'
-import { DEFAULT_SITE_CONTENT } from '@/lib/site-content.shared'
 
 const navItems = [
   {
@@ -67,6 +65,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
+  const currentPage = navItems.find((n) =>
+    n.href === '/admin' ? pathname === '/admin' : pathname.startsWith(n.href)
+  )
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Overlay móvil */}
@@ -85,13 +87,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           'lg:translate-x-0 lg:static lg:z-auto'
         )}
       >
-        {/* Logo en el sidebar del admin */}
-        <div className="p-6 border-b border-gray-200"> {/* Contenedor del logo */}
+        {/* Logo en el sidebar */}
+        <div className="p-6 border-b border-gray-200">
           <Link href="/admin" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-amber-600 rounded-xl flex items-center justify-center shrink-0">
-              {/* Aquí puedes usar el logo de la panadería o un icono de admin */}
               <Image
-                src="/img/espiga.png" // Usar el logo por defecto o el que prefieras para admin
+                src="/img/espiga.png"
                 alt="Tiempo Bakery Admin"
                 width={36}
                 height={36}
@@ -104,8 +105,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </Link>
         </div>
-
-
 
         {/* Navegación */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -145,18 +144,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col min-w-0"> {/* Se mantiene el contenedor principal */}
-        {/* Header para el panel de administración, sin carrito */}
-        <Header siteContent={DEFAULT_SITE_CONTENT} showCart={false} />
-        <div className="flex-1 p-4 lg:p-6 overflow-auto"> {/* Contenedor de la página */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm">
-              A
-            </div>
-          </div>
-        </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Topbar simple con hamburguesa y título de página */}
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 lg:px-6">
+          <button
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 lg:hidden"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
 
-        {children}
+          <div className="flex-1">
+            <h1 className="text-base font-semibold text-gray-900">
+              {currentPage?.label ?? 'Panel Admin'}
+            </h1>
+          </div>
+        </header>
+
+        {/* Página */}
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+          {children}
+        </main>
       </div>
     </div>
   )

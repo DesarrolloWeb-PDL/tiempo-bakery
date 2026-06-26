@@ -55,9 +55,8 @@ function ThemeStyleInjector() {
   return null
 }
 
-interface HeaderProps { // Se añade la prop showCart
+interface HeaderProps {
   showCart?: boolean;
-  showMobileMenu?: boolean;
   siteContent: SiteContent
 }
 
@@ -69,10 +68,15 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
   const logoSrc = normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png';
   const logoIsExternal = /^https?:\/\//i.test(logoSrc);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [isHydrated, setIsHydrated] = React.useState(false); // Mantener para el carrito
+  const [isHydrated, setIsHydrated] = React.useState(false);
 
-  React.useEffect(() => { setIsHydrated(true); }, []); // Mantener para el carrito
-  const safeTotalItems = isHydrated ? totalItems : 0; // Mantener para el carrito
+  React.useEffect(() => { setIsHydrated(true); }, []);
+  const safeTotalItems = isHydrated ? totalItems : 0;
+
+  // No renderizar en rutas de admin (el admin tiene su propio layout)
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <>
@@ -84,7 +88,7 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 min-w-0"> {/* Se mantiene el logo */}
+          <Link href="/" className="flex items-center space-x-2 min-w-0">
             {theme.logoUrl && (
               <Image
                 src={logoSrc}
@@ -136,8 +140,8 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center space-x-4"> {/* Se mantiene el contenedor de acciones */}
-            {showCart && ( // Renderizado condicional del carrito
+          <div className="flex items-center space-x-4">
+            {showCart && (
               <Button
                 variant="outline"
                 size="icon"
