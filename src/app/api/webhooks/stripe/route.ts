@@ -4,11 +4,16 @@ import { prisma } from '@/lib/db';
 import { sendOrderPaidEmails } from '@/lib/order-email';
 import { stockManager } from '@/lib/stock-manager';
 import Stripe from 'stripe';
+import { getStripeSecretKey } from '@/lib/payments';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  const stripeSecretKey = await getStripeSecretKey()
+  if (!stripeSecretKey) {
+    return NextResponse.json({ error: 'STRIPE_SECRET_KEY no está configurada' }, { status: 503 })
+  }
+  const stripe = new Stripe(stripeSecretKey, {
     apiVersion: '2025-02-24.acacia',
   });
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;

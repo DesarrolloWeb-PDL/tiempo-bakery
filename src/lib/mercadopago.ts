@@ -1,4 +1,5 @@
 import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
+import { getMercadoPagoAccessToken } from '@/lib/payments';
 
 let mercadopagoClient: MercadoPagoConfig | null = null;
 
@@ -15,14 +16,21 @@ function splitCustomerName(fullName: string) {
   };
 }
 
-export function getMercadoPagoClient() {
-  if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
-    throw new Error('Falta MERCADOPAGO_ACCESS_TOKEN');
+export async function getMercadoPagoClient() {
+  const envToken = process.env.MERCADOPAGO_ACCESS_TOKEN
+  let accessToken: string | null = envToken ?? null
+
+  if (!accessToken) {
+    accessToken = await getMercadoPagoAccessToken();
+  }
+
+  if (!accessToken) {
+    throw new Error('Falta MERCADOPAGO_ACCESS_TOKEN. Configuralo en Admin → Pagos.');
   }
 
   if (!mercadopagoClient) {
     mercadopagoClient = new MercadoPagoConfig({
-      accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
+      accessToken,
       options: { timeout: 5000 },
     });
   }
@@ -54,7 +62,7 @@ export async function createMercadoPagoPreference(input: {
     throw new Error('Falta NEXT_PUBLIC_URL para generar los retornos de pago');
   }
 
-  const client = getMercadoPagoClient();
+  const client = await getMercadoPagoClient();
   const preference = new Preference(client);
   const { name, surname } = splitCustomerName(input.customerName);
   const phone = sanitizePhone(input.customerPhone);
@@ -118,7 +126,7 @@ export async function createMercadoPagoPreference(input: {
 }
 
 export async function getMercadoPagoPayment(id: string | number) {
-  const client = getMercadoPagoClient();
+  const client = await getMercadoPagoClient();
   const payment = new Payment(client);
 
   return payment.get({ id: Number(id) });

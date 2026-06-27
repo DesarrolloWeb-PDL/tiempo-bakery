@@ -4,7 +4,7 @@ import { stockManager } from '@/lib/stock-manager';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
 import { getShippingCostByMethod, getShippingCostsRuntime } from '@/lib/shipping-costs';
 import { createMercadoPagoPreference } from '@/lib/mercadopago';
-import { PaymentProvider, getPaymentSettings } from '@/lib/payments';
+import { PaymentProvider, getPaymentSettings, getStripeSecretKey } from '@/lib/payments';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -220,7 +220,11 @@ export async function POST(request: NextRequest) {
 
     try {
       if (selectedProvider === 'STRIPE') {
-        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+        const stripeSecretKey = await getStripeSecretKey()
+        if (!stripeSecretKey) {
+          throw new Error('STRIPE_SECRET_KEY no está configurada')
+        }
+        const stripe = new Stripe(stripeSecretKey, {
           apiVersion: '2025-02-24.acacia',
         });
 

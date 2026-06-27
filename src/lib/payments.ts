@@ -43,6 +43,7 @@ const DEFAULT_BANK_TRANSFER_SETTINGS: BankTransferSettings = {
 const DEFAULT_PROVIDER: PaymentProvider = 'STRIPE'
 const SITE_CONFIG_KEY = 'default_payment_provider'
 const BANK_TRANSFER_PREFIX = 'payment_bank_transfer_'
+const CRED_PREFIX = 'payment_cred_'
 
 function isFilled(value: string) {
   return value.trim().length > 0
@@ -60,15 +61,95 @@ export function isPaymentProvider(value: string): value is PaymentProvider {
   return PAYMENT_PROVIDERS.includes(value as PaymentProvider)
 }
 
-export function getEnabledPaymentProvidersFromEnv(): PaymentProvider[] {
-  const providers: PaymentProvider[] = []
+function maskKey(key: string): string {
+  if (key.length <= 8) return '****'
+  const suffix = key.slice(-4)
+  return `****...${suffix}`
+}
 
-  if (process.env.STRIPE_SECRET_KEY && process.env.NEXT_PUBLIC_URL) {
-    providers.push('STRIPE')
+function getSingleSetting(key: string): string | null {
+  return process.env[key]?.trim() || null
+}
+
+export async function getStripeSecretKey(): Promise<string | null> {
+  try {
+    const row = await prisma.siteConfig.findUnique({
+      where: { key: `${CRED_PREFIX}stripe_secret_key` },
+      select: { value: true },
+    })
+    if (row?.value) return row.value
+  } catch {}
+  return getSingleSetting('STRIPE_SECRET_KEY')
+}
+
+export async function getMercadoPagoAccessToken(): Promise<string | null> {
+  try {
+    const row = await prisma.siteConfig.findUnique({
+      where: { key: `${CRED_PREFIX}mercadopago_access_token` },
+      select: { value: true },
+    })
+    if (row?.value) return row.value
+  } catch {}
+  return getSingleSetting('MERCADOPAGO_ACCESS_TOKEN')
+}
+
+export async function getStripeConfigured(): Promise<boolean> {
+  const key = await getStripeSecretKey()
+  return !!key
+}
+
+export async function getMercadoPagoConfigured(): Promise<boolean> {
+  const token = await getMercadoPagoAccessToken()
+  return !!token
+}
+
+export async function setStripeSecretKey(key: string) {
+  if (!key.trim()) {
+    await prisma.siteConfig.delete({
+      where: { key: `${CRED_PREFIX}stripe_secret_key` },
+    }).catch(() => {})
+    return
   }
+  await prisma.siteConfig.upsert({
+    where: { key: `${CRED_PREFIX}stripe_secret_key` },
+    create: { key: `${CRED_PREFIX}stripe_secret_key`, value: key.trim() },
+    update: { value: key.trim() },
+  })
+}
 
-  if (process.env.MERCADOPAGO_ACCESS_TOKEN && process.env.NEXT_PUBLIC_URL) {
-    providers.push('MERCADO_PAGO')
+export async function setMercadoPagoAccessToken(token: string) {
+  if (!token.trim()) {
+    await prisma.siteConfig.delete({
+      where: { key: `${CRED_PREFIX}mercadopago_access_token` },
+    }).catch(() => {})
+    return
+  }
+  await prisma.siteConfig.upsert({
+    where: { key: `${CRED_PREFIX}mercadopago_access_token` },
+    create: { key: `${CRED_PREFIX}mercadopago_access_token`, value: token.trim() },
+    update: { value: token.trim() },
+  })
+}
+
+export async function getStripeKeyMask(): Promise<string | null> {
+  const key = await getStripeSecretKey()
+  return key ? maskKey(key) : null
+}
+
+export async function getMercadoPagoKeyMask(): Promise<string | null> {
+  const token = await getMercadoPagoAccessToken()
+  return token ? maskKey(token) : null
+}
+
+async function getAvailablePaymentProviders(): Promise<PaymentProvider[]> {
+  const providers: PaymentProvider[] = []
+  const hasUrl = !!process.env.NEXT_PUBLIC_URL
+
+  if (hasUrl) {
+    const stripeKey = await getStripeSecretKey()
+    if (stripeKey) providers.push('STRIPE')
+    const mpToken = await getMercadoPagoAccessToken()
+    if (mpToken) providers.push('MERCADO_PAGO')
   }
 
   return providers
@@ -138,7 +219,7 @@ interface PaymentSettings {
 }
 
 export async function getPaymentSettings(): Promise<PaymentSettings> {
-  const enabledProviders = getEnabledPaymentProvidersFromEnv()
+  const enabledProviders = await getAvailablePaymentProviders()
   const bankTransfer = await getBankTransferSettings()
 
   if (bankTransfer.enabled && (isFilled(bankTransfer.alias) || isFilled(bankTransfer.cbu) || isFilled(bankTransfer.bankName))) {

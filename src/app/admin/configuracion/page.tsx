@@ -1198,20 +1198,20 @@ export default function AdminConfigPage() {
         <Settings className="w-6 h-6 text-amber-600" /> Configuración
       </h1>
       <Tabs.Root defaultValue="entrega" className="w-full">
-        <Tabs.List className="flex gap-2 border-b mb-6">
-          <Tabs.Trigger value="entrega" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
-            <Truck className="w-4 h-4" /> Días y lugares de entrega
+        <Tabs.List className="flex gap-2 border-b mb-6 overflow-x-auto flex-nowrap -mx-4 px-4 scrollbar-none">
+          <Tabs.Trigger value="entrega" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+            <Truck className="w-4 h-4" /> Entrega
           </Tabs.Trigger>
-          <Tabs.Trigger value="footer" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+          <Tabs.Trigger value="footer" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
             <Layout className="w-4 h-4" /> Footer
           </Tabs.Trigger>
-          <Tabs.Trigger value="nav" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
-            <Palette className="w-4 h-4" /> Navegación
+          <Tabs.Trigger value="nav" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+            <Palette className="w-4 h-4" /> Nav
           </Tabs.Trigger>
-          <Tabs.Trigger value="sobre" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
-            <Info className="w-4 h-4" /> Sobre Nosotros
+          <Tabs.Trigger value="sobre" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+            <Info className="w-4 h-4" /> Nosotros
           </Tabs.Trigger>
-          <Tabs.Trigger value="contacto" className="px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+          <Tabs.Trigger value="contacto" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
             <Mail className="w-4 h-4" /> Contacto
           </Tabs.Trigger>
         </Tabs.List>
@@ -1330,7 +1330,7 @@ export default function AdminConfigPage() {
           <Settings className="w-4 h-4 text-amber-600" />
           <h3 className="font-semibold text-gray-900 text-sm">Información del sistema</h3>
         </div>
-        <div className="px-5 py-4 grid grid-cols-2 gap-4">
+        <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { label: 'Versión', value: '1.0.0' },
             { label: 'Stack', value: 'Next.js 14 + Prisma' },

@@ -6,9 +6,11 @@ import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 export const dynamic = 'force-dynamic'
 
 const VALID_STATUSES = ['PENDING', 'PAID', 'BAKING', 'READY', 'DELIVERED', 'CANCELLED'] as const
+const VALID_PAYMENT_STATUSES = ['PENDING', 'PAID', 'FAILED'] as const
 
 const updateSchema = z.object({
   status: z.enum(VALID_STATUSES).optional(),
+  paymentStatus: z.enum(VALID_PAYMENT_STATUSES).optional(),
   adminNotes: z.string().max(1000).optional(),
 })
 
@@ -66,7 +68,7 @@ export async function PATCH(
       )
     }
 
-    const { status, adminNotes } = parsed.data
+    const { status, paymentStatus, adminNotes } = parsed.data
 
     const existing = await db.order.findUnique({ where: { id: params.id } })
     if (!existing) {
@@ -77,8 +79,9 @@ export async function PATCH(
       where: { id: params.id },
       data: {
         ...(status !== undefined && { status }),
-        ...(adminNotes !== undefined && { adminNotes }),
+        ...(paymentStatus !== undefined && { paymentStatus }),
         ...(status === 'DELIVERED' && !existing.deliveredAt && { deliveredAt: new Date() }),
+        ...(paymentStatus === 'PAID' && existing.paymentStatus !== 'PAID' && { paidAt: new Date() }),
       },
       select: {
         id: true,

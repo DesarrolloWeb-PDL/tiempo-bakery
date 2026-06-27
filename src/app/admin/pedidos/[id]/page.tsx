@@ -186,6 +186,28 @@ export default function AdminOrderDetailPage() {
     }
   }
 
+  const handleMarkAsPaid = async () => {
+    if (!order) return
+    setSaving(true)
+    setSaveMessage(null)
+    try {
+      const res = await fetch(`/api/admin/pedidos/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus: 'PAID' }),
+      })
+      if (!res.ok) throw new Error()
+      const updated = await res.json()
+      setOrder((prev) => prev ? { ...prev, paymentStatus: 'PAID', paidAt: new Date().toISOString() } : prev)
+      setSaveMessage('Pago confirmado correctamente')
+    } catch {
+      setSaveMessage('Error al confirmar el pago')
+    } finally {
+      setSaving(false)
+      setTimeout(() => setSaveMessage(null), 3000)
+    }
+  }
+
   const saveNotes = async () => {
     if (!order) return
     setSaving(true)
@@ -466,6 +488,16 @@ export default function AdminOrderDetailPage() {
                 <Field label="ID de Mercado Pago" value={order.mercadopagoPaymentId} mono />
               )}
               <Field label="Semana de producción" value={order.weekId} mono />
+              {order.paymentStatus !== 'PAID' && order.status !== 'CANCELLED' && (
+                <button
+                  onClick={handleMarkAsPaid}
+                  disabled={saving}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 mt-1"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  Marcar como pagado
+                </button>
+              )}
             </div>
           </Section>
         </div>
