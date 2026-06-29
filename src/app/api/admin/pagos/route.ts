@@ -9,10 +9,8 @@ import {
   setDefaultPaymentProvider,
   setStripeSecretKey,
   setMercadoPagoAccessToken,
-  getStripeKeyMask,
-  getMercadoPagoKeyMask,
-  getStripeConfigured,
-  getMercadoPagoConfigured,
+  getStripeSecretKey,
+  getMercadoPagoAccessToken,
 } from '@/lib/payments';
 import { z } from 'zod';
 
@@ -20,6 +18,8 @@ export const dynamic = 'force-dynamic';
 
 const updateSchema = z.object({
   defaultProvider: z.enum(PAYMENT_PROVIDERS),
+  stripeSecretKey: z.string().max(500).optional().default(''),
+  mercadopagoAccessToken: z.string().max(500).optional().default(''),
   bankTransfer: z.object({
     enabled: z.boolean(),
     bankName: z.string().max(120),
@@ -29,23 +29,17 @@ const updateSchema = z.object({
     cuit: z.string().max(30),
     notes: z.string().max(500),
   }),
-  stripeSecretKey: z.string().max(200).optional(),
-  mercadopagoAccessToken: z.string().max(200).optional(),
 });
 
 export async function GET() {
   const settings = await getPaymentSettings();
-  const stripeKeyMask = await getStripeKeyMask();
-  const mercadopagoKeyMask = await getMercadoPagoKeyMask();
-  const stripeConfigured = await getStripeConfigured();
-  const mercadopagoConfigured = await getMercadoPagoConfigured();
+  const stripeSecretKey = await getStripeSecretKey();
+  const mercadopagoAccessToken = await getMercadoPagoAccessToken();
 
   return NextResponse.json({
     ...settings,
-    stripeKeyMask,
-    mercadopagoKeyMask,
-    stripeConfigured,
-    mercadopagoConfigured,
+    stripeSecretKey: stripeSecretKey ?? '',
+    mercadopagoAccessToken: mercadopagoAccessToken ?? '',
     options: PAYMENT_PROVIDERS.map((provider) => ({
       value: provider,
       label: PAYMENT_PROVIDER_LABELS[provider],
@@ -60,22 +54,11 @@ export async function PUT(request: NextRequest) {
     const parsed = updateSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
     const settings = await getPaymentSettings();
-    const { defaultProvider, bankTransfer, stripeSecretKey, mercadopagoAccessToken } = parsed.data;
-
-    if (stripeSecretKey !== undefined) {
-      await setStripeSecretKey(stripeSecretKey);
-    }
-
-    if (mercadopagoAccessToken !== undefined) {
-      await setMercadoPagoAccessToken(mercadopagoAccessToken);
-    }
-
-    const stripeConfigured = await getStripeConfigured();
-    const mercadopagoConfigured = await getMercadoPagoConfigured();
+    const { defaultProvider, stripeSecretKey, mercadopagoAccessToken, bankTransfer } = parsed.data;
 
     const bankTransferWillBeEnabled =
       bankTransfer.enabled &&
@@ -88,26 +71,39 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    await setBankTransferSettings(bankTransfer);
+    const stripeWillBeEnabled = !!stripeSecretKey.trim() && !!process.env.NEXT_PUBLIC_URL;
+    const mpWillBeEnabled = !!mercadopagoAccessToken.trim() && !!process.env.NEXT_PUBLIC_URL;
 
-    const nextEnabledProviders: PaymentProvider[] = [];
-    if (stripeConfigured) nextEnabledProviders.push('STRIPE');
-    if (mercadopagoConfigured) nextEnabledProviders.push('MERCADO_PAGO');
-    if (bankTransferWillBeEnabled) nextEnabledProviders.push('BANK_TRANSFER');
+    const nextEnabledProviders: PaymentProvider[] = [
+      ...(stripeWillBeEnabled ? ['STRIPE' as PaymentProvider] : []),
+      ...(mpWillBeEnabled ? ['MERCADO_PAGO' as PaymentProvider] : []),
+      ...settings.enabledProviders.filter(
+        (p) =>
+          (p === 'STRIPE' && !stripeWillBeEnabled) ||
+          (p === 'MERCADO_PAGO' && !mpWillBeEnabled)
+      ),
+    ];
 
-    if (!nextEnabledProviders.length) {
-      return NextResponse.json(
-        { error: 'No hay ningún medio de pago configurado. Activá al menos uno.' },
-        { status: 400 }
-      );
+    if (bankTransferWillBeEnabled && !nextEnabledProviders.includes('BANK_TRANSFER')) {
+      nextEnabledProviders.push('BANK_TRANSFER');
     }
 
     if (!isPaymentProvider(defaultProvider) || !nextEnabledProviders.includes(defaultProvider)) {
       return NextResponse.json(
-        { error: 'El proveedor seleccionado no está habilitado' },
+        { error: 'El proveedor seleccionado no está habilitado en el entorno' },
         { status: 400 }
       );
     }
+
+    if (stripeSecretKey.trim()) {
+      await setStripeSecretKey(stripeSecretKey.trim());
+    }
+
+    if (mercadopagoAccessToken.trim()) {
+      await setMercadoPagoAccessToken(mercadopagoAccessToken.trim());
+    }
+
+    await setBankTransferSettings(bankTransfer);
 
     await setDefaultPaymentProvider(defaultProvider);
 

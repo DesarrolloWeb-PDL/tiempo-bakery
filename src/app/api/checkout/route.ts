@@ -4,7 +4,7 @@ import { stockManager } from '@/lib/stock-manager';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
 import { getShippingCostByMethod, getShippingCostsRuntime } from '@/lib/shipping-costs';
 import { createMercadoPagoPreference } from '@/lib/mercadopago';
-import { PaymentProvider, getPaymentSettings, getStripeSecretKey } from '@/lib/payments';
+import { PaymentProvider, getPaymentSettings, getStripeSecretKey, getMercadoPagoAccessToken } from '@/lib/payments';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -220,11 +220,9 @@ export async function POST(request: NextRequest) {
 
     try {
       if (selectedProvider === 'STRIPE') {
-        const stripeSecretKey = await getStripeSecretKey()
-        if (!stripeSecretKey) {
-          throw new Error('STRIPE_SECRET_KEY no está configurada')
-        }
-        const stripe = new Stripe(stripeSecretKey, {
+        const stripeKey = await getStripeSecretKey()
+        if (!stripeKey) throw new Error('Falta STRIPE_SECRET_KEY')
+        const stripe = new Stripe(stripeKey, {
           apiVersion: '2025-02-24.acacia',
         });
 
@@ -289,6 +287,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (selectedProvider === 'MERCADO_PAGO') {
+        const mpToken = await getMercadoPagoAccessToken()
         const preference = await createMercadoPagoPreference({
           orderId: order.id,
           orderNumber: order.orderNumber,
@@ -306,6 +305,7 @@ export async function POST(request: NextRequest) {
             sliced: item.sliced,
           })),
           shippingCost,
+          accessToken: mpToken ?? undefined,
         });
 
         checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;

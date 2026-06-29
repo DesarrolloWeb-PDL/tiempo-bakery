@@ -1,5 +1,4 @@
 import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
-import { getMercadoPagoAccessToken } from '@/lib/payments';
 
 let mercadopagoClient: MercadoPagoConfig | null = null;
 
@@ -16,21 +15,16 @@ function splitCustomerName(fullName: string) {
   };
 }
 
-export async function getMercadoPagoClient() {
-  const envToken = process.env.MERCADOPAGO_ACCESS_TOKEN
-  let accessToken: string | null = envToken ?? null
+export function getMercadoPagoClient(accessToken?: string) {
+  const token = accessToken || process.env.MERCADOPAGO_ACCESS_TOKEN;
 
-  if (!accessToken) {
-    accessToken = await getMercadoPagoAccessToken();
+  if (!token) {
+    throw new Error('Falta MERCADOPAGO_ACCESS_TOKEN');
   }
 
-  if (!accessToken) {
-    throw new Error('Falta MERCADOPAGO_ACCESS_TOKEN. Configuralo en Admin → Pagos.');
-  }
-
-  if (!mercadopagoClient) {
+  if (!mercadopagoClient || mercadopagoClient.accessToken !== token) {
     mercadopagoClient = new MercadoPagoConfig({
-      accessToken,
+      accessToken: token,
       options: { timeout: 5000 },
     });
   }
@@ -55,6 +49,7 @@ export async function createMercadoPagoPreference(input: {
     sliced: boolean;
   }>;
   shippingCost: number;
+  accessToken?: string;
 }) {
   const baseUrl = process.env.NEXT_PUBLIC_URL;
 
@@ -62,7 +57,7 @@ export async function createMercadoPagoPreference(input: {
     throw new Error('Falta NEXT_PUBLIC_URL para generar los retornos de pago');
   }
 
-  const client = await getMercadoPagoClient();
+  const client = getMercadoPagoClient(input.accessToken);
   const preference = new Preference(client);
   const { name, surname } = splitCustomerName(input.customerName);
   const phone = sanitizePhone(input.customerPhone);
@@ -125,8 +120,8 @@ export async function createMercadoPagoPreference(input: {
   return response;
 }
 
-export async function getMercadoPagoPayment(id: string | number) {
-  const client = await getMercadoPagoClient();
+export async function getMercadoPagoPayment(id: string | number, accessToken?: string) {
+  const client = getMercadoPagoClient(accessToken);
   const payment = new Payment(client);
 
   return payment.get({ id: Number(id) });

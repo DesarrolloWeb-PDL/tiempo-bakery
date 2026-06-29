@@ -3,17 +3,17 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { sendOrderPaidEmails } from '@/lib/order-email';
 import { stockManager } from '@/lib/stock-manager';
-import Stripe from 'stripe';
 import { getStripeSecretKey } from '@/lib/payments';
+import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  const stripeSecretKey = await getStripeSecretKey()
-  if (!stripeSecretKey) {
-    return NextResponse.json({ error: 'STRIPE_SECRET_KEY no está configurada' }, { status: 503 })
+  const stripeKey = await getStripeSecretKey();
+  if (!stripeKey) {
+    return NextResponse.json({ error: 'Falta STRIPE_SECRET_KEY' }, { status: 500 });
   }
-  const stripe = new Stripe(stripeSecretKey, {
+  const stripe = new Stripe(stripeKey, {
     apiVersion: '2025-02-24.acacia',
   });
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
