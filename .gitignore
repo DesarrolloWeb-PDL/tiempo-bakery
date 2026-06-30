@@ -43,3 +43,7 @@ prisma/*.db-journal
 prisma/*.db-shm
 prisma/*.db-wal
 !prisma/migrations/.gitkeep
+
+# Windows junk
+nul
+*.lnk
