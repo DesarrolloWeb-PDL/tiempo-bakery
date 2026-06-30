@@ -104,15 +104,20 @@ export async function getEnabledPaymentProviders(): Promise<PaymentProvider[]> {
   const stripeKey = await getStripeSecretKey()
   const mpToken = await getMercadoPagoAccessToken()
 
-  if (stripeKey && process.env.NEXT_PUBLIC_URL) {
+  if (stripeKey) {
     providers.push('STRIPE')
   }
 
-  if (mpToken && process.env.NEXT_PUBLIC_URL) {
+  if (mpToken) {
     providers.push('MERCADO_PAGO')
   }
 
   return providers
+}
+
+export function getSiteUrl(): string {
+  return process.env.NEXT_PUBLIC_URL
+    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
 }
 
 export async function getBankTransferSettings(): Promise<BankTransferSettings> {

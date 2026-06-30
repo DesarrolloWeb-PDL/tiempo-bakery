@@ -51,10 +51,11 @@ export async function createMercadoPagoPreference(input: {
   shippingCost: number;
   accessToken?: string;
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_URL
+    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
 
   if (!baseUrl) {
-    throw new Error('Falta NEXT_PUBLIC_URL para generar los retornos de pago');
+    throw new Error('Falta NEXT_PUBLIC_URL o VERCEL_URL para generar los retornos de pago');
   }
 
   const client = getMercadoPagoClient(input.accessToken);

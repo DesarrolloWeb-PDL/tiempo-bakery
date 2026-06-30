@@ -71,8 +71,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const stripeWillBeEnabled = !!stripeSecretKey.trim() && !!process.env.NEXT_PUBLIC_URL;
-    const mpWillBeEnabled = !!mercadopagoAccessToken.trim() && !!process.env.NEXT_PUBLIC_URL;
+    const stripeWillBeEnabled = !!stripeSecretKey.trim();
+    const mpWillBeEnabled = !!mercadopagoAccessToken.trim();
 
     const nextEnabledProviders: PaymentProvider[] = [
       ...(stripeWillBeEnabled ? ['STRIPE' as PaymentProvider] : []),

@@ -4,7 +4,7 @@ import { stockManager } from '@/lib/stock-manager';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
 import { getShippingCostByMethod, getShippingCostsRuntime } from '@/lib/shipping-costs';
 import { createMercadoPagoPreference } from '@/lib/mercadopago';
-import { PaymentProvider, getPaymentSettings, getStripeSecretKey, getMercadoPagoAccessToken } from '@/lib/payments';
+import { PaymentProvider, getPaymentSettings, getStripeSecretKey, getMercadoPagoAccessToken, getSiteUrl } from '@/lib/payments';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -259,8 +259,8 @@ export async function POST(request: NextRequest) {
           payment_method_types: ['card'],
           line_items: lineItems,
           mode: 'payment',
-          success_url: `${process.env.NEXT_PUBLIC_URL}/pedido/${order.id}/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${process.env.NEXT_PUBLIC_URL}/checkout?cancelled=true`,
+          success_url: `${getSiteUrl()}/pedido/${order.id}/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${getSiteUrl()}/checkout?cancelled=true`,
           customer_email: data.customerEmail,
           client_reference_id: order.id,
           metadata: {
