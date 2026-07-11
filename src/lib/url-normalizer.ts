@@ -1,3 +1,14 @@
+const SUPABASE_PLACEHOLDER_HOST = 'tu-proyecto.supabase.co'
+
+function isPlaceholderSupabaseUrl(value: string): boolean {
+  return value.includes(SUPABASE_PLACEHOLDER_HOST)
+}
+
+function toFallbackOr(raw: string): string {
+  const FALLBACK = '/img/espiga.png'
+  return isPlaceholderSupabaseUrl(raw) ? FALLBACK : raw
+}
+
 export function normalizePublicAssetUrl(value?: string | null): string {
   if (!value) return ''
 
@@ -5,15 +16,13 @@ export function normalizePublicAssetUrl(value?: string | null): string {
   if (!raw) return ''
 
   const applyLegacyFallback = (assetPath: string) => {
-    // En producción, los uploads legacy bajo /uploads/productos no existen en el filesystem de Vercel.
-    // Las rutas /api/admin/uploads/serve se mantienen porque representan el flujo actual de fallback.
     const isLegacyLocalProductUpload = assetPath.startsWith('/uploads/productos/')
 
     if (process.env.NODE_ENV === 'production' && isLegacyLocalProductUpload) {
       return '/img/espiga.png'
     }
 
-    return assetPath
+    return toFallbackOr(assetPath)
   }
 
   const isSameOriginHost = (hostname: string) => {

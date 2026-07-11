@@ -17,8 +17,14 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
+const SUPABASE_PLACEHOLDER_HOST = 'tu-proyecto.supabase.co'
+
 function normalizeImageUrl(value: string) {
   if (!value) return '/img/espiga.png';
+
+  if (value.includes(SUPABASE_PLACEHOLDER_HOST)) {
+    return '/img/espiga.png';
+  }
 
   try {
     const parsed = new URL(value);

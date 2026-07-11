@@ -38,8 +38,8 @@ function shouldUseLocalFallback(error: unknown) {
 }
 
 function toStorageErrorMessage(error: unknown) {
-  if (error instanceof Error && error.message.includes('para usar Supabase Storage')) {
-    return 'Supabase Storage no está configurado en producción. Configurá NEXT_PUBLIC_SUPABASE_URL (o SUPABASE_URL) y SUPABASE_SERVICE_ROLE_KEY.'
+  if (error instanceof Error && error.message.includes('BLOB_READ_WRITE_TOKEN')) {
+    return 'Vercel Blob Storage no está configurado. Configurá BLOB_READ_WRITE_TOKEN en las variables de entorno.'
   }
 
   return error instanceof Error ? error.message : String(error)
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         throw new Error(toStorageErrorMessage(storageError))
       }
 
-      console.warn('[Logo Upload] Supabase no configurado; usando fallback local')
+      console.warn('[Logo Upload] Vercel Blob no disponible; usando fallback local')
       upload = await uploadLogoLocally(file, req)
     }
 

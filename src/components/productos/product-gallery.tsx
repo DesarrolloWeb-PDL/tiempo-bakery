@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
+const SUPABASE_PLACEHOLDER_HOST = 'tu-proyecto.supabase.co'
+
 interface ProductGalleryImage {
   id: string
   url: string
@@ -12,6 +14,10 @@ interface ProductGalleryImage {
 
 function shouldSkipOptimization(url: string) {
   return url.includes('.supabase.co/storage/v1/object/public/')
+}
+
+function isPlaceholderUrl(url: string) {
+  return url.includes(SUPABASE_PLACEHOLDER_HOST)
 }
 
 function buildProductPlaceholder(productName: string) {
@@ -53,7 +59,8 @@ export function ProductGallery({ images, productName }: { images: ProductGallery
   }
 
   const resolveImageSrc = (url: string) => {
-    return brokenUrls[url] ? placeholderSrc : url
+    if (brokenUrls[url] || isPlaceholderUrl(url)) return placeholderSrc
+    return url
   }
 
   const selectedSrc = resolveImageSrc(selectedImage.url)
