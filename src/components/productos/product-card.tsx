@@ -17,12 +17,12 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-const SUPABASE_PLACEHOLDER_HOST = 'tu-proyecto.supabase.co'
+const SUPABASE_STORAGE_PATTERN = '.supabase.co/storage/v1/object/public/'
 
 function normalizeImageUrl(value: string) {
   if (!value) return '/img/espiga.png';
 
-  if (value.includes(SUPABASE_PLACEHOLDER_HOST)) {
+  if (value.includes(SUPABASE_STORAGE_PATTERN)) {
     return '/img/espiga.png';
   }
 

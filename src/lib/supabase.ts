@@ -1,4 +1,4 @@
-import { put } from '@vercel/blob';
+import { put, getDownloadUrl } from '@vercel/blob';
 
 function getExtension(fileName: string, mimeType: string) {
 	const byMime: Record<string, string> = {
@@ -19,13 +19,31 @@ export async function uploadPublicAsset(file: File, folder: string) {
 	const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
 	const filepath = `${folder}/${filename}`;
 
-	const blob = await put(filepath, file, {
-		access: 'public',
-		addRandomSuffix: false,
-	});
+	try {
+		const blob = await put(filepath, file, {
+			access: 'public',
+			addRandomSuffix: false,
+		});
 
-	return {
-		filePath: blob.pathname,
-		publicUrl: blob.url,
-	};
+		return {
+			filePath: blob.pathname,
+			publicUrl: blob.url,
+		};
+	} catch (error) {
+		if (error instanceof Error && error.message.includes('Cannot use public access on a private store')) {
+			const blob = await put(filepath, file, {
+				access: 'private',
+				addRandomSuffix: false,
+			});
+
+			const signedUrl = getDownloadUrl(blob.url);
+
+			return {
+				filePath: blob.pathname,
+				publicUrl: signedUrl,
+			};
+		}
+
+		throw error;
+	}
 }

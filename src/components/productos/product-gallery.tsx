@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
-const SUPABASE_PLACEHOLDER_HOST = 'tu-proyecto.supabase.co'
+const SUPABASE_STORAGE_PATTERN = '.supabase.co/storage/v1/object/public/'
 
 interface ProductGalleryImage {
   id: string
@@ -13,11 +13,11 @@ interface ProductGalleryImage {
 }
 
 function shouldSkipOptimization(url: string) {
-  return url.includes('.supabase.co/storage/v1/object/public/')
+  return url.includes(SUPABASE_STORAGE_PATTERN)
 }
 
 function isPlaceholderUrl(url: string) {
-  return url.includes(SUPABASE_PLACEHOLDER_HOST)
+  return url.includes(SUPABASE_STORAGE_PATTERN)
 }
 
 function buildProductPlaceholder(productName: string) {
