@@ -1,4 +1,4 @@
-import { put, getDownloadUrl } from '@vercel/blob';
+import { put } from '@vercel/blob';
 
 function getExtension(fileName: string, mimeType: string) {
 	const byMime: Record<string, string> = {
@@ -36,11 +36,11 @@ export async function uploadPublicAsset(file: File, folder: string) {
 				addRandomSuffix: false,
 			});
 
-			const signedUrl = getDownloadUrl(blob.url);
+			const proxyUrl = `/api/admin/uploads/blob-serve?path=${encodeURIComponent(blob.pathname)}`;
 
 			return {
 				filePath: blob.pathname,
-				publicUrl: signedUrl,
+				publicUrl: proxyUrl,
 			};
 		}
 

@@ -19,6 +19,7 @@ const PUBLIC_ADMIN_API_PATHS = new Set([
   '/api/admin/uploads/logo',
   '/api/admin/uploads/logo-serve',
   '/api/admin/uploads/serve',
+  '/api/admin/uploads/blob-serve',
 ])
 
 function getClientIp(req: NextRequest) {
