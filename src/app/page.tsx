@@ -139,15 +139,15 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-brand-gold/5 via-white to-brand-gold/5">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-amber-100 to-amber-50 border-b border-amber-200">
+      <section className="bg-gradient-to-r from-brand-gold/15 to-brand-gold/5 border-b border-brand-gold/20">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-brand-gold-dark mb-4">
               Pan Artesanal de Masa Madre
             </h1>
-            <p className="text-lg text-amber-800 mb-6">
+            <p className="text-lg text-brand-gold/80 mb-6">
               Horneado fresco cada semana con ingredientes naturales y tiempo de fermentación tradicional
             </p>
             
@@ -225,12 +225,12 @@ export default async function HomePage() {
       </section>
 
       {/* Info Section */}
-      <section className="bg-amber-50 border-t border-amber-100">
+      <section className="bg-brand-gold/5 border-t border-brand-gold/15">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="text-4xl mb-3">⏰</div>
-              <h3 className="font-semibold text-amber-900 mb-2">
+              <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Preventa Semanal
               </h3>
               <p className="text-sm text-gray-600">
@@ -239,7 +239,7 @@ export default async function HomePage() {
             </div>
             <div className="text-center">
               <div className="text-4xl mb-3">🌾</div>
-              <h3 className="font-semibold text-amber-900 mb-2">
+              <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Masa Madre Natural
               </h3>
               <p className="text-sm text-gray-600">
@@ -248,7 +248,7 @@ export default async function HomePage() {
             </div>
             <div className="text-center">
               <div className="text-4xl mb-3">📍</div>
-              <h3 className="font-semibold text-amber-900 mb-2">
+              <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Recogida Local
               </h3>
               <p className="text-sm text-gray-600">

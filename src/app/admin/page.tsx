@@ -292,10 +292,10 @@ export default function AdminDashboard() {
 
           {/* Semana actual */}
           <div className="flex items-center gap-2">
-            <Package className="w-4 h-4 text-amber-600" />
+            <Package className="w-4 h-4 text-brand-gold" />
             <span className="text-sm font-medium text-gray-700">
               Semana{' '}
-              <span className="font-bold text-amber-700">{data.currentWeekId}</span>
+              <span className="font-bold text-brand-gold-dark">{data.currentWeekId}</span>
             </span>
           </div>
 
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold text-gray-900">Pedidos recientes</h3>
                 <Link
                   href="/admin/pedidos"
-                  className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1"
+                  className="text-sm text-brand-gold hover:text-brand-gold-dark font-medium flex items-center gap-1"
                 >
                   Ver todos
                   <ArrowUpRight className="w-4 h-4" />
@@ -368,7 +368,7 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold text-gray-900">Stock semanal</h3>
                 <Link
                   href="/admin/stock"
-                  className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1"
+                  className="text-sm text-brand-gold hover:text-brand-gold-dark font-medium flex items-center gap-1"
                 >
                   Gestionar
                   <ArrowUpRight className="w-4 h-4" />

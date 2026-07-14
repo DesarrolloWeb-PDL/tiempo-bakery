@@ -133,7 +133,7 @@ function SiteContentActions({ loading, saving, message, onSave, onReset }: Omit<
         <button
           onClick={onSave}
           disabled={loading || saving}
-          className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50"
+          className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
         >
           {saving ? 'Guardando...' : 'Guardar contenido'}
         </button>
@@ -507,7 +507,7 @@ function DeliveryConfigAdmin({
             <button
               onClick={onSavePreventa}
               disabled={loadingPreventa || savingPreventa}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm rounded-lg hover:bg-amber-700 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-brand-gold text-white text-sm rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
             >
               <Save className="w-4 h-4" /> {savingPreventa ? 'Guardando...' : 'Guardar'}
             </button>
@@ -613,7 +613,7 @@ function DeliveryConfigAdmin({
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Truck className="w-4 h-4 text-amber-600" />
+          <Truck className="w-4 h-4 text-brand-gold" />
           <h3 className="font-semibold text-gray-900 text-sm">Costos de envío</h3>
         </div>
         <div className="px-5 py-4 space-y-4">
@@ -653,7 +653,7 @@ function DeliveryConfigAdmin({
             <button
               onClick={onSaveShipping}
               disabled={loadingShipping || savingShipping}
-              className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50"
+              className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
             >
               {savingShipping ? 'Guardando...' : 'Guardar costos'}
             </button>
@@ -722,7 +722,7 @@ function DeliveryConfigAdmin({
           {pickupPointsMsg && <p className={`text-sm ${pickupPointsMsg.includes('guardado') || pickupPointsMsg.includes('agregado') || pickupPointsMsg.includes('eliminado') ? 'text-green-600' : 'text-red-600'}`}>{pickupPointsMsg}</p>}
 
           <div className="flex gap-2">
-            <button onClick={onSavePickupPoint} disabled={savingPickupPoint} className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm rounded-lg hover:bg-amber-700 disabled:opacity-50">
+            <button onClick={onSavePickupPoint} disabled={savingPickupPoint} className="flex items-center gap-2 px-4 py-2 bg-brand-gold text-white text-sm rounded-lg hover:bg-brand-gold-dark disabled:opacity-50">
               {editingPickupId ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {savingPickupPoint ? 'Guardando...' : editingPickupId ? 'Actualizar punto' : 'Agregar punto'}
             </button>
             {editingPickupId && (
@@ -738,7 +738,7 @@ function DeliveryConfigAdmin({
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-amber-600" /> {point.name}
+                      <MapPin className="w-4 h-4 text-brand-gold" /> {point.name}
                     </p>
                     <p className="text-sm text-gray-600">{point.address}, {point.city} {point.postalCode}</p>
                     <p className="text-xs text-gray-500">{point.schedule}</p>
@@ -1195,23 +1195,23 @@ export default function AdminConfigPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <Settings className="w-6 h-6 text-amber-600" /> Configuración
+        <Settings className="w-6 h-6 text-brand-gold" /> Configuración
       </h1>
       <Tabs.Root defaultValue="entrega" className="w-full">
         <Tabs.List className="flex gap-2 border-b mb-6 overflow-x-auto flex-nowrap -mx-4 px-4 scrollbar-none">
-          <Tabs.Trigger value="entrega" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+          <Tabs.Trigger value="entrega" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
             <Truck className="w-4 h-4" /> Entrega
           </Tabs.Trigger>
-          <Tabs.Trigger value="footer" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+          <Tabs.Trigger value="footer" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
             <Layout className="w-4 h-4" /> Footer
           </Tabs.Trigger>
-          <Tabs.Trigger value="nav" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+          <Tabs.Trigger value="nav" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
             <Palette className="w-4 h-4" /> Nav
           </Tabs.Trigger>
-          <Tabs.Trigger value="sobre" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+          <Tabs.Trigger value="sobre" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
             <Info className="w-4 h-4" /> Nosotros
           </Tabs.Trigger>
-          <Tabs.Trigger value="contacto" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:text-amber-700 flex items-center gap-1">
+          <Tabs.Trigger value="contacto" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
             <Mail className="w-4 h-4" /> Contacto
           </Tabs.Trigger>
         </Tabs.List>
@@ -1296,7 +1296,7 @@ export default function AdminConfigPage() {
       {/* Seguridad */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-10">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Key className="w-4 h-4 text-amber-600" />
+          <Key className="w-4 h-4 text-brand-gold" />
           <h3 className="font-semibold text-gray-900 text-sm">Seguridad</h3>
         </div>
         <div className="px-5 py-4 space-y-4">
@@ -1327,7 +1327,7 @@ export default function AdminConfigPage() {
       {/* Info del sistema */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-6">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Settings className="w-4 h-4 text-amber-600" />
+          <Settings className="w-4 h-4 text-brand-gold" />
           <h3 className="font-semibold text-gray-900 text-sm">Información del sistema</h3>
         </div>
         <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1347,7 +1347,7 @@ export default function AdminConfigPage() {
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-6">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Settings className="w-4 h-4 text-amber-600" />
+          <Settings className="w-4 h-4 text-brand-gold" />
           <h3 className="font-semibold text-gray-900 text-sm">Pagos</h3>
         </div>
         <div className="px-5 py-4 space-y-3">
@@ -1367,7 +1367,7 @@ export default function AdminConfigPage() {
             </div>
             <button
               onClick={() => router.push('/admin/pagos')}
-              className="px-3 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700"
+              className="px-3 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark"
             >
               Ir a Pagos
             </button>
@@ -1378,7 +1378,7 @@ export default function AdminConfigPage() {
       {/* Personalización de la app */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Palette className="w-4 h-4 text-amber-600" />
+          <Palette className="w-4 h-4 text-brand-gold" />
           <h3 className="font-semibold text-gray-900 text-sm">Personalización de la app</h3>
         </div>
         <div className="px-5 py-4 space-y-4">
@@ -1539,7 +1539,7 @@ export default function AdminConfigPage() {
             <button
               onClick={handleSaveTheme}
               disabled={loadingTheme || savingTheme}
-              className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50"
+              className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
             >
               {savingTheme ? 'Guardando...' : 'Guardar personalización'}
             </button>

@@ -122,7 +122,7 @@ export function CartSidebar() {
                     <Link
                       href={`/productos/${item.slug}`}
                       onClick={closeCart}
-                      className="font-medium text-sm hover:text-amber-700 transition-colors line-clamp-2"
+                      className="font-medium text-sm hover:text-brand-gold-dark transition-colors line-clamp-2"
                     >
                       {item.name}
                     </Link>
@@ -142,7 +142,7 @@ export function CartSidebar() {
                         onChange={(e) =>
                           updateSliced(item.productId, e.target.checked)
                         }
-                        className="rounded border-gray-300 text-amber-600 focus:ring-amber-600"
+                        className="rounded border-gray-300 text-brand-gold focus:ring-brand-gold"
                       />
                       <label
                         htmlFor={`sliced-${item.productId}`}
@@ -182,7 +182,7 @@ export function CartSidebar() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-amber-700">
+                        <span className="text-sm font-semibold text-brand-gold-dark">
                           {formatCurrency(item.price * item.quantity)}
                         </span>
                         <Button
@@ -214,7 +214,7 @@ export function CartSidebar() {
                 <span className="text-sm font-medium text-gray-700">
                   Subtotal
                 </span>
-                <span className="text-xl font-bold text-amber-700">
+                <span className="text-xl font-bold text-brand-gold-dark">
                   {formatCurrency(subtotal)}
                 </span>
               </div>

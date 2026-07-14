@@ -43,7 +43,7 @@ export default function ImagenUploadAdmin({ onUpload }: { onUpload: (url: string
       />
       <button
         type="button"
-        className="px-3 py-2 bg-amber-600 text-white rounded hover:bg-amber-700"
+        className="px-3 py-2 bg-brand-gold text-white rounded hover:bg-brand-gold-dark"
         onClick={() => inputRef.current?.click()}
         disabled={loading}
       >

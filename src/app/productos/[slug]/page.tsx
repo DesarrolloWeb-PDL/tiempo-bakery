@@ -83,10 +83,10 @@ export default async function ProductoDetallePage({ params }: { params: { slug: 
         <ProductGallery images={galleryImages} productName={product.name} />
 
         <div className="space-y-4">
-          <p className="text-sm text-amber-700 font-medium">{product.category.name}</p>
+          <p className="text-sm text-brand-gold-dark font-medium">{product.category.name}</p>
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
           <p className="text-gray-600">{product.description}</p>
-          <p className="text-2xl font-bold text-amber-700">
+          <p className="text-2xl font-bold text-brand-gold-dark">
             {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(product.price)}
           </p>
 

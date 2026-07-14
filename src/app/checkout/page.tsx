@@ -172,7 +172,7 @@ export default function CheckoutPage() {
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-amber-700 mb-4"
+            className="inline-flex items-center text-sm text-gray-600 hover:text-brand-gold-dark mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Volver a la tienda
@@ -191,7 +191,7 @@ export default function CheckoutPage() {
                     <div
                       className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                         step.complete || currentStep === step.number
-                          ? 'border-amber-600 bg-amber-600 text-white'
+                          ? 'border-brand-gold bg-brand-gold text-white'
                           : 'border-gray-300 bg-white text-gray-400'
                       }`}
                     >
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
                     <span
                       className={`ml-2 text-sm font-medium ${
                         step.complete || currentStep === step.number
-                          ? 'text-amber-700'
+                          ? 'text-brand-gold-dark'
                           : 'text-gray-500'
                       }`}
                     >
@@ -214,7 +214,7 @@ export default function CheckoutPage() {
                   {index < steps.length - 1 && (
                     <div
                       className={`flex-1 h-0.5 mx-4 ${
-                        step.complete ? 'bg-amber-600' : 'bg-gray-300'
+                        step.complete ? 'bg-brand-gold' : 'bg-gray-300'
                       }`}
                     />
                   )}
@@ -318,12 +318,12 @@ export default function CheckoutPage() {
                 )}
                 <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
                   <span>Total</span>
-                  <span className="text-amber-700">{formatCurrency(total)}</span>
+                  <span className="text-brand-gold-dark">{formatCurrency(total)}</span>
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-amber-50 rounded-lg">
-                <p className="text-xs text-amber-800">
+              <div className="mt-6 p-4 bg-brand-gold/5 rounded-lg">
+                <p className="text-xs text-brand-gold-dark">
                   <strong>Nota:</strong>{' '}
                   {selectedPaymentProvider === PaymentProvider.BANK_TRANSFER
                     ? 'No vas a ser redirigido: vas a recibir los datos para hacer la transferencia al confirmar el pedido.'

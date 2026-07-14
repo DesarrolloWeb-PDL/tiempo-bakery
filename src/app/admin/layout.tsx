@@ -91,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo en el sidebar */}
         <div className="p-6 border-b border-gray-200">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-600 rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-brand-gold rounded-xl flex items-center justify-center shrink-0">
               <Image
                 src="/img/espiga.png"
                 alt="Tiempo Bakery Admin"
@@ -121,11 +121,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-amber-50 text-amber-700'
+                    ? 'bg-brand-gold/10 text-brand-gold-dark'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 )}
               >
-                <Icon className={cn('w-5 h-5', isActive ? 'text-amber-600' : 'text-gray-400')} />
+                <Icon className={cn('w-5 h-5', isActive ? 'text-brand-gold' : 'text-gray-400')} />
                 {item.label}
               </Link>
             )

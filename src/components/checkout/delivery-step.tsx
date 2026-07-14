@@ -128,7 +128,7 @@ export function DeliveryStep({
                   onClick={() => handleMethodChange(option.method)}
                   className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                     isSelected
-                      ? 'border-amber-600 bg-amber-50'
+                      ? 'border-brand-gold bg-brand-gold/5'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -136,13 +136,13 @@ export function DeliveryStep({
                     <div className="flex gap-3">
                       <Icon
                         className={`h-5 w-5 mt-1 ${
-                          isSelected ? 'text-amber-600' : 'text-gray-400'
+                          isSelected ? 'text-brand-gold' : 'text-gray-400'
                         }`}
                       />
                       <div>
                         <h3
                           className={`font-semibold ${
-                            isSelected ? 'text-amber-900' : 'text-gray-900'
+                            isSelected ? 'text-brand-gold-dark' : 'text-gray-900'
                           }`}
                         >
                           {option.title}
@@ -177,7 +177,7 @@ export function DeliveryStep({
                   onClick={() => onUpdate({ pickupLocationId: point.id })}
                   className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                     pickupLocationId === point.id
-                      ? 'border-amber-600 bg-amber-50'
+                      ? 'border-brand-gold bg-brand-gold/5'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -185,7 +185,7 @@ export function DeliveryStep({
                   <p className="text-sm text-gray-600 mt-1">
                     {point.address}, {point.city}
                   </p>
-                  <p className="text-sm text-amber-700 mt-1">{point.schedule}</p>
+                  <p className="text-sm text-brand-gold-dark mt-1">{point.schedule}</p>
                   {point.instructions && (
                     <p className="text-xs text-gray-500 mt-1">{point.instructions}</p>
                   )}

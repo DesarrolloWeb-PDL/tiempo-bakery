@@ -59,24 +59,24 @@ export function TimeGatingBanner({
   }
 
   return (
-    <Card className="bg-amber-50 border-amber-200">
+    <Card className="bg-brand-gold/5 border-brand-gold/20">
       <CardContent className="flex items-center gap-3 p-4">
         <div className="flex-shrink-0">
-          <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
-            <AlertCircle className="h-5 w-5 text-amber-600" />
+          <div className="h-10 w-10 rounded-full bg-brand-gold/10 flex items-center justify-center">
+            <AlertCircle className="h-5 w-5 text-brand-gold" />
           </div>
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold text-amber-900">
+          <h3 className="font-semibold text-brand-gold-dark">
             Temporalmente cerrado
           </h3>
           {timeRemaining && (
-            <p className="text-sm text-amber-700">
+            <p className="text-sm text-brand-gold-dark">
               Abrimos en: {timeRemaining.days}d {timeRemaining.hours}h{' '}
               {timeRemaining.minutes}m
             </p>
           )}
-          <p className="text-xs text-amber-700 mt-2">
+          <p className="text-xs text-brand-gold-dark mt-2">
             Horario de pedidos: {openingDayLabel} {String(openingHour).padStart(2, '0')}:{String(openingMinute).padStart(2, '0')} a {closingDayLabel} {String(closingHour).padStart(2, '0')}:{String(closingMinute).padStart(2, '0')}
           </p>
         </div>

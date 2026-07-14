@@ -120,7 +120,7 @@ export function ReviewStep({
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-semibold text-amber-700">
+                  <p className="font-semibold text-brand-gold-dark">
                     {formatCurrency(item.price * item.quantity)}
                   </p>
                 </div>
@@ -158,7 +158,7 @@ export function ReviewStep({
                 <p>
                   {selectedPickupPoint.address}, {selectedPickupPoint.city}
                 </p>
-                <p className="text-amber-700 mt-1">{selectedPickupPoint.schedule}</p>
+                <p className="text-brand-gold-dark mt-1">{selectedPickupPoint.schedule}</p>
               </div>
             )}
             {(deliveryData.method === DeliveryMethod.LOCAL_DELIVERY ||
@@ -186,8 +186,8 @@ export function ReviewStep({
                   onClick={() => onPaymentProviderChange(option.value)}
                   className={`rounded-lg border p-4 text-left transition-colors ${
                     selected
-                      ? 'border-amber-600 bg-amber-50 ring-1 ring-amber-200'
-                      : 'border-gray-200 bg-white hover:border-amber-300'
+                      ? 'border-brand-gold bg-brand-gold/5 ring-1 ring-brand-gold/20'
+                      : 'border-gray-200 bg-white hover:border-brand-gold/40'
                   }`}
                 >
                   <p className="text-sm font-medium text-gray-900">{option.label}</p>
@@ -240,7 +240,7 @@ export function ReviewStep({
             </div>
             <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
               <span>Total</span>
-              <span className="text-amber-700">{formatCurrency(total)}</span>
+              <span className="text-brand-gold-dark">{formatCurrency(total)}</span>
             </div>
           </div>
         </div>

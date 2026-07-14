@@ -227,11 +227,11 @@ export function ProductCard({
       <CardHeader className="space-y-2 pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-amber-700">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-gold-dark">
               {category.name}
             </p>
             <Link href={`/productos/${slug}`} className="relative z-10 block">
-              <h3 className="line-clamp-2 text-lg font-semibold text-gray-900 transition-colors group-hover:text-amber-800">
+              <h3 className="line-clamp-2 text-lg font-semibold text-gray-900 transition-colors group-hover:text-brand-gold-dark">
                 {name}
               </h3>
             </Link>

@@ -138,7 +138,7 @@ export default function AdminPagosPage() {
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <CreditCard className="w-6 h-6 text-amber-600" /> Pagos
+          <CreditCard className="w-6 h-6 text-brand-gold" /> Pagos
         </h1>
         <p className="text-sm text-gray-500 mt-1">
           Configurá métodos de pago para checkout y definí el proveedor por defecto.
@@ -195,7 +195,7 @@ export default function AdminPagosPage() {
                   <button
                     type="button"
                     onClick={() => setShowKeys(!showKeys)}
-                    className="text-xs text-amber-600 hover:text-amber-700 inline-flex items-center gap-1"
+                    className="text-xs text-brand-gold hover:text-brand-gold-dark inline-flex items-center gap-1"
                   >
                     {showKeys ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     {showKeys ? 'Ocultar' : 'Mostrar'}
@@ -306,7 +306,7 @@ export default function AdminPagosPage() {
                 </select>
               </div>
 
-              <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-4 space-y-4">
+              <div className="rounded-lg border border-brand-gold/20 bg-brand-gold/5 p-4 space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">Transferencia bancaria</p>
@@ -433,7 +433,7 @@ export default function AdminPagosPage() {
               <button
                 onClick={handleSave}
                 disabled={loading || saving || !effectiveProviders.length}
-                className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 inline-flex items-center gap-2"
+                className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50 inline-flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 {saving ? 'Guardando...' : 'Guardar pagos'}

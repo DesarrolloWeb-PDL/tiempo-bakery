@@ -93,7 +93,7 @@ export function ProductGallery({ images, productName }: { images: ProductGallery
               onClick={() => setSelectedIndex(index)}
               className={cn(
                 'relative aspect-square overflow-hidden rounded-lg border bg-gray-100 transition-colors',
-                index === selectedIndex ? 'border-amber-500 ring-2 ring-amber-200' : 'border-gray-200 hover:border-gray-300'
+                index === selectedIndex ? 'border-brand-gold ring-2 ring-brand-gold/20' : 'border-gray-200 hover:border-gray-300'
               )}
               aria-label={`Ver imagen ${index + 1} de ${productName}`}
             >

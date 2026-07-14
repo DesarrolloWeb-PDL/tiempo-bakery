@@ -106,7 +106,7 @@ export default function OrderConfirmationPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-amber-600 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-brand-gold mx-auto mb-4" />
           <p className="text-gray-600">Cargando información del pedido...</p>
         </div>
       </div>
@@ -322,10 +322,10 @@ export default function OrderConfirmationPage() {
                       <p className="font-medium text-sm text-gray-700 mb-1">
                         Punto de recogida
                       </p>
-                      <div className="bg-amber-50 rounded-lg p-3">
+                      <div className="bg-brand-gold/5 rounded-lg p-3">
                         <p className="font-medium">{order.pickupLocation}</p>
                         <p className="text-sm text-gray-600">{order.pickupAddress}</p>
-                        <p className="text-sm text-amber-700 mt-1">
+                        <p className="text-sm text-brand-gold-dark mt-1">
                           {order.pickupSchedule}
                         </p>
                       </div>
@@ -384,7 +384,7 @@ export default function OrderConfirmationPage() {
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                     <span>Total</span>
-                    <span className="text-amber-700">{formatCurrency(order.total)}</span>
+                    <span className="text-brand-gold-dark">{formatCurrency(order.total)}</span>
                   </div>
                 </div>
 
@@ -406,27 +406,27 @@ export default function OrderConfirmationPage() {
                 </div>
 
                 {isBankTransfer && bankTransfer?.enabled && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-2">
-                    <p className="text-sm font-semibold text-amber-900">Datos para transferir</p>
+                  <div className="rounded-lg border border-brand-gold/20 bg-brand-gold/5 p-4 space-y-2">
+                    <p className="text-sm font-semibold text-brand-gold-dark">Datos para transferir</p>
                     {bankTransfer.bankName && (
-                      <p className="text-sm text-amber-900"><span className="font-medium">Banco:</span> {bankTransfer.bankName}</p>
+                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">Banco:</span> {bankTransfer.bankName}</p>
                     )}
                     {bankTransfer.accountHolder && (
-                      <p className="text-sm text-amber-900"><span className="font-medium">Titular:</span> {bankTransfer.accountHolder}</p>
+                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">Titular:</span> {bankTransfer.accountHolder}</p>
                     )}
                     {bankTransfer.alias && (
-                      <p className="text-sm text-amber-900"><span className="font-medium">Alias:</span> {bankTransfer.alias}</p>
+                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">Alias:</span> {bankTransfer.alias}</p>
                     )}
                     {bankTransfer.cbu && (
-                      <p className="text-sm text-amber-900 break-all"><span className="font-medium">CBU:</span> {bankTransfer.cbu}</p>
+                      <p className="text-sm text-brand-gold-dark break-all"><span className="font-medium">CBU:</span> {bankTransfer.cbu}</p>
                     )}
                     {bankTransfer.cuit && (
-                      <p className="text-sm text-amber-900"><span className="font-medium">CUIT:</span> {bankTransfer.cuit}</p>
+                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">CUIT:</span> {bankTransfer.cuit}</p>
                     )}
                     {bankTransfer.notes && (
-                      <p className="text-sm text-amber-800 whitespace-pre-line">{bankTransfer.notes}</p>
+                      <p className="text-sm text-brand-gold-dark whitespace-pre-line">{bankTransfer.notes}</p>
                     )}
-                    <p className="text-xs text-amber-800">Subí o enviá el comprobante para agilizar la confirmación.</p>
+                    <p className="text-xs text-brand-gold-dark">Subí o enviá el comprobante para agilizar la confirmación.</p>
                   </div>
                 )}
 
@@ -438,8 +438,8 @@ export default function OrderConfirmationPage() {
                   </Link>
                 </div>
 
-                <div className="bg-amber-50 rounded-lg p-4">
-                  <p className="text-xs text-amber-800">
+                <div className="bg-brand-gold/5 rounded-lg p-4">
+                  <p className="text-xs text-brand-gold-dark">
                     <strong>📞 ¿Necesitas ayuda?</strong>
                     <br />
                     Contáctanos en contacto@tiempobakery.com

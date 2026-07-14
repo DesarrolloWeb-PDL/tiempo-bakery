@@ -221,7 +221,7 @@ export default function AdminStockPage() {
           <button
             onClick={handleResync}
             disabled={loading || saving || resyncing}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-brand-gold-dark bg-brand-gold/5 border border-brand-gold/20 rounded-lg hover:bg-brand-gold/15 transition-colors disabled:opacity-50"
           >
             {resyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             Re-sincronizar semana
@@ -230,7 +230,7 @@ export default function AdminStockPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark transition-colors disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Guardar cambios
@@ -266,7 +266,7 @@ export default function AdminStockPage() {
         </button>
         <button
           onClick={() => setCurrentWeekId(getISOWeek(new Date()))}
-          className="px-3 py-2 text-sm text-amber-600 font-medium bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+          className="px-3 py-2 text-sm text-brand-gold font-medium bg-brand-gold/5 rounded-lg hover:bg-brand-gold/15 transition-colors"
         >
           Hoy
         </button>
@@ -350,7 +350,7 @@ export default function AdminStockPage() {
                       key={row.productId}
                       className={cn(
                         'grid grid-cols-12 gap-4 px-5 py-4 items-center',
-                        isEdited && 'bg-amber-50/50'
+                        isEdited && 'bg-brand-gold/5'
                       )}
                     >
                       {/* Producto */}
@@ -411,8 +411,8 @@ export default function AdminStockPage() {
                             }
                           }}
                           className={cn(
-                            'w-16 text-center text-sm font-semibold border rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500',
-                            isEdited ? 'border-amber-400 bg-amber-50' : 'border-gray-200'
+                            'w-16 text-center text-sm font-semibold border rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold',
+                            isEdited ? 'border-brand-gold bg-brand-gold/5' : 'border-gray-200'
                           )}
                         />
                       </div>
@@ -431,7 +431,7 @@ export default function AdminStockPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="pointer-events-auto flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-xl shadow-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+            className="pointer-events-auto flex items-center gap-2 px-6 py-3 bg-brand-gold text-white font-medium rounded-xl shadow-lg hover:bg-brand-gold-dark transition-colors disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             Guardar {Object.keys(edits).length} cambio{Object.keys(edits).length !== 1 ? 's' : ''}

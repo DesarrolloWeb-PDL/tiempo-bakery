@@ -102,7 +102,7 @@ export default function AdminDatosPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <Database className="w-5 h-5 text-amber-600" /> Base de Datos e Imagenes
+            <Database className="w-5 h-5 text-brand-gold" /> Base de Datos e Imagenes
           </h2>
           <p className="text-sm text-gray-500 mt-1">
             Vista central de productos, logos e informacion clave de la aplicacion.
@@ -158,7 +158,7 @@ export default function AdminDatosPage() {
             <div className="pt-2 flex gap-2">
               <Link
                 href="/admin/configuracion"
-                className="px-3 py-2 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                className="px-3 py-2 text-sm bg-brand-gold text-white rounded-lg hover:bg-brand-gold-dark"
               >
                 Editar tema/logo
               </Link>
@@ -219,11 +219,11 @@ export default function AdminDatosPage() {
           )}
 
           {data.flagged.productsWithoutImageBankRow.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <h3 className="font-semibold text-amber-800 mb-2">Productos con imagen principal fuera del banco</h3>
+            <div className="bg-brand-gold/5 border border-brand-gold/20 rounded-xl p-4">
+              <h3 className="font-semibold text-brand-gold-dark mb-2">Productos con imagen principal fuera del banco</h3>
               <div className="space-y-2">
                 {data.flagged.productsWithoutImageBankRow.map((p) => (
-                  <div key={p.id} className="text-sm text-amber-700">
+                  <div key={p.id} className="text-sm text-brand-gold-dark">
                     {p.name} ({p.slug}) - {p.imageUrl}
                   </div>
                 ))}

@@ -45,7 +45,7 @@ function LoginForm() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-brand-gold rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ChefHat className="w-9 h-9 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Tiempo Bakery</h1>
@@ -78,7 +78,7 @@ function LoginForm() {
                   autoComplete="current-password"
                   autoFocus
                   required
-                  className="w-full px-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                  className="w-full px-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold"
                 />
                 <button
                   type="button"
@@ -97,7 +97,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading || !password}
-              className="w-full py-2.5 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-brand-gold text-white font-medium rounded-lg hover:bg-brand-gold-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Entrar al panel
