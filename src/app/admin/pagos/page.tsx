@@ -6,6 +6,8 @@ import { CreditCard, Eye, EyeOff, Save } from 'lucide-react'
 type PaymentSettingsState = {
   defaultProvider: 'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'
   enabledProviders: Array<'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'>
+  stripeEnabled: boolean
+  mercadopagoEnabled: boolean
   stripeSecretKey: string
   mercadopagoAccessToken: string
   options: Array<{
@@ -28,6 +30,8 @@ type PaymentSettingsState = {
 const DEFAULT_PAYMENT_SETTINGS: PaymentSettingsState = {
   defaultProvider: 'STRIPE',
   enabledProviders: [],
+  stripeEnabled: false,
+  mercadopagoEnabled: false,
   stripeSecretKey: '',
   mercadopagoAccessToken: '',
   options: [],
@@ -58,34 +62,16 @@ export default function AdminPagosPage() {
       paymentSettings.bankTransfer.cbu.trim()
     )
 
-  const stripeKeyEntered = paymentSettings.stripeSecretKey.trim().length > 0
-  const mpKeyEntered = paymentSettings.mercadopagoAccessToken.trim().length > 0
-
-  const keyProviders = useMemo(() => {
-    const providers: Array<'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'> = []
-    if (stripeKeyEntered) providers.push('STRIPE')
-    if (mpKeyEntered) providers.push('MERCADO_PAGO')
-    return providers
-  }, [stripeKeyEntered, mpKeyEntered])
-
-  const envProviders = useMemo(
-    () =>
-      paymentSettings.enabledProviders.filter(
-        (p) => p !== 'BANK_TRANSFER' && !keyProviders.includes(p)
-      ),
-    [paymentSettings.enabledProviders, keyProviders]
-  )
-
   const effectiveProviders = useMemo(
     () =>
       Array.from(
         new Set([
-          ...envProviders,
-          ...keyProviders,
+          ...(paymentSettings.stripeEnabled ? ['STRIPE' as const] : []),
+          ...(paymentSettings.mercadopagoEnabled ? ['MERCADO_PAGO' as const] : []),
           ...(bankTransferConfigured ? ['BANK_TRANSFER' as const] : []),
         ])
       ) as Array<'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'>,
-    [envProviders, keyProviders, bankTransferConfigured]
+    [paymentSettings.stripeEnabled, paymentSettings.mercadopagoEnabled, bankTransferConfigured]
   )
 
   const fetchPaymentSettings = async () => {
@@ -121,13 +107,20 @@ export default function AdminPagosPage() {
       const res = await fetch('/api/admin/pagos', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentSettings),
+        body: JSON.stringify({
+          defaultProvider: paymentSettings.defaultProvider,
+          stripeEnabled: paymentSettings.stripeEnabled,
+          mercadopagoEnabled: paymentSettings.mercadopagoEnabled,
+          stripeSecretKey: paymentSettings.stripeSecretKey,
+          mercadopagoAccessToken: paymentSettings.mercadopagoAccessToken,
+          bankTransfer: paymentSettings.bankTransfer,
+        }),
       })
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'No se pudo guardar la configuración de pagos')
 
-      setMessage(`Proveedor por defecto actualizado a ${data.label}`)
+      setMessage(`Configuración guardada. Proveedor por defecto: ${data.label}`)
       await fetchPaymentSettings()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'No se pudo guardar la configuración de pagos')
@@ -163,27 +156,20 @@ export default function AdminPagosPage() {
                     option.value === 'BANK_TRANSFER'
                       ? bankTransferConfigured
                       : option.value === 'STRIPE'
-                        ? option.enabled || stripeKeyEntered
+                        ? paymentSettings.stripeEnabled
                         : option.value === 'MERCADO_PAGO'
-                          ? option.enabled || mpKeyEntered
-                          : option.enabled
-
-                  const source =
-                    option.value === 'BANK_TRANSFER'
-                      ? available
-                        ? 'Configurado en este panel'
-                        : 'Completá los datos para habilitarlo'
-                      : option.enabled
-                        ? 'Configurado en variables de entorno'
-                        : stripeKeyEntered || mpKeyEntered
-                          ? 'Configurado con credencial guardada'
-                          : 'Falta credencial (completá abajo)'
+                          ? paymentSettings.mercadopagoEnabled
+                          : false
 
                   return (
                     <div key={option.value} className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
                       <div>
                         <p className="text-sm font-medium text-gray-800">{option.label}</p>
-                        <p className="text-xs text-gray-500">{source}</p>
+                        <p className="text-xs text-gray-500">
+                          {option.value === 'BANK_TRANSFER'
+                            ? available ? 'Configurado' : 'Completá los datos para habilitarlo'
+                            : available ? 'Habilitado' : 'Deshabilitado'}
+                        </p>
                         {option.description && <p className="text-[11px] text-gray-400 mt-1">{option.description}</p>}
                       </div>
                       <span
@@ -211,35 +197,75 @@ export default function AdminPagosPage() {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Stripe Secret Key</label>
-                    <input
-                      type={showKeys ? 'text' : 'password'}
-                      value={paymentSettings.stripeSecretKey}
-                      onChange={(e) =>
-                        setPaymentSettings((prev) => ({
-                          ...prev,
-                          stripeSecretKey: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono"
-                      placeholder="sk_live_..."
-                    />
+                  <div className="space-y-3 border border-gray-200 rounded-lg p-3 bg-white">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-gray-700">Stripe</label>
+                      <label className="flex items-center gap-2 text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={paymentSettings.stripeEnabled}
+                          onChange={(e) =>
+                            setPaymentSettings((prev) => ({
+                              ...prev,
+                              stripeEnabled: e.target.checked,
+                            }))
+                          }
+                          className="rounded"
+                        />
+                        Habilitado
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Secret Key</label>
+                      <input
+                        type={showKeys ? 'text' : 'password'}
+                        value={paymentSettings.stripeSecretKey}
+                        onChange={(e) =>
+                          setPaymentSettings((prev) => ({
+                            ...prev,
+                            stripeSecretKey: e.target.value,
+                          }))
+                        }
+                        disabled={!paymentSettings.stripeEnabled}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono disabled:opacity-50 disabled:bg-gray-100"
+                        placeholder="sk_live_..."
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Mercado Pago Access Token</label>
-                    <input
-                      type={showKeys ? 'text' : 'password'}
-                      value={paymentSettings.mercadopagoAccessToken}
-                      onChange={(e) =>
-                        setPaymentSettings((prev) => ({
-                          ...prev,
-                          mercadopagoAccessToken: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono"
-                      placeholder="APP_USR-..."
-                    />
+                  <div className="space-y-3 border border-gray-200 rounded-lg p-3 bg-white">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-gray-700">Mercado Pago</label>
+                      <label className="flex items-center gap-2 text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={paymentSettings.mercadopagoEnabled}
+                          onChange={(e) =>
+                            setPaymentSettings((prev) => ({
+                              ...prev,
+                              mercadopagoEnabled: e.target.checked,
+                            }))
+                          }
+                          className="rounded"
+                        />
+                        Habilitado
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Access Token</label>
+                      <input
+                        type={showKeys ? 'text' : 'password'}
+                        value={paymentSettings.mercadopagoAccessToken}
+                        onChange={(e) =>
+                          setPaymentSettings((prev) => ({
+                            ...prev,
+                            mercadopagoAccessToken: e.target.value,
+                          }))
+                        }
+                        disabled={!paymentSettings.mercadopagoEnabled}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono disabled:opacity-50 disabled:bg-gray-100"
+                        placeholder="APP_USR-..."
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -262,10 +288,10 @@ export default function AdminPagosPage() {
                       option.value === 'BANK_TRANSFER'
                         ? bankTransferConfigured
                         : option.value === 'STRIPE'
-                          ? option.enabled || stripeKeyEntered
+                          ? paymentSettings.stripeEnabled
                           : option.value === 'MERCADO_PAGO'
-                            ? option.enabled || mpKeyEntered
-                            : option.enabled
+                            ? paymentSettings.mercadopagoEnabled
+                            : false
                     return (
                       <option key={option.value} value={option.value} disabled={!available}>
                         {option.label}{!available ? ' (no disponible)' : ''}
@@ -394,7 +420,7 @@ export default function AdminPagosPage() {
               </div>
 
               <p className="text-xs text-gray-500">
-                Configurá las credenciales de Stripe y Mercado Pago arriba, o definilas como variables de entorno (STRIPE_SECRET_KEY, MERCADOPAGO_ACCESS_TOKEN) en el servidor. La transferencia bancaria no usa credenciales externas.
+                Activá cada proveedor con su toggle, ingresá la credencial correspondiente y guardá. Si desactivás un proveedor, su credencial se elimina de la base de datos. La transferencia bancaria no usa credenciales externas.
               </p>
 
               {message && <p className="text-sm text-gray-600">{message}</p>}

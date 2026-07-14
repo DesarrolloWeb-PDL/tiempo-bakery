@@ -11,6 +11,8 @@ import {
   setMercadoPagoAccessToken,
   getStripeSecretKey,
   getMercadoPagoAccessToken,
+  deleteStripeSecretKey,
+  deleteMercadoPagoAccessToken,
 } from '@/lib/payments';
 import { z } from 'zod';
 
@@ -18,6 +20,8 @@ export const dynamic = 'force-dynamic';
 
 const updateSchema = z.object({
   defaultProvider: z.enum(PAYMENT_PROVIDERS),
+  stripeEnabled: z.boolean().optional().default(false),
+  mercadopagoEnabled: z.boolean().optional().default(false),
   stripeSecretKey: z.string().max(500).optional().default(''),
   mercadopagoAccessToken: z.string().max(500).optional().default(''),
   bankTransfer: z.object({
@@ -40,6 +44,8 @@ export async function GET() {
     ...settings,
     stripeSecretKey: stripeSecretKey ?? '',
     mercadopagoAccessToken: mercadopagoAccessToken ?? '',
+    stripeEnabled: settings.enabledProviders.includes('STRIPE'),
+    mercadopagoEnabled: settings.enabledProviders.includes('MERCADO_PAGO'),
     options: PAYMENT_PROVIDERS.map((provider) => ({
       value: provider,
       label: PAYMENT_PROVIDER_LABELS[provider],
@@ -57,8 +63,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
-    const settings = await getPaymentSettings();
-    const { defaultProvider, stripeSecretKey, mercadopagoAccessToken, bankTransfer } = parsed.data;
+    const { defaultProvider, stripeEnabled, mercadopagoEnabled, stripeSecretKey, mercadopagoAccessToken, bankTransfer } = parsed.data;
 
     const bankTransferWillBeEnabled =
       bankTransfer.enabled &&
@@ -71,39 +76,44 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const stripeWillBeEnabled = !!stripeSecretKey.trim();
-    const mpWillBeEnabled = !!mercadopagoAccessToken.trim();
-
-    const nextEnabledProviders: PaymentProvider[] = [
-      ...(stripeWillBeEnabled ? ['STRIPE' as PaymentProvider] : []),
-      ...(mpWillBeEnabled ? ['MERCADO_PAGO' as PaymentProvider] : []),
-      ...settings.enabledProviders.filter(
-        (p) =>
-          (p === 'STRIPE' && !stripeWillBeEnabled) ||
-          (p === 'MERCADO_PAGO' && !mpWillBeEnabled)
-      ),
-    ];
-
-    if (bankTransferWillBeEnabled && !nextEnabledProviders.includes('BANK_TRANSFER')) {
-      nextEnabledProviders.push('BANK_TRANSFER');
-    }
-
-    if (!isPaymentProvider(defaultProvider) || !nextEnabledProviders.includes(defaultProvider)) {
-      return NextResponse.json(
-        { error: 'El proveedor seleccionado no está habilitado en el entorno' },
-        { status: 400 }
-      );
-    }
-
-    if (stripeSecretKey.trim()) {
+    // Guardar o eliminar credenciales según el estado enabled
+    if (stripeEnabled) {
+      if (!stripeSecretKey.trim()) {
+        return NextResponse.json(
+          { error: 'Stripe está habilitado pero no ingresaste la Secret Key' },
+          { status: 400 }
+        );
+      }
       await setStripeSecretKey(stripeSecretKey.trim());
+    } else {
+      await deleteStripeSecretKey();
     }
 
-    if (mercadopagoAccessToken.trim()) {
+    if (mercadopagoEnabled) {
+      if (!mercadopagoAccessToken.trim()) {
+        return NextResponse.json(
+          { error: 'Mercado Pago está habilitado pero no ingresaste el Access Token' },
+          { status: 400 }
+        );
+      }
       await setMercadoPagoAccessToken(mercadopagoAccessToken.trim());
+    } else {
+      await deleteMercadoPagoAccessToken();
     }
 
     await setBankTransferSettings(bankTransfer);
+
+    const nextEnabledProviders: PaymentProvider[] = [];
+    if (stripeEnabled) nextEnabledProviders.push('STRIPE');
+    if (mercadopagoEnabled) nextEnabledProviders.push('MERCADO_PAGO');
+    if (bankTransferWillBeEnabled) nextEnabledProviders.push('BANK_TRANSFER');
+
+    if (!isPaymentProvider(defaultProvider) || !nextEnabledProviders.includes(defaultProvider)) {
+      return NextResponse.json(
+        { error: 'El proveedor seleccionado no está habilitado' },
+        { status: 400 }
+      );
+    }
 
     await setDefaultPaymentProvider(defaultProvider);
 

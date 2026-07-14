@@ -98,6 +98,18 @@ export async function setMercadoPagoAccessToken(token: string) {
   })
 }
 
+export async function deleteStripeSecretKey() {
+  try {
+    await prisma.siteConfig.delete({ where: { key: 'stripe_secret_key' } })
+  } catch {}
+}
+
+export async function deleteMercadoPagoAccessToken() {
+  try {
+    await prisma.siteConfig.delete({ where: { key: 'mercadopago_access_token' } })
+  } catch {}
+}
+
 export async function getEnabledPaymentProviders(): Promise<PaymentProvider[]> {
   const providers: PaymentProvider[] = []
 
