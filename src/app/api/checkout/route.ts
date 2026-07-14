@@ -287,33 +287,37 @@ export async function POST(request: NextRequest) {
       }
 
       if (selectedProvider === 'MERCADO_PAGO') {
-        const mpToken = await getMercadoPagoAccessToken()
-        const preference = await createMercadoPagoPreference({
-          orderId: order.id,
-          orderNumber: order.orderNumber,
-          customerName: data.customerName,
-          customerEmail: data.customerEmail,
-          customerPhone: data.customerPhone,
-          deliveryMethod: data.deliveryMethod,
-          shippingAddress: data.shippingAddress,
-          shippingPostal: data.shippingPostal,
-          items: order.items.map((item) => ({
-            productId: item.productId,
-            productName: item.productName,
-            quantity: item.quantity,
-            unitPrice: Number(item.unitPrice),
-            sliced: item.sliced,
-          })),
-          shippingCost,
-          accessToken: mpToken ?? undefined,
-        });
+        try {
+          const mpToken = await getMercadoPagoAccessToken()
+          const preference = await createMercadoPagoPreference({
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            customerName: data.customerName,
+            customerEmail: data.customerEmail,
+            customerPhone: data.customerPhone,
+            deliveryMethod: data.deliveryMethod,
+            shippingAddress: data.shippingAddress,
+            shippingPostal: data.shippingPostal,
+            items: order.items.map((item) => ({
+              productId: item.productId,
+              productName: item.productName,
+              quantity: item.quantity,
+              unitPrice: Number(item.unitPrice),
+              sliced: item.sliced,
+            })),
+            shippingCost,
+            accessToken: mpToken ?? undefined,
+          });
 
-        checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
+          checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
 
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { mercadopagoPaymentId: preference.id },
-        });
+          await prisma.order.update({
+            where: { id: order.id },
+            data: { mercadopagoPaymentId: preference.id },
+          });
+        } catch (mpError) {
+          console.error('MP error (continuando sin pago):', mpError);
+        }
       }
 
       if (selectedProvider === 'BANK_TRANSFER') {

@@ -107,7 +107,6 @@ export async function createMercadoPagoPreference(input: {
         failure: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=failure`,
         pending: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=pending`,
       },
-      auto_return: 'approved',
       notification_url: `${baseUrl}/api/webhooks/mercadopago`,
       external_reference: input.orderId,
       statement_descriptor: 'TIEMPOBAKERY',

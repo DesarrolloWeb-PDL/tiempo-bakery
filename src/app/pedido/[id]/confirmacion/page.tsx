@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams } from 'next/navigation';
-import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -152,10 +152,19 @@ export default function OrderConfirmationPage() {
   const isBankTransfer = order.paymentMethod === 'bank_transfer';
 
   return (
+    <>
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          .print-ticket, .print-ticket * { visibility: visible; }
+          .print-ticket { position: absolute; left: 0; top: 0; margin: 0 !important; max-width: 100% !important; border: none !important; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Success Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 no-print">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
             <CheckCircle className="h-10 w-10 text-green-600" />
           </div>
@@ -170,8 +179,66 @@ export default function OrderConfirmationPage() {
           </p>
         </div>
 
+        {/* Print Button */}
+        <div className="flex justify-center mb-6 gap-4 no-print">
+          <Button onClick={() => window.print()} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Imprimir comprobante
+          </Button>
+        </div>
+
+        {/* Printable Ticket */}
+        <div className="print-ticket bg-white border-2 border-gray-300 rounded-lg p-6 mb-6 max-w-sm mx-auto">
+          <div className="text-center border-b-2 border-dashed pb-3 mb-3">
+            <p className="text-lg font-bold">Tiempo Bakery</p>
+            <p className="text-xs text-gray-600">Micropanadería artesanal</p>
+          </div>
+          <div className="text-center mb-3">
+            <p className="text-[10px] text-gray-500">{order.orderNumber}</p>
+            <p className="text-2xl font-bold tracking-widest">{order.orderNumber}</p>
+            <div className="flex justify-center mt-2">
+              <img
+                src={`https://quickchart.io/qr?text=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/pedido/${order.id}/confirmacion`)}&size=150&margin=2`}
+                alt="QR del pedido"
+                className="w-24 h-24"
+              />
+            </div>
+          </div>
+          <div className="border-t border-dashed pt-3 mb-3 space-y-1">
+            <p className="text-xs"><span className="font-semibold">Cliente:</span> {order.customerName}</p>
+            <p className="text-xs"><span className="font-semibold">Fecha:</span> {new Date(order.createdAt).toLocaleDateString('es-ES')}</p>
+          </div>
+          <div className="border-t border-dashed pt-3 mb-3">
+            {order.items.map((item) => (
+              <div key={item.id} className="flex justify-between text-xs mb-1">
+                <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
+                <span className="font-semibold">{formatCurrency(item.subtotal)}</span>
+              </div>
+            ))}
+            <div className="flex justify-between text-xs border-t pt-1 mt-1">
+              <span className="font-semibold">Total</span>
+              <span className="font-semibold">{formatCurrency(order.total)}</span>
+            </div>
+          </div>
+          <div className="border-t border-dashed pt-3 text-center">
+            {order.deliveryMethod === 'PICKUP_POINT' && (
+              <>
+                <p className="font-semibold text-sm">{order.pickupLocation}</p>
+                <p className="text-xs text-gray-600">{order.pickupAddress}</p>
+                <p className="text-xs text-gray-600">{order.pickupSchedule}</p>
+              </>
+            )}
+            {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && (
+              <p className="text-xs">Envío a: {order.shippingAddress}, {order.shippingCity}</p>
+            )}
+          </div>
+          <div className="border-t-2 border-dashed mt-3 pt-2 text-center">
+            <p className="text-[10px] text-gray-400">Presentá este comprobante al retirar tu pedido</p>
+          </div>
+        </div>
+
         {/* Email Confirmation Notice */}
-        <Card className="mb-6 bg-blue-50 border-blue-200">
+        <Card className="mb-6 bg-blue-50 border-blue-200 no-print">
           <CardContent className="p-4">
             <p className="text-sm text-blue-800">
               📧 Si el email está bien ingresado, recibirás la confirmación en{' '}
@@ -384,5 +451,6 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

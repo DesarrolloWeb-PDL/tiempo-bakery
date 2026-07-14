@@ -138,16 +138,10 @@ export default function CheckoutPage() {
         throw new Error(result.error || 'Error al procesar el pedido');
       }
 
-      // Limpiar carrito
-      clearCart();
-
-      // Redirigir al checkout del proveedor seleccionado
-      if (result.checkoutUrl) {
-        window.location.href = result.checkoutUrl;
-      } else {
-        // Si no hay URL externa, ir a confirmación directamente
-        router.push(`/pedido/${result.orderId}/confirmacion`);
-      }
+      // Redirigir primero, luego limpiar carrito
+      const redirectUrl = result.checkoutUrl || `/pedido/${result.orderId}/confirmacion`;
+      window.location.href = redirectUrl;
+      setTimeout(() => clearCart(), 500);
     } catch (error) {
       console.error('Checkout error:', error);
       alert(error instanceof Error ? error.message : 'Error al procesar el pedido');
