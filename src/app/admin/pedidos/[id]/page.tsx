@@ -120,7 +120,7 @@ function Section({ title, icon: Icon, children }: {
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
       <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-        <Icon className="w-4 h-4 text-amber-600" />
+        <Icon className="w-4 h-4 text-brand-gold" />
         <h3 className="font-semibold text-gray-900 text-sm">{title}</h3>
       </div>
       <div className="px-5 py-4">{children}</div>
@@ -231,7 +231,7 @@ export default function AdminOrderDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 text-amber-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand-gold animate-spin" />
       </div>
     )
   }
@@ -241,7 +241,7 @@ export default function AdminOrderDetailPage() {
       <div className="text-center py-24">
         <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
         <p className="text-gray-500">Pedido no encontrado</p>
-        <Link href="/admin/pedidos" className="text-amber-600 text-sm mt-2 inline-block hover:underline">
+        <Link href="/admin/pedidos" className="text-brand-gold text-sm mt-2 inline-block hover:underline">
           Volver a pedidos
         </Link>
       </div>
@@ -311,12 +311,12 @@ export default function AdminOrderDetailPage() {
                       <div key={st} className="flex-1 flex items-center gap-1">
                         <div className={cn(
                           'flex-1 h-1.5 rounded-full transition-colors',
-                          isPast || isCurrent ? 'bg-amber-500' : 'bg-gray-200'
+                          isPast || isCurrent ? 'bg-brand-gold' : 'bg-gray-200'
                         )} />
                         {idx === STATUS_FLOW.length - 1 && (
                           <div className={cn(
                             'w-3 h-3 rounded-full border-2 transition-colors',
-                            isCurrent ? 'border-amber-500 bg-amber-500' : isPast ? 'border-amber-500 bg-amber-500' : 'border-gray-300 bg-white'
+                            isCurrent ? 'border-brand-gold bg-brand-gold' : isPast ? 'border-brand-gold bg-brand-gold' : 'border-gray-300 bg-white'
                           )} />
                         )}
                       </div>
@@ -338,7 +338,7 @@ export default function AdminOrderDetailPage() {
                           'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors border',
                           isCurrent
                             ? `${conf.bg} ${conf.color} border-transparent cursor-default`
-                            : 'bg-white text-gray-600 border-gray-200 hover:border-amber-300 hover:text-amber-700 hover:bg-amber-50',
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-brand-gold/40 hover:text-brand-gold-dark hover:bg-brand-gold/10',
                           saving && 'opacity-50'
                         )}
                       >
@@ -411,14 +411,14 @@ export default function AdminOrderDetailPage() {
               onChange={(e) => setAdminNotes(e.target.value)}
               placeholder="Añadir notas internas sobre este pedido..."
               rows={3}
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none"
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold resize-none"
             />
             <div className="flex items-center justify-between mt-2">
               <p className="text-xs text-gray-400">Estas notas no son visibles para el cliente</p>
               <button
                 onClick={saveNotes}
                 disabled={saving}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark transition-colors disabled:opacity-50"
               >
                 {saving && <Loader2 className="w-3 h-3 animate-spin" />}
                 Guardar notas
@@ -434,12 +434,12 @@ export default function AdminOrderDetailPage() {
             <div className="space-y-3">
               <Field label="Nombre" value={order.customerName} />
               <Field label="Email" value={
-                <a href={`mailto:${order.customerEmail}`} className="text-amber-600 hover:underline">
+                <a href={`mailto:${order.customerEmail}`} className="text-brand-gold hover:underline">
                   {order.customerEmail}
                 </a>
               } />
               <Field label="Teléfono" value={
-                <a href={`tel:${order.customerPhone}`} className="text-amber-600 hover:underline">
+                <a href={`tel:${order.customerPhone}`} className="text-brand-gold hover:underline">
                   {order.customerPhone}
                 </a>
               } />

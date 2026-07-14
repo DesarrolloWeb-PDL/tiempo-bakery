@@ -134,7 +134,7 @@ export default function AdminPreventaPage() {
           <button
             onClick={handleSave}
             disabled={saving || loading || !dirty}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-brand-gold rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             Guardar

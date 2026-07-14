@@ -581,7 +581,7 @@ export default function AdminProductosPage() {
         <div className="flex gap-2">
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-amber-600 rounded-lg hover:bg-amber-700"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-brand-gold rounded-lg hover:bg-brand-gold-dark"
           >
             <Plus className="w-4 h-4" />
             Nuevo producto
@@ -777,7 +777,7 @@ export default function AdminProductosPage() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingImage}
-                className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-gold px-3 py-2 text-sm font-medium text-white hover:bg-brand-gold-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {uploadingImage ? 'Subiendo portada...' : 'Subir portada'}
               </button>
@@ -806,9 +806,9 @@ export default function AdminProductosPage() {
                       }}
                     />
                     <div className="text-xs text-gray-500 space-y-1">
-                      <p className="text-amber-700 font-semibold">Portada actual</p>
+                      <p className="text-brand-gold-dark font-semibold">Portada actual</p>
                       {localPreviewUrl && !form.imageUrl && (
-                        <p className="text-amber-600 font-medium">Vista previa local — subiendo al servidor…</p>
+                        <p className="text-brand-gold font-medium">Vista previa local — subiendo al servidor…</p>
                       )}
                       {form.imageUrl && (
                         <p className="text-green-700 font-medium">Imagen guardada en servidor</p>
@@ -852,7 +852,7 @@ export default function AdminProductosPage() {
                           <button
                             type="button"
                             onClick={() => handleSetAsPrimaryImage(index)}
-                            className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800 hover:bg-amber-200"
+                            className="inline-flex items-center gap-1 rounded-full bg-brand-gold/10 px-2 py-1 text-xs font-medium text-brand-gold-dark hover:bg-brand-gold/20"
                           >
                             <Star className="w-3 h-3" />
                             Usar como portada
@@ -946,7 +946,7 @@ export default function AdminProductosPage() {
             <button type="button" onClick={resetForm} className="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={saving || uploadingImage || creatingCategory} className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-60">
+            <button type="submit" disabled={saving || uploadingImage || creatingCategory} className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-brand-gold rounded-lg hover:bg-brand-gold-dark disabled:opacity-60">
               <Save className="w-4 h-4" />
               {saving ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear producto'}
             </button>
@@ -1032,7 +1032,7 @@ export default function AdminProductosPage() {
                             <p>{p.currentWeekStock.reservedStock} reservadas, {p.currentWeekStock.sold} vendidas</p>
                           </div>
                         ) : (
-                          <p className="text-xs text-amber-700">Semana actual sin inicializar</p>
+                          <p className="text-xs text-brand-gold-dark">Semana actual sin inicializar</p>
                         )}
                       </div>
                     ) : (

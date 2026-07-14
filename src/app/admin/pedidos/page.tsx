@@ -198,7 +198,7 @@ function PedidosContent() {
               placeholder="Buscar por nº pedido, nombre o email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold"
             />
           </div>
 
@@ -208,7 +208,7 @@ function PedidosContent() {
             <select
               value={status}
               onChange={(e) => handleFilterChange(setStatus)(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 bg-white"
+              className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-white"
             >
               {STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -220,7 +220,7 @@ function PedidosContent() {
           <select
             value={paymentStatus}
             onChange={(e) => handleFilterChange(setPaymentStatus)(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 bg-white"
+            className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-white"
           >
             {PAYMENT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -229,7 +229,7 @@ function PedidosContent() {
 
           <button
             type="submit"
-            className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
+            className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark transition-colors"
           >
             Buscar
           </button>
@@ -273,11 +273,11 @@ function PedidosContent() {
                   <Link
                     key={order.id}
                     href={`/admin/pedidos/${order.id}`}
-                    className="flex md:grid md:grid-cols-12 gap-4 px-5 py-4 hover:bg-amber-50/40 transition-colors items-center group"
+                    className="flex md:grid md:grid-cols-12 gap-4 px-5 py-4 hover:bg-brand-gold/5 transition-colors items-center group"
                   >
                     {/* Número */}
                     <div className="md:col-span-2 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 group-hover:text-amber-700 transition-colors">
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-gold-dark transition-colors">
                         {order.orderNumber}
                       </p>
                       <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
@@ -326,7 +326,7 @@ function PedidosContent() {
                       <span className="text-sm font-semibold text-gray-900">
                         {formatCurrency(order.total)}
                       </span>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-amber-500 transition-colors" />
+                      <ArrowUpRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-gold transition-colors" />
                     </div>
                   </Link>
                 )
