@@ -104,11 +104,16 @@ export default function AdminPagosPage() {
     setSaving(true)
     setMessage(null)
     try {
+      const defaultProvider =
+        effectiveProviders.includes(paymentSettings.defaultProvider)
+          ? paymentSettings.defaultProvider
+          : effectiveProviders[0] || paymentSettings.defaultProvider
+
       const res = await fetch('/api/admin/pagos', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          defaultProvider: paymentSettings.defaultProvider,
+          defaultProvider,
           stripeEnabled: paymentSettings.stripeEnabled,
           mercadopagoEnabled: paymentSettings.mercadopagoEnabled,
           stripeSecretKey: paymentSettings.stripeSecretKey,

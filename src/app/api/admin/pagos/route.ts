@@ -4,7 +4,6 @@ import {
   PAYMENT_PROVIDERS,
   type PaymentProvider,
   getPaymentSettings,
-  isPaymentProvider,
   setBankTransferSettings,
   setDefaultPaymentProvider,
   setStripeSecretKey,
@@ -108,14 +107,11 @@ export async function PUT(request: NextRequest) {
     if (mercadopagoEnabled) nextEnabledProviders.push('MERCADO_PAGO');
     if (bankTransferWillBeEnabled) nextEnabledProviders.push('BANK_TRANSFER');
 
-    if (!isPaymentProvider(defaultProvider) || !nextEnabledProviders.includes(defaultProvider)) {
-      return NextResponse.json(
-        { error: 'El proveedor seleccionado no está habilitado' },
-        { status: 400 }
-      );
-    }
+    const finalDefault = nextEnabledProviders.includes(defaultProvider as PaymentProvider)
+      ? defaultProvider
+      : nextEnabledProviders[0] ?? defaultProvider;
 
-    await setDefaultPaymentProvider(defaultProvider);
+    await setDefaultPaymentProvider(finalDefault);
 
     return NextResponse.json({
       success: true,
