@@ -35,13 +35,22 @@ function mapDbError(error: unknown, fallback: string) {
   return payload
 }
 
+const hexColor = z.string().regex(/^#[0-9A-F]{6}$/i)
+
 const themeSchema = z.object({
   appTitle: z.string().min(1).max(100),
   appSubtitle: z.string().max(200),
   logoUrl: z.string().min(1).max(500).optional().or(z.literal('')),
-  primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
-  secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i),
-  accentColor: z.string().regex(/^#[0-9A-F]{6}$/i),
+  primaryColor: hexColor,
+  primaryHover: hexColor,
+  secondaryColor: hexColor,
+  accentColor: hexColor,
+  bgBody: hexColor,
+  bgCard: hexColor,
+  textPrimary: hexColor,
+  textMuted: hexColor,
+  fontHeading: z.string().min(1).max(100),
+  fontBody: z.string().min(1).max(100),
 })
 
 type ThemeConfig = z.infer<typeof themeSchema>
@@ -50,9 +59,16 @@ const DEFAULT_THEME: ThemeConfig = {
   appTitle: 'Tiempo Bakery',
   appSubtitle: 'Micropanadería artesanal por encargo semanal',
   logoUrl: '/img/espiga.png',
-  primaryColor: '#d89a44',
+  primaryColor: '#d2a859',
+  primaryHover: '#b8923a',
   secondaryColor: '#2c2c2c',
   accentColor: '#f5f5f5',
+  bgBody: '#f0ede8',
+  bgCard: '#ffffff',
+  textPrimary: '#212429',
+  textMuted: '#6b7280',
+  fontHeading: 'system-ui',
+  fontBody: 'system-ui',
 }
 
 export async function GET() {
@@ -65,8 +81,15 @@ export async function GET() {
             'theme_appSubtitle',
             'theme_logoUrl',
             'theme_primaryColor',
+            'theme_primaryHover',
             'theme_secondaryColor',
             'theme_accentColor',
+            'theme_bgBody',
+            'theme_bgCard',
+            'theme_textPrimary',
+            'theme_textMuted',
+            'theme_fontHeading',
+            'theme_fontBody',
           ],
         },
       },
@@ -140,14 +163,7 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE() {
   try {
-    const keys = [
-      'theme_appTitle',
-      'theme_appSubtitle',
-      'theme_logoUrl',
-      'theme_primaryColor',
-      'theme_secondaryColor',
-      'theme_accentColor',
-    ]
+    const keys = Object.keys(DEFAULT_THEME).map((k) => `theme_${k}`)
 
     const updates = Object.entries(DEFAULT_THEME).map(([key, value]) =>
       db.siteConfig.upsert({

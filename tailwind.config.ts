@@ -53,6 +53,14 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
         brand: {
+          primary: 'var(--brand-primary)',
+          'primary-hover': 'var(--brand-primary-hover)',
+          secondary: 'var(--brand-secondary)',
+          accent: 'var(--brand-accent)',
+          'bg-body': 'var(--brand-bg-body)',
+          'bg-card': 'var(--brand-bg-card)',
+          'text-primary': 'var(--brand-text-primary)',
+          'text-muted': 'var(--brand-text-muted)',
           gold: {
             DEFAULT: '#d2a859',
             light: '#e8c97a',
@@ -81,6 +89,10 @@ const config = {
             900: '#212429',
           },
         },
+      },
+      fontFamily: {
+        heading: ['var(--brand-font-heading)', 'system-ui', 'sans-serif'],
+        body: ['var(--brand-font-body)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -789,9 +789,16 @@ export default function AdminConfigPage() {
     appTitle: 'Tiempo Bakery',
     appSubtitle: 'Micropanadería artesanal por encargo semanal',
     logoUrl: '/img/espiga.png',
-    primaryColor: '#d89a44',
+    primaryColor: '#d2a859',
+    primaryHover: '#b8923a',
     secondaryColor: '#2c2c2c',
     accentColor: '#f5f5f5',
+    bgBody: '#f0ede8',
+    bgCard: '#ffffff',
+    textPrimary: '#212429',
+    textMuted: '#6b7280',
+    fontHeading: 'system-ui',
+    fontBody: 'system-ui',
   })
   const [loadingPayments, setLoadingPayments] = useState(true)
   const [paymentSettings, setPaymentSettings] = useState<{
@@ -1464,68 +1471,103 @@ export default function AdminConfigPage() {
           </div>
 
           {/* Colores */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Color primario</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.primaryColor}
+          <div>
+            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Colores de la marca</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {([
+                { key: 'primaryColor', label: 'Color primario (botones, links)' },
+                { key: 'primaryHover', label: 'Primario hover' },
+                { key: 'secondaryColor', label: 'Color secundario (headers)' },
+                { key: 'accentColor', label: 'Color de acento' },
+                { key: 'bgBody', label: 'Fondo del body' },
+                { key: 'bgCard', label: 'Fondo de tarjetas' },
+                { key: 'textPrimary', label: 'Color de texto principal' },
+                { key: 'textMuted', label: 'Color de texto secundario' },
+              ] as const).map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={(theme as any)[key]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                      className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={(theme as any)[key]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                      placeholder="#000000"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tipografía */}
+          <div>
+            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Tipografía</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Fuente para títulos</label>
+                <select
+                  value={theme.fontHeading}
                   disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
-                  className="h-10 w-20 rounded border border-gray-200 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.primaryColor}
+                  onChange={(e) => setTheme({ ...theme, fontHeading: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                >
+                  <optgroup label="Sistema">
+                    <option value="system-ui">system-ui (predeterminado)</option>
+                    <option value="serif">Serif</option>
+                    <option value="sans-serif">Sans-serif</option>
+                    <option value="monospace">Monospace</option>
+                  </optgroup>
+                  <optgroup label="Google Fonts (títulos)">
+                    <option value="'Playfair Display', serif">Playfair Display</option>
+                    <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
+                    <option value="'Libre Baskerville', serif">Libre Baskerville</option>
+                    <option value="'DM Serif Display', serif">DM Serif Display</option>
+                    <option value="'Lora', serif">Lora</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Fuente para cuerpo de texto</label>
+                <select
+                  value={theme.fontBody}
                   disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
-                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
-                  placeholder="#000000"
-                />
+                  onChange={(e) => setTheme({ ...theme, fontBody: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                >
+                  <optgroup label="Sistema">
+                    <option value="system-ui">system-ui (predeterminado)</option>
+                    <option value="serif">Serif</option>
+                    <option value="sans-serif">Sans-serif</option>
+                    <option value="monospace">Monospace</option>
+                  </optgroup>
+                  <optgroup label="Google Fonts (cuerpo)">
+                    <option value="'Lato', sans-serif">Lato</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                    <option value="'Raleway', sans-serif">Raleway</option>
+                    <option value="'Nunito', sans-serif">Nunito</option>
+                    <option value="'Work Sans', sans-serif">Work Sans</option>
+                  </optgroup>
+                </select>
               </div>
             </div>
-
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Color secundario</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.secondaryColor}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, secondaryColor: e.target.value })}
-                  className="h-10 w-20 rounded border border-gray-200 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.secondaryColor}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, secondaryColor: e.target.value })}
-                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
-                  placeholder="#000000"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Color de acentos</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.accentColor}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, accentColor: e.target.value })}
-                  className="h-10 w-20 rounded border border-gray-200 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.accentColor}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, accentColor: e.target.value })}
-                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
-                  placeholder="#000000"
-                />
-              </div>
+            <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+              <span>Vista previa:</span>
+              <span style={{ fontFamily: theme.fontHeading }} className="text-base font-bold text-gray-800">
+                Título de ejemplo
+              </span>
+              <span style={{ fontFamily: theme.fontBody }} className="text-sm text-gray-600">
+                — Texto de cuerpo de ejemplo
+              </span>
             </div>
           </div>
 

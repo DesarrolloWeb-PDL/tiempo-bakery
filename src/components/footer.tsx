@@ -1,6 +1,6 @@
 'use client'
 
-import { useAppTheme } from '@/hooks/useAppTheme'
+import { useTheme } from '@/components/theme-provider'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
@@ -12,7 +12,7 @@ interface FooterProps {
 
 export default function Footer({ siteContent }: FooterProps) {
   const pathname = usePathname()
-  const { theme } = useAppTheme()
+  const theme = useTheme()
   const logoSrc = normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'
   const logoIsExternal = /^https?:\/\//i.test(logoSrc)
 

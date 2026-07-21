@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { CartSidebar } from "@/components/cart-sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteContent } from "@/lib/site-content";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Tiempo Bakery - Panadería Artesanal",
@@ -31,15 +29,17 @@ export default async function RootLayout({
 
   return (
     <html lang="es">
-      <body className={inter.className}>
-        <div className="flex flex-col min-h-screen">
-          <Header siteContent={siteContent} showCart={true} /> {/* Aseguramos que el carrito se muestre en el cliente */}
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer siteContent={siteContent} />
-          <CartSidebar />
-        </div>
+      <body>
+        <ThemeProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header siteContent={siteContent} showCart={true} />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer siteContent={siteContent} />
+            <CartSidebar />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

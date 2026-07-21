@@ -8,52 +8,9 @@ import { ShoppingCart, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
-import { useAppTheme } from '@/hooks/useAppTheme';
+import { useTheme } from '@/components/theme-provider';
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 import type { SiteContent } from '@/lib/site-content.shared';
-
-// Inyector de CSS de tema - integrado en Header para evitar error #418
-function ThemeStyleInjector() {
-  const { theme } = useAppTheme()
-
-  React.useEffect(() => {
-    let styleEl = document.getElementById('theme-styles')
-    if (!styleEl) {
-      styleEl = document.createElement('style')
-      styleEl.id = 'theme-styles'
-      document.head.appendChild(styleEl)
-    }
-
-    const css = `
-      :root {
-        --theme-primary: ${theme.primaryColor};
-        --theme-secondary: ${theme.secondaryColor};
-        --theme-accent: ${theme.accentColor};
-      }
-
-      .btn-primary, button[type="submit"]:not([class*="outline"]):not([class*="ghost"]) {
-        background-color: var(--theme-primary);
-        color: white;
-      }
-
-      .btn-primary:hover, button[type="submit"]:not([class*="outline"]):not([class*="ghost"]):hover {
-        opacity: 0.9;
-      }
-
-      .text-primary, a.text-primary {
-        color: var(--theme-primary);
-      }
-
-      .badge-default {
-        background-color: var(--theme-primary);
-      }
-    `
-
-    styleEl.textContent = css
-  }, [theme])
-
-  return null
-}
 
 interface HeaderProps {
   showCart?: boolean;
@@ -64,7 +21,7 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
   const pathname = usePathname();
   const totalItems = useCartStore((state) => state.getTotalItems());
   const toggleCart = useCartStore((state) => state.toggleCart);
-  const { theme } = useAppTheme();
+  const theme = useTheme();
   const logoSrc = normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png';
   const logoIsExternal = /^https?:\/\//i.test(logoSrc);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -79,9 +36,7 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
   }
 
   return (
-    <>
-      <ThemeStyleInjector />
-      <header 
+    <header 
       className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60"
       style={{ borderColor: theme.primaryColor + '20' }}
     >
@@ -205,6 +160,5 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
         )}
       </div>
     </header>
-    </>
   );
 }
