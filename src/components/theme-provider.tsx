@@ -62,7 +62,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    fetch('/api/admin/tema')
+    fetch('/api/tema')
       .then((r) => r.json())
       .then((data) => {
         setTheme((prev) => ({ ...prev, ...data }))
