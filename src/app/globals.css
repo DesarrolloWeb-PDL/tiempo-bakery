@@ -4,49 +4,49 @@
 
 @layer base {
   :root {
-    --background: 40 10% 95%;
-    --foreground: 210 6% 13%;
+    --background: 40 10% 18%;
+    --foreground: 40 48% 59%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 6% 13%;
+    --card: 0 0% 17%;
+    --card-foreground: 40 48% 59%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 6% 13%;
+    --popover: 0 0% 17%;
+    --popover-foreground: 40 48% 59%;
 
     --primary: 40 48% 59%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 0 0% 17%;
 
-    --secondary: 40 20% 92%;
-    --secondary-foreground: 210 6% 13%;
+    --secondary: 40 15% 22%;
+    --secondary-foreground: 40 48% 59%;
 
-    --muted: 40 15% 92%;
-    --muted-foreground: 210 4% 35%;
+    --muted: 40 10% 20%;
+    --muted-foreground: 40 15% 45%;
 
     --accent: 40 48% 59%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 0 0% 17%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 15% 86%;
-    --input: 40 15% 86%;
+    --border: 40 15% 28%;
+    --input: 40 15% 28%;
     --ring: 40 48% 59%;
 
     --radius: 0.5rem;
 
-    --brand-primary: #d2a859;
-    --brand-primary-hover: #b8923a;
-    --brand-secondary: #2c2c2c;
-    --brand-accent: #f5f5f5;
-    --brand-bg-body: #f0ede8;
-    --brand-bg-card: #ffffff;
-    --brand-text-primary: #212429;
-    --brand-text-muted: #6b7280;
-    --brand-border: #d1d5db;
-    --brand-muted-bg: #f3f4f6;
-    --brand-hover-bg: #f9fafb;
-    --brand-sidebar-bg: #ffffff;
-    --brand-sidebar-text: #374151;
+    --brand-primary: #D4A95A;
+    --brand-primary-hover: #C49A4A;
+    --brand-secondary: #2C2C2C;
+    --brand-accent: #544A37;
+    --brand-bg-body: #3A352C;
+    --brand-bg-card: #2C2C2C;
+    --brand-text-primary: #D4A95A;
+    --brand-text-muted: #9D804B;
+    --brand-border: #544A37;
+    --brand-muted-bg: #433D32;
+    --brand-hover-bg: #4D4535;
+    --brand-sidebar-bg: #2C2C2C;
+    --brand-sidebar-text: #D4A95A;
     --brand-success: #10b981;
     --brand-warning: #f59e0b;
     --brand-error: #ef4444;
@@ -99,5 +99,6 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--brand-font-heading), system-ui, sans-serif;
+    color: var(--brand-primary);
   }
 }

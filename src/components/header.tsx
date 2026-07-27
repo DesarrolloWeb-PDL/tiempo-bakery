@@ -26,23 +26,33 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
   const logoIsExternal = /^https?:\/\//i.test(logoSrc);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isHydrated, setIsHydrated] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
 
   React.useEffect(() => { setIsHydrated(true); }, []);
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const safeTotalItems = isHydrated ? totalItems : 0;
 
-  // No renderizar en rutas de admin (el admin tiene su propio layout)
   if (pathname.startsWith('/admin')) {
     return null;
   }
 
   return (
-    <header 
-      className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60"
-      style={{ borderColor: theme.primaryColor + '20' }}
+    <header
+      className="sticky top-0 z-50 w-full border-b transition-all duration-300 backdrop-blur-xl"
+      style={{
+        backgroundColor: scrolled ? 'rgba(44, 44, 44, 0.85)' : 'rgba(44, 44, 44, 0.6)',
+        borderColor: theme.primaryColor + '30',
+      }}
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 min-w-0">
             {theme.logoUrl && (
               <Image
@@ -55,46 +65,44 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
               />
             )}
             <div className="min-w-0">
-              <span 
+              <span
                 className="text-base md:text-xl font-bold block leading-tight truncate"
                 style={{ color: theme.primaryColor }}
               >
                 {theme.appTitle}
               </span>
               {theme.appSubtitle && (
-                <span className="hidden sm:block text-xs text-gray-500 truncate">
+                <span className="hidden sm:block text-xs truncate" style={{ color: theme.textMuted }}>
                   {theme.appSubtitle}
                 </span>
               )}
             </div>
           </Link>
 
-          {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link
               href="/"
-              className="text-sm font-medium text-gray-700 transition-colors hover:opacity-75"
+              className="text-sm font-medium transition-colors hover:opacity-75"
               style={{ color: theme.primaryColor }}
             >
               {siteContent.navProductsLabel}
             </Link>
             <Link
               href="/sobre-nosotros"
-              className="text-sm font-medium text-gray-700 transition-colors hover:opacity-75"
+              className="text-sm font-medium transition-colors hover:opacity-75"
               style={{ color: theme.primaryColor }}
             >
               {siteContent.navAboutLabel}
             </Link>
             <Link
               href="/contacto"
-              className="text-sm font-medium text-gray-700 transition-colors hover:opacity-75"
+              className="text-sm font-medium transition-colors hover:opacity-75"
               style={{ color: theme.primaryColor }}
             >
               {siteContent.navContactLabel}
             </Link>
           </nav>
 
-          {/* Actions */}
           <div className="flex items-center space-x-4">
             {showCart && (
               <Button
@@ -109,6 +117,7 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
                   <Badge
                     variant="default"
                     className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                    style={{ backgroundColor: theme.primaryColor, color: '#2C2C2C' }}
                   >
                     {safeTotalItems}
                   </Badge>
@@ -116,22 +125,21 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
               </Button>
             )}
 
-            {/* Mobile Menu */}
             <Button
               variant="ghost"
               size="icon"
               className="md:hidden"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
               aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+              style={{ color: theme.primaryColor }}
             >
               <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
-        {/* Mobile Nav Panel */}
         {mobileMenuOpen && (
-          <nav className="md:hidden border-t py-4 flex flex-col gap-3" style={{ borderColor: theme.primaryColor + '20' }}>
+          <nav className="md:hidden border-t py-4 flex flex-col gap-3" style={{ borderColor: theme.primaryColor + '30' }}>
             <Link
               href="/"
               className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75"
