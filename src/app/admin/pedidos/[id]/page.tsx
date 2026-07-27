@@ -16,6 +16,7 @@ import {
   Loader2,
   ChefHat,
   Truck,
+  Trash2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
@@ -208,6 +209,21 @@ export default function AdminOrderDetailPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!order) return
+    if (!window.confirm(`¿Estás seguro de eliminar el pedido ${order.orderNumber}? Esta acción no se puede deshacer.`)) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/admin/pedidos/${order.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      router.push('/admin/pedidos')
+    } catch {
+      setSaveMessage('Error al eliminar el pedido')
+      setSaving(false)
+      setTimeout(() => setSaveMessage(null), 3000)
+    }
+  }
+
   const saveNotes = async () => {
     if (!order) return
     setSaving(true)
@@ -282,6 +298,14 @@ export default function AdminOrderDetailPage() {
           <p className="text-xs text-gray-400">Total</p>
           <p className="text-2xl font-bold text-gray-900">{formatCurrency(order.total)}</p>
         </div>
+        <button
+          onClick={handleDelete}
+          disabled={saving}
+          className="p-2 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+          title="Eliminar pedido"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Mensaje de guardado */}

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, Filter, RefreshCw, ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
+import { Search, Filter, RefreshCw, ChevronLeft, ChevronRight, ArrowUpRight, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ─────────────────────────────────────────────
@@ -269,66 +269,88 @@ function PedidosContent() {
             <div className="divide-y divide-gray-50">
               {data.orders.map((order) => {
                 const totalItems = order.items.reduce((s, i) => s + i.quantity, 0)
+
+                const handleDeleteOrder = async (e: React.MouseEvent) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  if (!window.confirm(`¿Eliminar pedido ${order.orderNumber}?`)) return
+                  try {
+                    const res = await fetch(`/api/admin/pedidos/${order.id}`, { method: 'DELETE' })
+                    if (!res.ok) throw new Error()
+                    fetchOrders()
+                  } catch {
+                    alert('Error al eliminar el pedido')
+                  }
+                }
+
                 return (
-                  <Link
-                    key={order.id}
-                    href={`/admin/pedidos/${order.id}`}
-                    className="flex md:grid md:grid-cols-12 gap-4 px-5 py-4 hover:bg-brand-gold/5 transition-colors items-center group"
-                  >
-                    {/* Número */}
-                    <div className="md:col-span-2 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-gold-dark transition-colors">
-                        {order.orderNumber}
-                      </p>
-                      <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
-                    </div>
+                  <div key={order.id} className="flex">
+                    <Link
+                      href={`/admin/pedidos/${order.id}`}
+                      className="flex-1 flex md:grid md:grid-cols-12 gap-4 px-5 py-4 hover:bg-brand-gold/5 transition-colors items-center group"
+                    >
+                      {/* Número */}
+                      <div className="md:col-span-2 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-gold-dark transition-colors">
+                          {order.orderNumber}
+                        </p>
+                        <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
+                      </div>
 
-                    {/* Cliente */}
-                    <div className="md:col-span-3 min-w-0 hidden md:block">
-                      <p className="text-sm text-gray-800 truncate">{order.customerName}</p>
-                      <p className="text-xs text-gray-400 truncate">{order.customerEmail}</p>
-                    </div>
+                      {/* Cliente */}
+                      <div className="md:col-span-3 min-w-0 hidden md:block">
+                        <p className="text-sm text-gray-800 truncate">{order.customerName}</p>
+                        <p className="text-xs text-gray-400 truncate">{order.customerEmail}</p>
+                      </div>
 
-                    {/* Estado */}
-                    <div className="md:col-span-2">
-                      <span
-                        className={cn(
-                          'inline-block text-xs px-2 py-1 rounded-full font-medium',
-                          STATUS_STYLES[order.status] ?? 'bg-gray-100 text-gray-600'
-                        )}
-                      >
-                        {STATUS_LABELS[order.status] ?? order.status}
-                      </span>
-                    </div>
+                      {/* Estado */}
+                      <div className="md:col-span-2">
+                        <span
+                          className={cn(
+                            'inline-block text-xs px-2 py-1 rounded-full font-medium',
+                            STATUS_STYLES[order.status] ?? 'bg-gray-100 text-gray-600'
+                          )}
+                        >
+                          {STATUS_LABELS[order.status] ?? order.status}
+                        </span>
+                      </div>
 
-                    {/* Pago (desktop) */}
-                    <div className="md:col-span-2 hidden md:block">
-                      <span
-                        className={cn(
-                          'inline-block text-xs px-2 py-1 rounded-full font-medium',
-                          PAYMENT_STYLES[order.paymentStatus] ?? 'bg-gray-100 text-gray-600'
-                        )}
-                      >
-                        {PAYMENT_LABELS[order.paymentStatus] ?? order.paymentStatus}
-                      </span>
-                    </div>
+                      {/* Pago (desktop) */}
+                      <div className="md:col-span-2 hidden md:block">
+                        <span
+                          className={cn(
+                            'inline-block text-xs px-2 py-1 rounded-full font-medium',
+                            PAYMENT_STYLES[order.paymentStatus] ?? 'bg-gray-100 text-gray-600'
+                          )}
+                        >
+                          {PAYMENT_LABELS[order.paymentStatus] ?? order.paymentStatus}
+                        </span>
+                      </div>
 
-                    {/* Entrega */}
-                    <div className="md:col-span-2 hidden md:block">
-                      <p className="text-sm text-gray-600">
-                        {DELIVERY_LABELS[order.deliveryMethod] ?? order.deliveryMethod}
-                      </p>
-                      <p className="text-xs text-gray-400">{totalItems} ud{totalItems !== 1 ? 's' : ''}.</p>
-                    </div>
+                      {/* Entrega */}
+                      <div className="md:col-span-2 hidden md:block">
+                        <p className="text-sm text-gray-600">
+                          {DELIVERY_LABELS[order.deliveryMethod] ?? order.deliveryMethod}
+                        </p>
+                        <p className="text-xs text-gray-400">{totalItems} ud{totalItems !== 1 ? 's' : ''}.</p>
+                      </div>
 
-                    {/* Total + icono */}
-                    <div className="md:col-span-1 flex items-center justify-end gap-1 ml-auto md:ml-0">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(order.total)}
-                      </span>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-gold transition-colors" />
-                    </div>
-                  </Link>
+                      {/* Total + icono */}
+                      <div className="md:col-span-1 flex items-center justify-end gap-1 ml-auto md:ml-0">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {formatCurrency(order.total)}
+                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-gold transition-colors" />
+                      </div>
+                    </Link>
+                    <button
+                      onClick={handleDeleteOrder}
+                      className="px-3 flex items-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      title="Eliminar pedido"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )
               })}
             </div>

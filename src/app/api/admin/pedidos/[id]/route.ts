@@ -99,3 +99,22 @@ export async function PATCH(
     return NextResponse.json({ error: 'Error al actualizar el pedido' }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const existing = await db.order.findUnique({ where: { id: params.id } })
+    if (!existing) {
+      return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
+    }
+
+    await db.order.delete({ where: { id: params.id } })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting order:', error)
+    return NextResponse.json({ error: 'Error al eliminar el pedido' }, { status: 500 })
+  }
+}
