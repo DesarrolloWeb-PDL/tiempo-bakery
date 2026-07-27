@@ -97,15 +97,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo en el sidebar */}
         <div className="p-6" style={{ borderBottomColor: 'var(--brand-border)', borderBottomWidth: '1px' }}>
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--brand-primary)' }}>
-              <Image
-                src="/img/espiga.png"
-                alt="Tiempo Bakery Admin"
-                width={36}
-                height={36}
-                className="h-6 w-6 object-contain"
-              />
-            </div>
+            <Image
+              src="/img/espiga.png"
+              alt="Tiempo Bakery Admin"
+              width={36}
+              height={36}
+              className="h-9 w-9 shrink-0 object-contain"
+            />
             <div>
               <p className="font-bold text-sm leading-none" style={{ color: 'var(--brand-text-primary)' }}>Tiempo Bakery</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--brand-text-muted)' }}>Panel de Admin</p>
