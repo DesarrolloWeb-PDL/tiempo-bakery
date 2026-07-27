@@ -799,6 +799,14 @@ export default function AdminConfigPage() {
     textMuted: '#6b7280',
     fontHeading: 'system-ui',
     fontBody: 'system-ui',
+    borderColor: '#d1d5db',
+    mutedBg: '#f3f4f6',
+    hoverBg: '#f9fafb',
+    sidebarBg: '#ffffff',
+    sidebarText: '#374151',
+    successColor: '#10b981',
+    warningColor: '#f59e0b',
+    errorColor: '#ef4444',
   })
   const [loadingPayments, setLoadingPayments] = useState(true)
   const [paymentSettings, setPaymentSettings] = useState<{
@@ -1475,14 +1483,80 @@ export default function AdminConfigPage() {
             <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Colores de la marca</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {([
-                { key: 'primaryColor', label: 'Color primario (botones, links)' },
+                { key: 'primaryColor', label: 'Primario (botones, links, acentos)' },
                 { key: 'primaryHover', label: 'Primario hover' },
-                { key: 'secondaryColor', label: 'Color secundario (headers)' },
-                { key: 'accentColor', label: 'Color de acento' },
+                { key: 'secondaryColor', label: 'Secundario (headers)' },
+                { key: 'accentColor', label: 'Acento' },
                 { key: 'bgBody', label: 'Fondo del body' },
                 { key: 'bgCard', label: 'Fondo de tarjetas' },
-                { key: 'textPrimary', label: 'Color de texto principal' },
-                { key: 'textMuted', label: 'Color de texto secundario' },
+                { key: 'textPrimary', label: 'Texto principal' },
+                { key: 'textMuted', label: 'Texto secundario' },
+              ] as const).map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={(theme as any)[key]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                      className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={(theme as any)[key]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                      placeholder="#000000"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Superficies y bordes</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {([
+                { key: 'borderColor', label: 'Color de bordes' },
+                { key: 'mutedBg', label: 'Fondo de superficies secundarias' },
+                { key: 'hoverBg', label: 'Fondo al pasar el mouse' },
+                { key: 'sidebarBg', label: 'Fondo del panel lateral' },
+                { key: 'sidebarText', label: 'Texto del panel lateral' },
+              ] as const).map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={(theme as any)[key]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                      className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={(theme as any)[key]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                      placeholder="#000000"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Estados y feedback</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {([
+                { key: 'successColor', label: 'Éxito / confirmación' },
+                { key: 'warningColor', label: 'Advertencia' },
+                { key: 'errorColor', label: 'Error / peligro' },
               ] as const).map(({ key, label }) => (
                 <div key={key}>
                   <label className="block text-xs text-gray-500 mb-1">{label}</label>

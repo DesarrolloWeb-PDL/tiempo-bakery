@@ -42,6 +42,14 @@
     --brand-bg-card: #ffffff;
     --brand-text-primary: #212429;
     --brand-text-muted: #6b7280;
+    --brand-border: #d1d5db;
+    --brand-muted-bg: #f3f4f6;
+    --brand-hover-bg: #f9fafb;
+    --brand-sidebar-bg: #ffffff;
+    --brand-sidebar-text: #374151;
+    --brand-success: #10b981;
+    --brand-warning: #f59e0b;
+    --brand-error: #ef4444;
     --brand-font-heading: system-ui;
     --brand-font-body: system-ui;
   }

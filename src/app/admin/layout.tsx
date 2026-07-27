@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -71,7 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
       {/* Overlay móvil */}
       {sidebarOpen && (
         <div
@@ -83,15 +83,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 z-30 transform transition-transform duration-300 ease-in-out flex flex-col',
+          'fixed top-0 left-0 h-full z-30 transform transition-transform duration-300 ease-in-out flex flex-col',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
           'lg:translate-x-0 lg:static lg:z-auto'
         )}
+        style={{
+          backgroundColor: 'var(--brand-sidebar-bg)',
+          borderRightColor: 'var(--brand-border)',
+          borderRightWidth: '1px',
+          width: '16rem',
+        }}
       >
         {/* Logo en el sidebar */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6" style={{ borderBottomColor: 'var(--brand-border)', borderBottomWidth: '1px' }}>
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-brand-gold rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--brand-primary)' }}>
               <Image
                 src="/img/espiga.png"
                 alt="Tiempo Bakery Admin"
@@ -101,8 +107,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               />
             </div>
             <div>
-              <p className="font-bold text-gray-900 text-sm leading-none">Tiempo Bakery</p>
-              <p className="text-xs text-gray-500 mt-0.5">Panel de Admin</p>
+              <p className="font-bold text-sm leading-none" style={{ color: 'var(--brand-text-primary)' }}>Tiempo Bakery</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--brand-text-muted)' }}>Panel de Admin</p>
             </div>
           </Link>
         </div>
@@ -120,12 +126,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-brand-gold/10 text-brand-gold-dark'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 )}
+                style={{
+                  color: isActive ? 'var(--brand-primary)' : 'var(--brand-sidebar-text)',
+                  backgroundColor: isActive ? 'color-mix(in srgb, var(--brand-primary) 10%, transparent)' : 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'var(--brand-hover-bg)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }
+                }}
               >
-                <Icon className={cn('w-5 h-5', isActive ? 'text-brand-gold' : 'text-gray-400')} />
+                <Icon className="w-5 h-5" style={{ color: isActive ? 'var(--brand-primary)' : 'var(--brand-text-muted)' }} />
                 {item.label}
               </Link>
             )
@@ -133,12 +150,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Footer del sidebar */}
-        <div className="p-4 border-t border-gray-200 space-y-1">
+        <div className="p-4 space-y-1" style={{ borderTopColor: 'var(--brand-border)', borderTopWidth: '1px' }}>
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            style={{ color: 'var(--brand-sidebar-text)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-hover-bg)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
           >
-            <ArrowLeft className="w-5 h-5 text-gray-400" />
+            <ArrowLeft className="w-5 h-5" style={{ color: 'var(--brand-text-muted)' }} />
             Volver a la tienda
           </Link>
           <button
@@ -146,20 +166,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               await fetch('/api/admin/login', { method: 'DELETE' })
               window.location.href = '/admin/login'
             }}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left"
+            style={{ color: 'var(--brand-error)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--brand-error) 10%, transparent)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
           >
-            <LogOut className="w-5 h-5 text-red-400" />
+            <LogOut className="w-5 h-5" style={{ color: 'var(--brand-error)' }} />
             Cerrar sesión
           </button>
         </div>
       </aside>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         {/* Topbar simple con hamburguesa y título de página */}
-        <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 lg:px-6">
+        <header
+          className="sticky top-0 z-10 px-4 py-3 flex items-center gap-4 lg:px-6"
+          style={{
+            backgroundColor: 'var(--brand-bg-card)',
+            borderBottomColor: 'var(--brand-border)',
+            borderBottomWidth: '1px',
+          }}
+        >
           <button
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 lg:hidden"
+            className="p-2 rounded-lg lg:hidden"
+            style={{ color: 'var(--brand-text-muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-hover-bg)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
           >
@@ -167,7 +200,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
 
           <div className="flex-1">
-            <h1 className="text-base font-semibold text-gray-900">
+            <h1 className="text-base font-semibold" style={{ color: 'var(--brand-text-primary)' }}>
               {currentPage?.label ?? 'Panel Admin'}
             </h1>
           </div>

@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState, createContext, useContext } from 'react'
+import { hexToHsl } from '@/lib/hex-to-hsl'
 
-type ThemeSettings = {
+export type ThemeSettings = {
   appTitle: string
   appSubtitle: string
   logoUrl: string
@@ -16,9 +17,17 @@ type ThemeSettings = {
   textMuted: string
   fontHeading: string
   fontBody: string
+  borderColor: string
+  mutedBg: string
+  hoverBg: string
+  sidebarBg: string
+  sidebarText: string
+  successColor: string
+  warningColor: string
+  errorColor: string
 }
 
-const DEFAULT_THEME: ThemeSettings = {
+export const DEFAULT_THEME: ThemeSettings = {
   appTitle: 'Tiempo Bakery',
   appSubtitle: 'Micropanadería artesanal por encargo semanal',
   logoUrl: '/img/espiga.png',
@@ -32,6 +41,14 @@ const DEFAULT_THEME: ThemeSettings = {
   textMuted: '#6b7280',
   fontHeading: 'system-ui',
   fontBody: 'system-ui',
+  borderColor: '#d1d5db',
+  mutedBg: '#f3f4f6',
+  hoverBg: '#f9fafb',
+  sidebarBg: '#ffffff',
+  sidebarText: '#374151',
+  successColor: '#10b981',
+  warningColor: '#f59e0b',
+  errorColor: '#ef4444',
 }
 
 const ThemeContext = createContext<ThemeSettings>(DEFAULT_THEME)
@@ -57,6 +74,61 @@ function getGoogleFontsUrl(fontName: string): string | null {
   return entry ? `https://fonts.googleapis.com/css2?${entry[1]}` : null
 }
 
+function applyTheme(theme: ThemeSettings) {
+  const root = document.documentElement
+
+  root.style.setProperty('--brand-primary', theme.primaryColor)
+  root.style.setProperty('--brand-primary-hover', theme.primaryHover)
+  root.style.setProperty('--brand-secondary', theme.secondaryColor)
+  root.style.setProperty('--brand-accent', theme.accentColor)
+  root.style.setProperty('--brand-bg-body', theme.bgBody)
+  root.style.setProperty('--brand-bg-card', theme.bgCard)
+  root.style.setProperty('--brand-text-primary', theme.textPrimary)
+  root.style.setProperty('--brand-text-muted', theme.textMuted)
+  root.style.setProperty('--brand-border', theme.borderColor)
+  root.style.setProperty('--brand-muted-bg', theme.mutedBg)
+  root.style.setProperty('--brand-hover-bg', theme.hoverBg)
+  root.style.setProperty('--brand-sidebar-bg', theme.sidebarBg)
+  root.style.setProperty('--brand-sidebar-text', theme.sidebarText)
+  root.style.setProperty('--brand-success', theme.successColor)
+  root.style.setProperty('--brand-warning', theme.warningColor)
+  root.style.setProperty('--brand-error', theme.errorColor)
+  root.style.setProperty('--brand-font-heading', theme.fontHeading)
+  root.style.setProperty('--brand-font-body', theme.fontBody)
+
+  const bgHsl = hexToHsl(theme.bgBody)
+  const fgHsl = hexToHsl(theme.textPrimary)
+  const cardHsl = hexToHsl(theme.bgCard)
+  const primaryHsl = hexToHsl(theme.primaryColor)
+  const secondaryHsl = hexToHsl(theme.accentColor)
+  const mutedFgHsl = hexToHsl(theme.textMuted)
+  const borderHsl = hexToHsl(theme.borderColor)
+  const destructiveHsl = hexToHsl(theme.errorColor)
+
+  root.style.setProperty('--background', bgHsl)
+  root.style.setProperty('--foreground', fgHsl)
+  root.style.setProperty('--card', cardHsl)
+  root.style.setProperty('--card-foreground', fgHsl)
+  root.style.setProperty('--popover', cardHsl)
+  root.style.setProperty('--popover-foreground', fgHsl)
+  root.style.setProperty('--primary', primaryHsl)
+  root.style.setProperty('--primary-foreground', cardHsl)
+  root.style.setProperty('--secondary', secondaryHsl)
+  root.style.setProperty('--secondary-foreground', fgHsl)
+  root.style.setProperty('--muted', hexToHsl(theme.mutedBg))
+  root.style.setProperty('--muted-foreground', mutedFgHsl)
+  root.style.setProperty('--accent', primaryHsl)
+  root.style.setProperty('--accent-foreground', cardHsl)
+  root.style.setProperty('--destructive', destructiveHsl)
+  root.style.setProperty('--destructive-foreground', cardHsl)
+  root.style.setProperty('--border', borderHsl)
+  root.style.setProperty('--input', borderHsl)
+  root.style.setProperty('--ring', primaryHsl)
+
+  document.body.style.backgroundColor = theme.bgBody
+  document.body.style.color = theme.textPrimary
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<ThemeSettings>(DEFAULT_THEME)
   const [loaded, setLoaded] = useState(false)
@@ -73,21 +145,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loaded) return
-
-    const root = document.documentElement
-    root.style.setProperty('--brand-primary', theme.primaryColor)
-    root.style.setProperty('--brand-primary-hover', theme.primaryHover)
-    root.style.setProperty('--brand-secondary', theme.secondaryColor)
-    root.style.setProperty('--brand-accent', theme.accentColor)
-    root.style.setProperty('--brand-bg-body', theme.bgBody)
-    root.style.setProperty('--brand-bg-card', theme.bgCard)
-    root.style.setProperty('--brand-text-primary', theme.textPrimary)
-    root.style.setProperty('--brand-text-muted', theme.textMuted)
-    root.style.setProperty('--brand-font-heading', theme.fontHeading)
-    root.style.setProperty('--brand-font-body', theme.fontBody)
-
-    document.body.style.backgroundColor = theme.bgBody
-    document.body.style.color = theme.textPrimary
+    applyTheme(theme)
 
     const googleUrl = getGoogleFontsUrl(theme.fontHeading) || getGoogleFontsUrl(theme.fontBody)
     if (googleUrl) {

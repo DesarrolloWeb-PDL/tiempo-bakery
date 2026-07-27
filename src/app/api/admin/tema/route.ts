@@ -51,6 +51,14 @@ const themeSchema = z.object({
   textMuted: hexColor,
   fontHeading: z.string().min(1).max(100),
   fontBody: z.string().min(1).max(100),
+  borderColor: hexColor,
+  mutedBg: hexColor,
+  hoverBg: hexColor,
+  sidebarBg: hexColor,
+  sidebarText: hexColor,
+  successColor: hexColor,
+  warningColor: hexColor,
+  errorColor: hexColor,
 })
 
 type ThemeConfig = z.infer<typeof themeSchema>
@@ -69,29 +77,23 @@ const DEFAULT_THEME: ThemeConfig = {
   textMuted: '#6b7280',
   fontHeading: 'system-ui',
   fontBody: 'system-ui',
+  borderColor: '#d1d5db',
+  mutedBg: '#f3f4f6',
+  hoverBg: '#f9fafb',
+  sidebarBg: '#ffffff',
+  sidebarText: '#374151',
+  successColor: '#10b981',
+  warningColor: '#f59e0b',
+  errorColor: '#ef4444',
 }
+
+const THEME_KEYS = Object.keys(DEFAULT_THEME) as (keyof ThemeConfig)[]
 
 export async function GET() {
   try {
     const configs = await db.siteConfig.findMany({
       where: {
-        key: {
-          in: [
-            'theme_appTitle',
-            'theme_appSubtitle',
-            'theme_logoUrl',
-            'theme_primaryColor',
-            'theme_primaryHover',
-            'theme_secondaryColor',
-            'theme_accentColor',
-            'theme_bgBody',
-            'theme_bgCard',
-            'theme_textPrimary',
-            'theme_textMuted',
-            'theme_fontHeading',
-            'theme_fontBody',
-          ],
-        },
+        key: { in: THEME_KEYS.map((k) => `theme_${k}`) },
       },
     })
 
@@ -127,7 +129,6 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
-    console.log('[Theme PUT] Received body:', body)
     const parsed = themeSchema.safeParse(body)
 
     if (!parsed.success) {
@@ -137,7 +138,6 @@ export async function PUT(req: NextRequest) {
         { status: 400 }
       )
     }
-    console.log('[Theme PUT] Validation passed, saving...')
 
     const normalizedData: ThemeConfig = {
       ...parsed.data,
@@ -163,8 +163,6 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE() {
   try {
-    const keys = Object.keys(DEFAULT_THEME).map((k) => `theme_${k}`)
-
     const updates = Object.entries(DEFAULT_THEME).map(([key, value]) =>
       db.siteConfig.upsert({
         where: { key: `theme_${key}` },
