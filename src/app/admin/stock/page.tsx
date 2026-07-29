@@ -40,6 +40,7 @@ function offsetWeek(weekId: string, offset: number): string {
 }
 
 function weekLabel(weekId: string): string {
+  if (!weekId) return ''
   const [year, wStr] = weekId.split('-W')
   const week = parseInt(wStr)
   const jan4 = new Date(Date.UTC(parseInt(year), 0, 4))
@@ -99,7 +100,7 @@ function MiniStockBar({ sold, reserved, free, max }: {
 // Página principal
 // ─────────────────────────────────────────────
 export default function AdminStockPage() {
-  const [currentWeekId, setCurrentWeekId] = useState(getISOWeek(new Date()))
+  const [currentWeekId, setCurrentWeekId] = useState('')
   const [data, setData] = useState<StockData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -108,7 +109,12 @@ export default function AdminStockPage() {
   // Edits: productId -> new maxStock value
   const [edits, setEdits] = useState<Record<string, number>>({})
 
+  useEffect(() => {
+    setCurrentWeekId(getISOWeek(new Date()))
+  }, [])
+
   const fetchStock = useCallback(async () => {
+    if (!currentWeekId) return
     setLoading(true)
     setEdits({})
     setMessage(null)
@@ -137,8 +143,10 @@ export default function AdminStockPage() {
   }, [currentWeekId])
 
   useEffect(() => {
-    fetchStock()
-  }, [fetchStock])
+    if (currentWeekId) {
+      fetchStock()
+    }
+  }, [fetchStock, currentWeekId])
 
   const getMaxStock = (row: StockRow) =>
     edits[row.productId] !== undefined ? edits[row.productId] : row.maxStock

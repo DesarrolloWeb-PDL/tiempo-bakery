@@ -77,6 +77,11 @@ export default function OrderConfirmationPage() {
   const [bankTransfer, setBankTransfer] = React.useState<BankTransferSettings | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [origin, setOrigin] = React.useState('');
+
+  React.useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   React.useEffect(() => {
     if (!orderId) return;
@@ -198,7 +203,7 @@ export default function OrderConfirmationPage() {
             <p className="text-2xl font-bold tracking-widest">{order.orderNumber}</p>
             <div className="flex justify-center mt-2">
               <img
-                src={`https://quickchart.io/qr?text=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/pedido/${order.id}/confirmacion`)}&size=150&margin=2`}
+                src={`https://quickchart.io/qr?text=${encodeURIComponent(`${origin}/pedido/${order.id}/confirmacion`)}&size=150&margin=2`}
                 alt="QR del pedido"
                 className="w-24 h-24"
               />

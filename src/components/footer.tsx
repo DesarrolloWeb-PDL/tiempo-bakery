@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useTheme } from '@/components/theme-provider'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -11,10 +12,15 @@ interface FooterProps {
 }
 
 export default function Footer({ siteContent }: FooterProps) {
+  const [year, setYear] = useState('')
   const pathname = usePathname()
   const theme = useTheme()
   const logoSrc = normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'
   const logoIsExternal = /^https?:\/\//i.test(logoSrc)
+
+  useEffect(() => {
+    setYear(String(new Date().getFullYear()))
+  }, [])
 
   if (pathname.startsWith('/admin')) {
     return null
@@ -90,7 +96,7 @@ export default function Footer({ siteContent }: FooterProps) {
           style={{ borderColor: theme.primaryColor + '30' }}
         >
           <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} {theme.appTitle}. {siteContent.footerLegalNote}
+            © {year || '2026'} {theme.appTitle}. {siteContent.footerLegalNote}
           </p>
         </div>
       </div>
