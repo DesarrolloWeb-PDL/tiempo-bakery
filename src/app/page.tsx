@@ -246,7 +246,6 @@ export default async function HomePage() {
                 width={40}
                 height={40}
                 className="mx-auto mb-3 object-contain"
-                style={{ filter: 'brightness(0) saturate(100%) sepia(60%) hue-rotate(350deg) brightness(85%)' }}
               />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Masa Madre Natural
