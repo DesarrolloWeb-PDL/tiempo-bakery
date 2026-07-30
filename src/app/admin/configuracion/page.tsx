@@ -1514,6 +1514,73 @@ export default function AdminConfigPage() {
             </div>
           </div>
 
+          {/* Hero section */}
+          <div className="border-t border-gray-700 pt-4">
+            <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Hero / Header principal</p>
+            <div className="space-y-2">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Título principal</label>
+                <input
+                  type="text"
+                  value={theme.heroTitle}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, heroTitle: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+                  placeholder="Pan Artesanal de Masa Madre"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Subtítulo</label>
+                <input
+                  type="text"
+                  value={theme.heroSubtitle}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, heroSubtitle: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+                  placeholder="Horneado fresco cada semana..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Info section texts */}
+          <div className="border-t border-gray-700 pt-4">
+            <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Sección de información (home)</p>
+            {([
+              { num: 1, titleKey: 'infoTitle1' as const, subKey: 'infoSubtitle1' as const, titleLabel: 'Título 1', subLabel: 'Subtítulo 1' },
+              { num: 2, titleKey: 'infoTitle2' as const, subKey: 'infoSubtitle2' as const, titleLabel: 'Título 2', subLabel: 'Subtítulo 2' },
+              { num: 3, titleKey: 'infoTitle3' as const, subKey: 'infoSubtitle3' as const, titleLabel: 'Título 3', subLabel: 'Subtítulo 3' },
+            ]).map(({ num, titleKey, subKey, titleLabel, subLabel }) => (
+              <div key={num} className="mb-3 pb-3 border-b border-gray-700 last:border-b-0 last:mb-0 last:pb-0">
+                <p className="text-xs text-gray-400 mb-2">Columna {num}</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">{titleLabel}</label>
+                    <input
+                      type="text"
+                      value={(theme as any)[titleKey]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [titleKey]: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
+                      placeholder="Título"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">{subLabel}</label>
+                    <input
+                      type="text"
+                      value={(theme as any)[subKey]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [subKey]: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
+                      placeholder="Subtítulo"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {themeMsg && (
             <div>
               <p className={`text-sm ${typeof themeMsg === 'string' && themeMsg?.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
@@ -1655,73 +1722,6 @@ export default function AdminConfigPage() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Hero section */}
-            <div className="border-t border-gray-700 pt-4">
-              <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Hero / Header principal</p>
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">Título principal</label>
-                  <input
-                    type="text"
-                    value={theme.heroTitle}
-                    disabled={loadingTheme || savingTheme}
-                    onChange={(e) => setTheme({ ...theme, heroTitle: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
-                    placeholder="Pan Artesanal de Masa Madre"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">Subtítulo</label>
-                  <input
-                    type="text"
-                    value={theme.heroSubtitle}
-                    disabled={loadingTheme || savingTheme}
-                    onChange={(e) => setTheme({ ...theme, heroSubtitle: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
-                    placeholder="Horneado fresco cada semana..."
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Info section texts */}
-            <div className="border-t border-gray-700 pt-4">
-              <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Sección de información (home)</p>
-              {([
-                { num: 1, titleKey: 'infoTitle1' as const, subKey: 'infoSubtitle1' as const, titleLabel: 'Título 1', subLabel: 'Subtítulo 1' },
-                { num: 2, titleKey: 'infoTitle2' as const, subKey: 'infoSubtitle2' as const, titleLabel: 'Título 2', subLabel: 'Subtítulo 2' },
-                { num: 3, titleKey: 'infoTitle3' as const, subKey: 'infoSubtitle3' as const, titleLabel: 'Título 3', subLabel: 'Subtítulo 3' },
-              ]).map(({ num, titleKey, subKey, titleLabel, subLabel }) => (
-                <div key={num} className="mb-3 pb-3 border-b border-gray-700 last:border-b-0 last:mb-0 last:pb-0">
-                  <p className="text-xs text-gray-400 mb-2">Columna {num}</p>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1">{titleLabel}</label>
-                      <input
-                        type="text"
-                        value={(theme as any)[titleKey]}
-                        disabled={loadingTheme || savingTheme}
-                        onChange={(e) => setTheme({ ...theme, [titleKey]: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
-                        placeholder="Título"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1">{subLabel}</label>
-                      <input
-                        type="text"
-                        value={(theme as any)[subKey]}
-                        disabled={loadingTheme || savingTheme}
-                        onChange={(e) => setTheme({ ...theme, [subKey]: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
-                        placeholder="Subtítulo"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
 
             {themeMsg && (
