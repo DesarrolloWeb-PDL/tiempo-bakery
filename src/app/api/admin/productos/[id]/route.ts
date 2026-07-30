@@ -114,7 +114,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await db.product.delete({ where: { id: params.id } })
+    await db.$transaction(async (tx) => {
+      await tx.orderItem.deleteMany({ where: { productId: params.id } })
+      await tx.product.delete({ where: { id: params.id } })
+    })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting product:', error)

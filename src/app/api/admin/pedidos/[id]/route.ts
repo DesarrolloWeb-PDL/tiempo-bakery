@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
+import { timeGating } from '@/lib/time-gating'
 
 export const dynamic = 'force-dynamic'
 
@@ -105,14 +106,45 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const existing = await db.order.findUnique({ where: { id: params.id } })
+    const existing = await db.order.findUnique({
+      where: { id: params.id },
+      include: {
+        items: { select: { productId: true, quantity: true } },
+      },
+    })
     if (!existing) {
       return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
     }
 
-    await db.order.update({
-      where: { id: params.id },
-      data: { deletedAt: new Date() },
+    const weekId = timeGating.getCurrentWeekId()
+
+    await db.$transaction(async (tx) => {
+      for (const item of existing.items) {
+        if (existing.paymentStatus === 'PAID') {
+          await tx.$queryRaw`
+            UPDATE "WeeklyStock"
+            SET "currentStock" = "currentStock" + ${item.quantity},
+                "reservedStock" = "reservedStock" + ${item.quantity},
+                "updatedAt" = NOW()
+            WHERE "productId" = ${item.productId}
+              AND "weekId" = ${weekId}
+          `
+        } else {
+          await tx.$queryRaw`
+            UPDATE "WeeklyStock"
+            SET "reservedStock" = GREATEST(0, "reservedStock" - ${item.quantity}),
+                "updatedAt" = NOW()
+            WHERE "productId" = ${item.productId}
+              AND "weekId" = ${weekId}
+              AND "reservedStock" >= ${item.quantity}
+          `
+        }
+      }
+
+      await tx.order.update({
+        where: { id: params.id },
+        data: { deletedAt: new Date() },
+      })
     })
 
     return NextResponse.json({ success: true })

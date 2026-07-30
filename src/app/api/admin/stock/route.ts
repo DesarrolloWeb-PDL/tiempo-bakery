@@ -111,7 +111,6 @@ export async function POST(req: NextRequest) {
         })
 
         if (existing) {
-          // Si el maxStock cambia, ajustar currentStock proporcionalmente
           const sold = existing.maxStock - existing.currentStock - existing.reservedStock
           const newCurrentStock = Math.max(0, maxStock - sold - existing.reservedStock)
           return db.weeklyStock.update({
@@ -130,5 +129,45 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Error upserting stock:', error)
     return NextResponse.json(mapDbError(error, 'Error al actualizar stock'), { status: 500 })
+  }
+}
+
+const fixStockSchema = z.object({
+  weekId: z.string().regex(/^\d{4}-W\d{2}$/),
+  productId: z.string(),
+  currentStock: z.number().int().min(0).optional(),
+  reservedStock: z.number().int().min(0).optional(),
+  maxStock: z.number().int().min(0).optional(),
+})
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const parsed = fixStockSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+
+    const { weekId, productId, ...updates } = parsed.data
+
+    const existing = await db.weeklyStock.findUnique({
+      where: { productId_weekId: { productId, weekId } },
+    })
+    if (!existing) {
+      return NextResponse.json({ error: 'Registro de stock no encontrado' }, { status: 404 })
+    }
+
+    const updated = await db.weeklyStock.update({
+      where: { id: existing.id },
+      data: updates,
+    })
+
+    return NextResponse.json({ success: true, stock: updated })
+  } catch (error) {
+    console.error('Error fixing stock:', error)
+    return NextResponse.json(mapDbError(error, 'Error al corregir stock'), { status: 500 })
   }
 }
