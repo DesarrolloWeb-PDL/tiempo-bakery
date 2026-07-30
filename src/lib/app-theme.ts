@@ -8,6 +8,8 @@ export interface AppTheme {
   primaryColor: string
   secondaryColor: string
   accentColor: string
+  heroTitle: string
+  heroSubtitle: string
   infoTitle1: string
   infoSubtitle1: string
   infoTitle2: string
@@ -23,6 +25,8 @@ const DEFAULT_THEME: AppTheme = {
   primaryColor: '#d89a44',
   secondaryColor: '#2c2c2c',
   accentColor: '#f5f5f5',
+  heroTitle: 'Pan Artesanal de Masa Madre',
+  heroSubtitle: 'Horneado fresco cada semana con ingredientes naturales y tiempo de fermentación tradicional.',
   infoTitle1: 'Preventa Semanal',
   infoSubtitle1: 'Pedidos de miércoles a domingo. Entrega en fin de semana.',
   infoTitle2: 'Masa Madre Natural',
@@ -43,6 +47,8 @@ export async function getThemeConfig(): Promise<AppTheme> {
             'theme_primaryColor',
             'theme_secondaryColor',
             'theme_accentColor',
+            'theme_heroTitle',
+            'theme_heroSubtitle',
             'theme_infoTitle1',
             'theme_infoSubtitle1',
             'theme_infoTitle2',

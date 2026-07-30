@@ -811,6 +811,8 @@ export default function AdminConfigPage() {
     warningColor: '#f59e0b',
     errorColor: '#ef4444',
     headerMaxWidth: '1280px',
+    heroTitle: 'Pan Artesanal de Masa Madre',
+    heroSubtitle: 'Horneado fresco cada semana con ingredientes naturales y tiempo de fermentación tradicional.',
     infoTitle1: 'Preventa Semanal',
     infoSubtitle1: 'Pedidos de miércoles a domingo. Entrega en fin de semana.',
     infoTitle2: 'Masa Madre Natural',
@@ -1652,6 +1654,35 @@ export default function AdminConfigPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Hero section */}
+            <div className="border-t border-gray-700 pt-4">
+              <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Hero / Header principal</p>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Título principal</label>
+                  <input
+                    type="text"
+                    value={theme.heroTitle}
+                    disabled={loadingTheme || savingTheme}
+                    onChange={(e) => setTheme({ ...theme, heroTitle: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+                    placeholder="Pan Artesanal de Masa Madre"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Subtítulo</label>
+                  <input
+                    type="text"
+                    value={theme.heroSubtitle}
+                    disabled={loadingTheme || savingTheme}
+                    onChange={(e) => setTheme({ ...theme, heroSubtitle: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+                    placeholder="Horneado fresco cada semana..."
+                  />
+                </div>
               </div>
             </div>
 

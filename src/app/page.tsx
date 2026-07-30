@@ -149,10 +149,10 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-brand-gold-dark mb-4">
-              Pan Artesanal de Masa Madre
+              {themeConfig.heroTitle}
             </h1>
             <p className="text-lg text-brand-gold/80 mb-6">
-              Horneado fresco cada semana con ingredientes naturales y tiempo de fermentación tradicional
+              {themeConfig.heroSubtitle}
             </p>
             
             {/* Time Gating Banner */}
