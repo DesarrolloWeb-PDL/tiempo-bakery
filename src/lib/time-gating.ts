@@ -33,27 +33,44 @@ export class TimeGatingService {
   }
 
   /**
+   * Calcula el openingTime basado en weekStart (lunes)
+   */
+  private getOpeningTime(weekStart: DateTime): DateTime {
+    return weekStart.plus({ 
+      days: this.config.openingDay - 1,
+      hours: this.config.openingHour,
+      minutes: this.config.openingMinute 
+    });
+  }
+
+  /**
+   * Calcula el closingTime basado en weekStart (lunes)
+   * Cuando openingDay > closingDay (ej. Miércoles→Domingo), el cierre cae en la misma semana.
+   * Cuando openingDay <= closingDay (ej. Domingo→Miércoles), apertura y cierre están en la misma semana.
+   */
+  private getClosingTime(weekStart: DateTime): DateTime {
+    if (this.config.openingDay <= this.config.closingDay) {
+      return weekStart.plus({ 
+        days: this.config.closingDay - 1,
+        hours: this.config.closingHour,
+        minutes: this.config.closingMinute 
+      });
+    }
+    return weekStart.plus({ 
+      days: this.config.closingDay + 6,
+      hours: this.config.closingHour,
+      minutes: this.config.closingMinute 
+    });
+  }
+
+  /**
    * Verifica si el sitio está abierto para pedidos
    */
   isOpen(now?: DateTime): boolean {
     const currentTime = now || DateTime.now().setZone(this.config.timezone);
-    
     const weekStart = currentTime.startOf('week'); // Lunes 00:00
-    
-    // Calcular tiempo de apertura (Miércoles 18:00)
-    const openingTime = weekStart.plus({ 
-      days: this.config.openingDay - 1, // Ajuste porque startOf('week') es lunes
-      hours: this.config.openingHour,
-      minutes: this.config.openingMinute 
-    });
-    
-    // Calcular tiempo de cierre (Domingo 20:00)
-    const closingTime = weekStart.plus({ 
-      days: this.config.closingDay + 6, // Domingo de la semana actual
-      hours: this.config.closingHour,
-      minutes: this.config.closingMinute 
-    });
-    
+    const openingTime = this.getOpeningTime(weekStart);
+    const closingTime = this.getClosingTime(weekStart);
     return currentTime >= openingTime && currentTime <= closingTime;
   }
 
@@ -140,13 +157,8 @@ export class TimeGatingService {
       };
     }
 
-    // Calcular cierre de esta semana
     const weekStart = currentTime.startOf('week');
-    const closingTime = weekStart.plus({ 
-      days: this.config.closingDay + 6,
-      hours: this.config.closingHour,
-      minutes: this.config.closingMinute 
-    });
+    const closingTime = this.getClosingTime(weekStart);
 
     return {
       isClosed: false,
