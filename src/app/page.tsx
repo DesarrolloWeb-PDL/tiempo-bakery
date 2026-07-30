@@ -3,6 +3,7 @@ import { TimeGatingBanner } from '@/components/time-gating-banner';
 import { Badge } from '@/components/ui/badge';
 import { prisma } from '@/lib/db';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
+import Image from 'next/image';
 import { Calendar, Map } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -239,16 +240,13 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="text-center">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10 mx-auto mb-3 text-brand-gold">
-                <path d="M5 21c.5-4.5 2.5-8 7-10" />
-                <path d="M9 17c2-3 4-4.5 6-5" />
-                <path d="M7 13c2-2.5 4-3.5 6-3" />
-                <path d="M12 3c-1 2-1.5 4-1 7" />
-                <path d="M16 5c0 2-.5 4-2 6" />
-                <path d="M10 7c-1 1.5-1.5 3-1 5" />
-                <path d="M12 10v11" />
-                <path d="M10 18l2 3 2-3" />
-              </svg>
+              <Image
+                src="/img/espiga.png"
+                alt="Masa Madre Natural"
+                width={40}
+                height={40}
+                className="mx-auto mb-3 object-contain"
+              />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Masa Madre Natural
               </h3>
