@@ -3,7 +3,8 @@ import { TimeGatingBanner } from '@/components/time-gating-banner';
 import { Badge } from '@/components/ui/badge';
 import { prisma } from '@/lib/db';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
-import { Calendar, Wheat, Map } from 'lucide-react';
+import Image from 'next/image';
+import { Calendar, Map } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -226,11 +227,11 @@ export default async function HomePage() {
       </section>
 
       {/* Info Section */}
-      <section className="bg-brand-gold/5 border-t border-brand-gold/15">
+      <section className="bg-black/20 border-t border-brand-gold/15">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <Calendar className="w-10 h-10 mx-auto mb-3 text-brand-gold-dark" />
+              <Calendar className="w-10 h-10 mx-auto mb-3 text-brand-gold" />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Preventa Semanal
               </h3>
@@ -239,7 +240,14 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="text-center">
-              <Wheat className="w-10 h-10 mx-auto mb-3 text-brand-gold-dark" />
+              <Image
+                src="/img/espiga.png"
+                alt="Masa Madre Natural"
+                width={40}
+                height={40}
+                className="mx-auto mb-3 object-contain"
+                style={{ filter: 'brightness(0) saturate(100%) sepia(60%) hue-rotate(350deg) brightness(85%)' }}
+              />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Masa Madre Natural
               </h3>
@@ -248,7 +256,7 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="text-center">
-              <Map className="w-10 h-10 mx-auto mb-3 text-brand-gold-dark" />
+              <Map className="w-10 h-10 mx-auto mb-3 text-brand-gold" />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Retirada Local
               </h3>
