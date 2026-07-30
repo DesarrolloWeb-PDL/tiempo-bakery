@@ -36,6 +36,7 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((state) => state.clearCart);
 
   const [currentStep, setCurrentStep] = React.useState(1);
+  const [mounted, setMounted] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [pickupPoints, setPickupPoints] = React.useState<PickupPoint[]>([]);
   const [shippingCosts, setShippingCosts] = React.useState<ShippingCosts>(DEFAULT_SHIPPING_COSTS);
@@ -50,6 +51,11 @@ export default function CheckoutPage() {
     method: DeliveryMethod.PICKUP_POINT,
     customerNotes: '',
   });
+
+  // Evitar hydration mismatch por Zustand persist
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Cargar puntos de recogida
   React.useEffect(() => {
@@ -205,8 +211,12 @@ export default function CheckoutPage() {
     }
   }, [isSubmitting, selectedPaymentProvider]);
 
+  if (!mounted) {
+    return <div className="min-h-screen bg-gray-50" />;
+  }
+
   if (items.length === 0) {
-    return null; // El useEffect redirigirá
+    return null;
   }
 
   const steps = [

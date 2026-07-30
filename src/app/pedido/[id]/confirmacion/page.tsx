@@ -230,7 +230,7 @@ export default function OrderConfirmationPage() {
           </div>
           <div className="border-t border-dashed pt-3 mb-3 space-y-1">
             <p className="text-xs"><span className="font-semibold">Cliente:</span> {order.customerName}</p>
-            <p className="text-xs"><span className="font-semibold">Fecha:</span> {new Date(order.createdAt).toLocaleDateString('es-ES')}</p>
+            <p className="text-xs"><span className="font-semibold">Fecha:</span> {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}</p>
           </div>
           <div className="border-t border-dashed pt-3 mb-3">
             {order.items.map((item) => (
