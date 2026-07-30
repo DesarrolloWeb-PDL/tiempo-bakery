@@ -67,7 +67,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [logoSrc, setLogoSrc] = useState<string | null>(null)
   const pathname = usePathname()
 
+  const isLoginPage = pathname === '/admin/login'
+
   useEffect(() => {
+    if (isLoginPage) return
     fetch('/api/admin/tema')
       .then((r) => r.json())
       .then((data) => {
@@ -75,11 +78,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         else setLogoSrc(null)
       })
       .catch(() => setLogoSrc(null))
-  }, [])
+  }, [isLoginPage])
 
   const currentPage = navItems.find((n) =>
     n.href === '/admin' ? pathname === '/admin' : pathname.startsWith(n.href)
   )
+
+  if (isLoginPage) {
+    return <>{children}</>
+  }
 
   return (
     <div className="min-h-screen lg:flex" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>

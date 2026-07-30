@@ -2,7 +2,8 @@
 
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChefHat, Eye, EyeOff, Loader2 } from 'lucide-react'
+import Image from 'next/image'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 function LoginForm() {
   const router = useRouter()
@@ -46,7 +47,13 @@ function LoginForm() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-brand-gold rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ChefHat className="w-9 h-9 text-white" />
+            <Image
+                src="/favicon.png"
+                alt="Tiempo Bakery"
+                width={36}
+                height={36}
+                className="object-contain brightness-0 invert"
+              />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Tiempo Bakery</h1>
           <p className="text-gray-500 text-sm mt-1">Panel de administración</p>
