@@ -36,8 +36,8 @@ export default function Footer({ siteContent }: FooterProps) {
           {/* Info */}
           <div>
             <h3 
-              className="font-semibold mb-3"
-              style={{ color: theme.primaryColor }}
+              className="font-semibold mb-3 truncate"
+              style={{ color: theme.primaryColor, fontSize: theme.fontSizeTitle }}
             >
               {theme.logoUrl && (
                 <Image

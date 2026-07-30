@@ -37,6 +37,8 @@ function mapDbError(error: unknown, fallback: string) {
 
 const hexColor = z.string().regex(/^#[0-9A-F]{6}$/i)
 
+const FONT_SIZE_PATTERN = /^clamp\([^)]+\)$|^\d+(\.\d+)?(rem|px)$/
+
 const themeSchema = z.object({
   appTitle: z.string().min(1).max(100),
   appSubtitle: z.string().max(200),
@@ -51,6 +53,7 @@ const themeSchema = z.object({
   textMuted: hexColor,
   fontHeading: z.string().min(1).max(100),
   fontBody: z.string().min(1).max(100),
+  fontSizeTitle: z.string().regex(FONT_SIZE_PATTERN, 'Formato inválido. Usá rem, px o clamp()'),
   borderColor: hexColor,
   mutedBg: hexColor,
   hoverBg: hexColor,
@@ -77,6 +80,7 @@ const DEFAULT_THEME: ThemeConfig = {
   textMuted: '#9D804B',
   fontHeading: 'system-ui',
   fontBody: 'system-ui',
+  fontSizeTitle: 'clamp(1rem, 2.5vw, 1.5rem)',
   borderColor: '#544A37',
   mutedBg: '#433D32',
   hoverBg: '#4D4535',

@@ -799,6 +799,7 @@ export default function AdminConfigPage() {
     textMuted: '#9D804B',
     fontHeading: 'system-ui',
     fontBody: 'system-ui',
+    fontSizeTitle: 'clamp(1rem, 2.5vw, 1.5rem)',
     borderColor: '#544A37',
     mutedBg: '#433D32',
     hoverBg: '#4D4535',
@@ -1634,10 +1635,29 @@ export default function AdminConfigPage() {
                 </select>
               </div>
             </div>
-            <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+            <div className="mt-4">
+              <label className="block text-xs text-gray-500 mb-1">Tamaño del nombre de la app</label>
+              <select
+                value={theme.fontSizeTitle}
+                disabled={loadingTheme || savingTheme}
+                onChange={(e) => setTheme({ ...theme, fontSizeTitle: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+              >
+                <option value="clamp(0.875rem, 2vw, 1.125rem)">Pequeño</option>
+                <option value="clamp(1rem, 2.5vw, 1.5rem)">Normal (predeterminado)</option>
+                <option value="clamp(1.125rem, 3vw, 1.75rem)">Mediano</option>
+                <option value="clamp(1.25rem, 3.5vw, 2rem)">Grande</option>
+                <option value="clamp(1.375rem, 4vw, 2.25rem)">Extra grande</option>
+                <option value="clamp(1.5rem, 4.5vw, 2.5rem)">Muy grande</option>
+              </select>
+              <p className="text-[10px] text-gray-400 mt-0.5">
+                El tamaño se adapta automáticamente al ancho de pantalla. El máximo evita que se desborde.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
               <span>Vista previa:</span>
-              <span style={{ fontFamily: theme.fontHeading }} className="text-base font-bold text-gray-800">
-                Título de ejemplo
+              <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate max-w-[200px]">
+                {theme.appTitle || 'Tiempo Bakery'}
               </span>
               <span style={{ fontFamily: theme.fontBody }} className="text-sm text-gray-600">
                 — Texto de cuerpo de ejemplo

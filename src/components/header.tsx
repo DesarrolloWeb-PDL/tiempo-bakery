@@ -64,10 +64,10 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
                 unoptimized={logoIsExternal}
               />
             )}
-            <div className="min-w-0">
+            <div className="min-w-0 max-w-[200px] sm:max-w-none">
               <span
-                className="text-base md:text-xl font-bold block leading-tight truncate"
-                style={{ color: theme.primaryColor }}
+                className="font-bold block leading-tight truncate"
+                style={{ color: theme.primaryColor, fontSize: theme.fontSizeTitle }}
               >
                 {theme.appTitle}
               </span>
