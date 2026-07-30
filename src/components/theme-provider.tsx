@@ -28,6 +28,7 @@ export type ThemeSettings = {
   successColor: string
   warningColor: string
   errorColor: string
+  headerMaxWidth: string
 }
 
 export const DEFAULT_THEME: ThemeSettings = {
@@ -55,6 +56,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   successColor: '#10b981',
   warningColor: '#f59e0b',
   errorColor: '#ef4444',
+  headerMaxWidth: '1280px',
 }
 
 const ThemeContext = createContext<ThemeSettings>(DEFAULT_THEME)
@@ -103,6 +105,7 @@ function applyTheme(theme: ThemeSettings) {
   root.style.setProperty('--brand-font-body', theme.fontBody)
   root.style.setProperty('--brand-font-size-title', theme.fontSizeTitle)
   root.style.setProperty('--brand-logo-size', `${theme.logoSize}px`)
+  root.style.setProperty('--brand-header-max-width', theme.headerMaxWidth)
 
   const bgHsl = hexToHsl(theme.bgBody)
   const fgHsl = hexToHsl(theme.textPrimary)

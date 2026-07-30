@@ -51,7 +51,10 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
         borderColor: theme.primaryColor + '30',
       }}
     >
-      <div className="container mx-auto px-4">
+      <div
+        className="mx-auto px-4"
+        style={{ maxWidth: 'var(--brand-header-max-width, 1280px)' }}
+      >
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 min-w-0 max-w-[60%] sm:max-w-none">
             {theme.logoUrl && (

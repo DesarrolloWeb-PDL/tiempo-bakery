@@ -810,6 +810,7 @@ export default function AdminConfigPage() {
     successColor: '#10b981',
     warningColor: '#f59e0b',
     errorColor: '#ef4444',
+    headerMaxWidth: '1280px',
     infoTitle1: 'Preventa Semanal',
     infoSubtitle1: 'Pedidos de miércoles a domingo. Entrega en fin de semana.',
     infoTitle2: 'Masa Madre Natural',
@@ -1383,6 +1384,26 @@ export default function AdminConfigPage() {
               />
               <span className="text-xs text-gray-400">{theme.logoSize}px</span>
             </div>
+          </div>
+
+          {/* Ancho del header */}
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Ancho maximo del header</label>
+            <select
+              value={theme.headerMaxWidth}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, headerMaxWidth: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+            >
+              <option value="100%">100% — Ancho completo</option>
+              <option value="960px">960px — Angosto</option>
+              <option value="1120px">1120px — Mediano</option>
+              <option value="1280px">1280px — Normal (predeterminado)</option>
+              <option value="1440px">1440px — Ancho</option>
+            </select>
+            <p className="text-[10px] text-gray-400 mt-0.5">
+              Controla el ancho maximo del contenedor del header. A menor valor, mas centrado quedara el contenido.
+            </p>
           </div>
 
           {/* Tipografía */}
