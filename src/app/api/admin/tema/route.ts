@@ -64,6 +64,12 @@ const themeSchema = z.object({
   successColor: hexColor,
   warningColor: hexColor,
   errorColor: hexColor,
+  infoTitle1: z.string().min(1).max(100),
+  infoSubtitle1: z.string().max(300),
+  infoTitle2: z.string().min(1).max(100),
+  infoSubtitle2: z.string().max(300),
+  infoTitle3: z.string().min(1).max(100),
+  infoSubtitle3: z.string().max(300),
 })
 
 type ThemeConfig = z.infer<typeof themeSchema>
@@ -93,6 +99,12 @@ const DEFAULT_THEME: ThemeConfig = {
   successColor: '#10b981',
   warningColor: '#f59e0b',
   errorColor: '#ef4444',
+  infoTitle1: 'Preventa Semanal',
+  infoSubtitle1: 'Pedidos de miércoles a domingo. Entrega en fin de semana.',
+  infoTitle2: 'Masa Madre Natural',
+  infoSubtitle2: 'Sin levadura industrial. Fermentación lenta y natural.',
+  infoTitle3: 'Retirada Local',
+  infoSubtitle3: 'Puntos de retirada en Utrera o envío a domicilio.',
 }
 
 const THEME_KEYS = Object.keys(DEFAULT_THEME) as (keyof ThemeConfig)[]

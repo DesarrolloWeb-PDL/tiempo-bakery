@@ -810,6 +810,12 @@ export default function AdminConfigPage() {
     successColor: '#10b981',
     warningColor: '#f59e0b',
     errorColor: '#ef4444',
+    infoTitle1: 'Preventa Semanal',
+    infoSubtitle1: 'Pedidos de miércoles a domingo. Entrega en fin de semana.',
+    infoTitle2: 'Masa Madre Natural',
+    infoSubtitle2: 'Sin levadura industrial. Fermentación lenta y natural.',
+    infoTitle3: 'Retirada Local',
+    infoSubtitle3: 'Puntos de retirada en Utrera o envío a domicilio.',
   })
   const [loadingPayments, setLoadingPayments] = useState(true)
   const [paymentSettings, setPaymentSettings] = useState<{
@@ -1509,6 +1515,44 @@ export default function AdminConfigPage() {
               />
               <span className="text-xs text-gray-400">{theme.logoSize}px</span>
             </div>
+          </div>
+
+          {/* Info section texts */}
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Sección de información (home)</p>
+            {([
+              { num: 1, titleKey: 'infoTitle1' as const, subKey: 'infoSubtitle1' as const, titleLabel: 'Título 1', subLabel: 'Subtítulo 1' },
+              { num: 2, titleKey: 'infoTitle2' as const, subKey: 'infoSubtitle2' as const, titleLabel: 'Título 2', subLabel: 'Subtítulo 2' },
+              { num: 3, titleKey: 'infoTitle3' as const, subKey: 'infoSubtitle3' as const, titleLabel: 'Título 3', subLabel: 'Subtítulo 3' },
+            ]).map(({ num, titleKey, subKey, titleLabel, subLabel }) => (
+              <div key={num} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0 last:mb-0 last:pb-0">
+                <p className="text-xs text-gray-400 mb-2">Columna {num}</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">{titleLabel}</label>
+                    <input
+                      type="text"
+                      value={(theme as any)[titleKey]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [titleKey]: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                      placeholder="Título"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">{subLabel}</label>
+                    <input
+                      type="text"
+                      value={(theme as any)[subKey]}
+                      disabled={loadingTheme || savingTheme}
+                      onChange={(e) => setTheme({ ...theme, [subKey]: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                      placeholder="Subtítulo"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Colores */}

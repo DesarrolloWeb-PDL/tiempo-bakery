@@ -235,20 +235,20 @@ export default async function HomePage() {
             <div className="text-center">
               <Calendar className="w-10 h-10 mx-auto mb-3 text-brand-gold" />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
-                Preventa Semanal
+                {themeConfig.infoTitle1}
               </h3>
               <p className="text-sm text-white/80">
-                Pedidos de miércoles a domingo. Entrega en fin de semana.
+                {themeConfig.infoSubtitle1}
               </p>
             </div>
             <div className="text-center">
               {themeConfig.logoUrl ? (
                 <Image
                   src={themeConfig.logoUrl}
-                  alt="Masa Madre Natural"
+                  alt={themeConfig.infoTitle2}
                   width={40}
                   height={40}
-                  className="mx-auto mb-3 object-contain"
+                  className="mx-auto mb-3 w-10 h-10 object-contain"
                 />
               ) : (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10 mx-auto mb-3 text-brand-gold">
@@ -264,19 +264,19 @@ export default async function HomePage() {
                 </svg>
               )}
               <h3 className="font-semibold text-brand-gold-dark mb-2">
-                Masa Madre Natural
+                {themeConfig.infoTitle2}
               </h3>
               <p className="text-sm text-white/80">
-                Sin levadura industrial. Fermentación lenta y natural.
+                {themeConfig.infoSubtitle2}
               </p>
             </div>
             <div className="text-center">
               <Map className="w-10 h-10 mx-auto mb-3 text-brand-gold" />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
-                Retirada Local
+                {themeConfig.infoTitle3}
               </h3>
               <p className="text-sm text-white/80">
-                Puntos de retirada en Utrera o envío a domicilio.
+                {themeConfig.infoSubtitle3}
               </p>
             </div>
           </div>

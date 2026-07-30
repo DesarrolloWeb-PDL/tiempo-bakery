@@ -8,6 +8,12 @@ export interface AppTheme {
   primaryColor: string
   secondaryColor: string
   accentColor: string
+  infoTitle1: string
+  infoSubtitle1: string
+  infoTitle2: string
+  infoSubtitle2: string
+  infoTitle3: string
+  infoSubtitle3: string
 }
 
 const DEFAULT_THEME: AppTheme = {
@@ -17,6 +23,12 @@ const DEFAULT_THEME: AppTheme = {
   primaryColor: '#d89a44',
   secondaryColor: '#2c2c2c',
   accentColor: '#f5f5f5',
+  infoTitle1: 'Preventa Semanal',
+  infoSubtitle1: 'Pedidos de miércoles a domingo. Entrega en fin de semana.',
+  infoTitle2: 'Masa Madre Natural',
+  infoSubtitle2: 'Sin levadura industrial. Fermentación lenta y natural.',
+  infoTitle3: 'Retirada Local',
+  infoSubtitle3: 'Puntos de retirada en Utrera o envío a domicilio.',
 }
 
 export async function getThemeConfig(): Promise<AppTheme> {
@@ -31,6 +43,12 @@ export async function getThemeConfig(): Promise<AppTheme> {
             'theme_primaryColor',
             'theme_secondaryColor',
             'theme_accentColor',
+            'theme_infoTitle1',
+            'theme_infoSubtitle1',
+            'theme_infoTitle2',
+            'theme_infoSubtitle2',
+            'theme_infoTitle3',
+            'theme_infoSubtitle3',
           ],
         },
       },
