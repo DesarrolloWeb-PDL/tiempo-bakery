@@ -74,7 +74,7 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; co
   PAID:      { label: 'Pagado',     icon: CreditCard,    color: 'text-blue-600',   bg: 'bg-blue-100' },
   BAKING:    { label: 'En horno',   icon: ChefHat,       color: 'text-orange-600', bg: 'bg-orange-100' },
   READY:     { label: 'Listo',      icon: CheckCircle2,  color: 'text-green-600',  bg: 'bg-green-100' },
-  DELIVERED: { label: 'Entregado',  icon: Truck,         color: 'text-gray-600',   bg: 'bg-gray-100' },
+  DELIVERED: { label: 'Entregado',  icon: Truck,         color: 'text-gray-300',   bg: 'bg-gray-700' },
   CANCELLED: { label: 'Cancelado',  icon: XCircle,       color: 'text-red-600',    bg: 'bg-red-100' },
 }
 
@@ -120,10 +120,10 @@ function Section({ title, icon: Icon, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-700">
         <Icon className="w-4 h-4 text-brand-gold" />
-        <h3 className="font-semibold text-gray-900 text-sm">{title}</h3>
+        <h3 className="font-semibold text-white text-sm">{title}</h3>
       </div>
       <div className="px-5 py-4">{children}</div>
     </div>
@@ -134,7 +134,7 @@ function Field({ label, value, mono = false }: { label: string; value: React.Rea
   return (
     <div>
       <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-      <p className={cn('text-sm text-gray-800', mono && 'font-mono')}>{value ?? '—'}</p>
+      <p className={cn('text-sm text-white', mono && 'font-mono')}>{value ?? '—'}</p>
     </div>
   )
 }
@@ -257,7 +257,7 @@ export default function AdminOrderDetailPage() {
     return (
       <div className="text-center py-24">
         <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-gray-500">Pedido no encontrado</p>
+        <p className="text-gray-400">Pedido no encontrado</p>
         <Link href="/admin/pedidos" className="text-brand-gold text-sm mt-2 inline-block hover:underline">
           Volver a pedidos
         </Link>
@@ -275,34 +275,34 @@ export default function AdminOrderDetailPage() {
       <div className="flex items-start gap-4">
         <button
           onClick={() => router.back()}
-          className="mt-0.5 p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          className="mt-0.5 p-2 rounded-lg text-gray-400 hover:bg-gray-700 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <h2 className="text-xl font-bold text-gray-900">{order.orderNumber}</h2>
+            <h2 className="text-xl font-bold text-white">{order.orderNumber}</h2>
             <span className={cn('flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-full font-medium', statusConfig?.bg, statusConfig?.color)}>
               <StatusIcon className="w-4 h-4" />
               {statusConfig?.label ?? order.status}
             </span>
-            <span className={cn('text-sm font-medium', PAYMENT_CONFIG[order.paymentStatus]?.color ?? 'text-gray-600')}>
+            <span className={cn('text-sm font-medium', PAYMENT_CONFIG[order.paymentStatus]?.color ?? 'text-gray-300')}>
               {PAYMENT_CONFIG[order.paymentStatus]?.label ?? order.paymentStatus}
             </span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             Creado el {formatDate(order.createdAt)}
             {order.paidAt && ` · Pagado el ${formatDate(order.paidAt)}`}
           </p>
         </div>
         <div className="text-right shrink-0">
           <p className="text-xs text-gray-400">Total</p>
-          <p className="text-2xl font-bold text-gray-900">{formatCurrency(order.total)}</p>
+          <p className="text-2xl font-bold text-white">{formatCurrency(order.total)}</p>
         </div>
         <button
           onClick={handleDelete}
           disabled={saving}
-          className="p-2 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+          className="p-2 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-900/30 transition-colors disabled:opacity-40"
           title="Eliminar pedido"
         >
           <Trash2 className="w-5 h-5" />
@@ -313,7 +313,7 @@ export default function AdminOrderDetailPage() {
       {saveMessage && (
         <div className={cn(
           'px-4 py-2.5 rounded-lg text-sm font-medium',
-          saveMessage.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+          saveMessage.includes('Error') ? 'bg-red-900/30 text-red-400' : 'bg-green-900/30 text-green-400'
         )}>
           {saveMessage}
         </div>
@@ -336,7 +336,7 @@ export default function AdminOrderDetailPage() {
                       <div key={st} className="flex-1 flex items-center gap-1">
                         <div className={cn(
                           'flex-1 h-1.5 rounded-full transition-colors',
-                          isPast || isCurrent ? 'bg-brand-gold' : 'bg-gray-200'
+                          isPast || isCurrent ? 'bg-brand-gold' : 'bg-gray-700'
                         )} />
                         {idx === STATUS_FLOW.length - 1 && (
                           <div className={cn(
@@ -363,7 +363,7 @@ export default function AdminOrderDetailPage() {
                           'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors border',
                           isCurrent
                             ? `${conf.bg} ${conf.color} border-transparent cursor-default`
-                            : 'bg-white text-gray-600 border-gray-200 hover:border-brand-gold/40 hover:text-brand-gold-dark hover:bg-brand-gold/10',
+                            : 'bg-white text-gray-300 border-gray-700 hover:border-brand-gold/40 hover:text-brand-gold-dark hover:bg-brand-gold/10',
                           saving && 'opacity-50'
                         )}
                       >
@@ -375,7 +375,7 @@ export default function AdminOrderDetailPage() {
                   <button
                     onClick={() => updateStatus('CANCELLED')}
                     disabled={saving}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-red-800 text-red-400 hover:bg-red-900/30 disabled:opacity-50"
                   >
                     <XCircle className="w-4 h-4" />
                     Cancelar
@@ -387,42 +387,42 @@ export default function AdminOrderDetailPage() {
 
           {/* Productos */}
           <Section title="Productos del pedido" icon={Package}>
-            <div className="divide-y divide-gray-50 -mx-5">
+            <div className="divide-y divide-gray-700 -mx-5">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-4 px-5 py-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={normalizePublicAssetUrl(item.product.imageUrl) || '/img/espiga.png'}
                     alt={item.product.imageAlt}
-                    className="w-12 h-12 rounded-lg object-cover bg-gray-100"
+                    className="w-12 h-12 rounded-lg object-cover bg-gray-700"
                     onError={(e) => {
                       e.currentTarget.onerror = null
                       e.currentTarget.src = '/img/espiga.png'
                     }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-white truncate">{item.productName}</p>
+                    <p className="text-xs text-gray-400">
                       {item.quantity} ud. × {formatCurrency(item.unitPrice)}
                       {item.sliced && ' · Rebanado'}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-gray-900 shrink-0">
+                  <p className="text-sm font-semibold text-white shrink-0">
                     {formatCurrency(item.subtotal)}
                   </p>
                 </div>
               ))}
             </div>
-            <div className="mt-4 space-y-1.5 pt-4 border-t border-gray-100">
-              <div className="flex justify-between text-sm text-gray-600">
+            <div className="mt-4 space-y-1.5 pt-4 border-t border-gray-700">
+              <div className="flex justify-between text-sm text-gray-300">
                 <span>Subtotal</span>
                 <span>{formatCurrency(order.subtotal)}</span>
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
+              <div className="flex justify-between text-sm text-gray-300">
                 <span>Envío</span>
                 <span>{order.shippingCost > 0 ? formatCurrency(order.shippingCost) : 'Gratis'}</span>
               </div>
-              <div className="flex justify-between text-base font-bold text-gray-900 pt-1">
+              <div className="flex justify-between text-base font-bold text-white pt-1">
                 <span>Total</span>
                 <span>{formatCurrency(order.total)}</span>
               </div>
@@ -436,7 +436,7 @@ export default function AdminOrderDetailPage() {
               onChange={(e) => setAdminNotes(e.target.value)}
               placeholder="Añadir notas internas sobre este pedido..."
               rows={3}
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold resize-none"
+              className="w-full text-sm border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold resize-none bg-gray-900 text-white"
             />
             <div className="flex items-center justify-between mt-2">
               <p className="text-xs text-gray-400">Estas notas no son visibles para el cliente</p>
@@ -471,7 +471,7 @@ export default function AdminOrderDetailPage() {
               {order.customerNotes && (
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Notas del cliente</p>
-                  <p className="text-sm text-gray-700 italic">&ldquo;{order.customerNotes}&rdquo;</p>
+                  <p className="text-sm text-gray-300 italic">&ldquo;{order.customerNotes}&rdquo;</p>
                 </div>
               )}
             </div>

@@ -110,8 +110,8 @@ export default function AdminPreventaPage() {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Días de preventa</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h2 className="text-xl font-bold text-white">Días de preventa</h2>
+          <p className="text-sm text-gray-400 mt-0.5">
             Define apertura y cierre semanal del periodo de pedidos
           </p>
         </div>
@@ -119,14 +119,14 @@ export default function AdminPreventaPage() {
           <button
             onClick={fetchConfig}
             disabled={loading || saving}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 bg-white border border-gray-700 rounded-lg hover:bg-gray-700"
           >
             <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin')} />
           </button>
           <button
             onClick={handleReset}
             disabled={saving}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 bg-red-900/30 border border-red-800 rounded-lg hover:bg-red-900/50 disabled:opacity-50"
           >
             <RotateCcw className="w-4 h-4" />
             Restablecer
@@ -145,14 +145,14 @@ export default function AdminPreventaPage() {
       {message && (
         <div className={cn(
           'px-4 py-3 rounded-lg text-sm font-medium',
-          message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          message.type === 'success' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
         )}>
           {message.text}
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-5">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 space-y-5">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
           <input
             type="checkbox"
             checked={form.enabled}
@@ -163,12 +163,12 @@ export default function AdminPreventaPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Apertura</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Apertura</p>
             <div className="grid grid-cols-3 gap-2">
               <select
                 value={form.openingDay}
                 onChange={(e) => updateField('openingDay', Number(e.target.value))}
-                className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                className="col-span-2 px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
               >
                 {DAY_OPTIONS.map((day) => (
                   <option key={day.value} value={day.value}>{day.label}</option>
@@ -178,7 +178,7 @@ export default function AdminPreventaPage() {
                 <select
                   value={form.openingHour}
                   onChange={(e) => updateField('openingHour', Number(e.target.value))}
-                  className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
                 >
                   {timeOptions.map((hour) => (
                     <option key={hour} value={hour}>{String(hour).padStart(2, '0')}</option>
@@ -187,7 +187,7 @@ export default function AdminPreventaPage() {
                 <select
                   value={form.openingMinute}
                   onChange={(e) => updateField('openingMinute', Number(e.target.value))}
-                  className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
                 >
                   {minuteOptions.map((minute) => (
                     <option key={minute} value={minute}>{String(minute).padStart(2, '0')}</option>
@@ -198,12 +198,12 @@ export default function AdminPreventaPage() {
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Cierre</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Cierre</p>
             <div className="grid grid-cols-3 gap-2">
               <select
                 value={form.closingDay}
                 onChange={(e) => updateField('closingDay', Number(e.target.value))}
-                className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                className="col-span-2 px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
               >
                 {DAY_OPTIONS.map((day) => (
                   <option key={day.value} value={day.value}>{day.label}</option>
@@ -213,7 +213,7 @@ export default function AdminPreventaPage() {
                 <select
                   value={form.closingHour}
                   onChange={(e) => updateField('closingHour', Number(e.target.value))}
-                  className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
                 >
                   {timeOptions.map((hour) => (
                     <option key={hour} value={hour}>{String(hour).padStart(2, '0')}</option>
@@ -222,7 +222,7 @@ export default function AdminPreventaPage() {
                 <select
                   value={form.closingMinute}
                   onChange={(e) => updateField('closingMinute', Number(e.target.value))}
-                  className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
                 >
                   {minuteOptions.map((minute) => (
                     <option key={minute} value={minute}>{String(minute).padStart(2, '0')}</option>
@@ -233,7 +233,7 @@ export default function AdminPreventaPage() {
           </div>
         </div>
 
-        <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 flex items-center gap-2">
+        <div className="text-xs text-gray-400 bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 flex items-center gap-2">
           <Clock3 className="w-4 h-4 text-gray-400" />
           Horario actual: apertura {DAY_OPTIONS.find((d) => d.value === form.openingDay)?.label} {String(form.openingHour).padStart(2, '0')}:{String(form.openingMinute).padStart(2, '0')} · cierre {DAY_OPTIONS.find((d) => d.value === form.closingDay)?.label} {String(form.closingHour).padStart(2, '0')}:{String(form.closingMinute).padStart(2, '0')}
         </div>

@@ -101,17 +101,17 @@ export default function AdminDatosPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Database className="w-5 h-5 text-brand-gold" /> Base de Datos e Imagenes
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             Vista central de productos, logos e informacion clave de la aplicacion.
           </p>
         </div>
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700"
         >
           <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin')} />
           Actualizar
@@ -127,32 +127,32 @@ export default function AdminDatosPage() {
           ['Stocks semanales', data?.summary.weeklyStockRows ?? 0],
           ['Imagenes extra', data?.summary.productImageRows ?? 0],
         ].map(([label, value]) => (
-          <div key={String(label)} className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-            <p className="text-xs text-gray-500">{label}</p>
-            <p className="text-lg font-bold text-gray-900">{value}</p>
+          <div key={String(label)} className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+            <p className="text-xs text-gray-400">{label}</p>
+            <p className="text-lg font-bold text-white">{value}</p>
           </div>
         ))}
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+        <div className="bg-red-900/30 border border-red-800 rounded-lg px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {data && (
         <>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
-            <h3 className="font-semibold text-gray-900">Tema y logo actual</h3>
-            <p className="text-sm text-gray-600">Titulo: {data.theme.appTitle}</p>
-            <p className="text-sm text-gray-600">Subtitulo: {data.theme.appSubtitle}</p>
-            <p className="text-sm text-gray-600 break-all">Logo URL: {data.theme.logoUrl}</p>
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 space-y-2">
+            <h3 className="font-semibold text-white">Tema y logo actual</h3>
+            <p className="text-sm text-gray-300">Titulo: {data.theme.appTitle}</p>
+            <p className="text-sm text-gray-300">Subtitulo: {data.theme.appSubtitle}</p>
+            <p className="text-sm text-gray-300 break-all">Logo URL: {data.theme.logoUrl}</p>
             <div className="pt-1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={normalizePublicAssetUrl(data.theme.logoUrl) || '/img/espiga.png'}
                 alt="Logo actual"
-                className="h-14 w-14 object-contain border border-gray-200 rounded-lg bg-white"
+                className="h-14 w-14 object-contain border border-gray-700 rounded-lg bg-white"
               />
             </div>
             <div className="pt-2 flex gap-2">
@@ -166,8 +166,8 @@ export default function AdminDatosPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+              <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
                 {data.diagnostics.localhostThemeLogo || data.diagnostics.productsWithAbsoluteLocalhostImageCount > 0 ? (
                   <AlertTriangle className="w-4 h-4 text-red-600" />
                 ) : (
@@ -175,30 +175,30 @@ export default function AdminDatosPage() {
                 )}
                 Diagnostico de URLs de imagen
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-300">
                 Logo apuntando a localhost: {data.diagnostics.localhostThemeLogo ? 'SI' : 'NO'}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-300">
                 Productos con imagen en localhost: {data.diagnostics.productsWithAbsoluteLocalhostImageCount}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-300">
                 Productos sin imagen: {data.diagnostics.productsWithoutImageCount}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-300">
                 Productos fuera del banco: {data.diagnostics.productsWithoutImageBankRowCount}
               </p>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Accesos rapidos</h3>
+            <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+              <h3 className="font-semibold text-white mb-2">Accesos rapidos</h3>
               <div className="flex flex-wrap gap-2">
-                <Link href="/admin/productos" className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
+                <Link href="/admin/productos" className="px-3 py-2 text-sm bg-gray-700 rounded-lg hover:bg-gray-200">
                   Gestionar productos
                 </Link>
-                <Link href="/admin/stock" className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
+                <Link href="/admin/stock" className="px-3 py-2 text-sm bg-gray-700 rounded-lg hover:bg-gray-200">
                   Gestionar stock
                 </Link>
-                <Link href="/admin/configuracion" className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
+                <Link href="/admin/configuracion" className="px-3 py-2 text-sm bg-gray-700 rounded-lg hover:bg-gray-200">
                   Configuracion app
                 </Link>
               </div>
@@ -206,11 +206,11 @@ export default function AdminDatosPage() {
           </div>
 
           {data.flagged.productsWithAbsoluteLocalhostImage.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <h3 className="font-semibold text-red-800 mb-2">Productos con URL de imagen en localhost</h3>
+            <div className="bg-red-900/30 border border-red-800 rounded-xl p-4">
+              <h3 className="font-semibold text-red-400 mb-2">Productos con URL de imagen en localhost</h3>
               <div className="space-y-2">
                 {data.flagged.productsWithAbsoluteLocalhostImage.map((p) => (
-                  <div key={p.id} className="text-sm text-red-700">
+                  <div key={p.id} className="text-sm text-red-400">
                     {p.name} ({p.slug}) - {p.imageUrl}
                   </div>
                 ))}
@@ -231,9 +231,9 @@ export default function AdminDatosPage() {
             </div>
           )}
 
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900">Productos e imagenes</h3>
+          <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-700">
+              <h3 className="font-semibold text-white">Productos e imagenes</h3>
             </div>
             <div className="divide-y divide-gray-100 max-h-[540px] overflow-auto">
               {data.products.map((product) => (
@@ -242,15 +242,15 @@ export default function AdminDatosPage() {
                   <img
                     src={normalizePublicAssetUrl(product.imageUrl) || '/img/espiga.png'}
                     alt={product.imageAlt || product.name}
-                    className="w-12 h-12 object-cover rounded-lg border border-gray-200 bg-gray-50"
+                    className="w-12 h-12 object-cover rounded-lg border border-gray-700 bg-gray-700"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500 truncate">/{product.slug} - {product.category.name}</p>
+                    <p className="text-sm font-medium text-white truncate">{product.name}</p>
+                    <p className="text-xs text-gray-400 truncate">/{product.slug} - {product.category.name}</p>
                     <p className="text-xs text-gray-400 truncate">{product.imageUrl}</p>
                   </div>
                   <div className="text-right">
-                    <p className={cn('text-xs font-medium', product.published ? 'text-green-600' : 'text-gray-500')}>
+                    <p className={cn('text-xs font-medium', product.published ? 'text-green-600' : 'text-gray-400')}>
                       {product.published ? 'Publicado' : 'Borrador'}
                     </p>
                     <p className={cn('text-xs font-medium', product.isActive ? 'text-blue-600' : 'text-gray-400')}>

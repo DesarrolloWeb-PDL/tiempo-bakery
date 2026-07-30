@@ -88,10 +88,10 @@ function MiniStockBar({ sold, reserved, free, max }: {
   const reservedPct = (reserved / max) * 100
   const freePct = (free / max) * 100
   return (
-    <div className="w-full bg-gray-100 rounded-full h-1.5 flex overflow-hidden mt-1">
+    <div className="w-full bg-gray-700 rounded-full h-1.5 flex overflow-hidden mt-1">
       <div className="bg-green-500 h-1.5" style={{ width: `${soldPct}%` }} />
       <div className="bg-yellow-400 h-1.5" style={{ width: `${reservedPct}%` }} />
-      <div className="bg-gray-200 h-1.5" style={{ width: `${freePct}%` }} />
+      <div className="bg-gray-700 h-1.5" style={{ width: `${freePct}%` }} />
     </div>
   )
 }
@@ -220,8 +220,8 @@ export default function AdminStockPage() {
       {/* Cabecera */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Stock Semanal</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h2 className="text-xl font-bold text-white">Stock Semanal</h2>
+          <p className="text-sm text-gray-400 mt-0.5">
             Configura las unidades disponibles por semana de producción
           </p>
         </div>
@@ -247,7 +247,7 @@ export default function AdminStockPage() {
           <button
             onClick={fetchStock}
             disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 bg-white border border-gray-700 rounded-lg hover:bg-gray-700 transition-colors"
           >
             <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin')} />
           </button>
@@ -255,20 +255,20 @@ export default function AdminStockPage() {
       </div>
 
       {/* Selector de semana */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-4">
         <button
           onClick={() => setCurrentWeekId((w) => offsetWeek(w, -1))}
-          className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+          className="p-2 rounded-lg border border-gray-700 text-gray-300 hover:bg-gray-700"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 text-center">
-          <p className="font-semibold text-gray-900">{currentWeekId}</p>
-          <p className="text-sm text-gray-500">{weekLabel(currentWeekId)}</p>
+          <p className="font-semibold text-white">{currentWeekId}</p>
+          <p className="text-sm text-gray-400">{weekLabel(currentWeekId)}</p>
         </div>
         <button
           onClick={() => setCurrentWeekId((w) => offsetWeek(w, 1))}
-          className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+          className="p-2 rounded-lg border border-gray-700 text-gray-300 hover:bg-gray-700"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -284,7 +284,7 @@ export default function AdminStockPage() {
       {message && (
         <div className={cn(
           'flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium',
-          message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          message.type === 'success' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
         )}>
           {message.type === 'success'
             ? <CheckCircle2 className="w-4 h-4" />
@@ -294,7 +294,7 @@ export default function AdminStockPage() {
       )}
 
       {/* Leyenda */}
-      <div className="flex items-center gap-4 text-xs text-gray-500 bg-gray-50 rounded-lg px-4 py-2.5">
+      <div className="flex items-center gap-4 text-xs text-gray-400 bg-gray-700 rounded-lg px-4 py-2.5">
         <Info className="w-4 h-4 text-gray-400 shrink-0" />
         <div className="flex gap-4 flex-wrap">
           <span className="flex items-center gap-1">
@@ -312,28 +312,28 @@ export default function AdminStockPage() {
 
       {/* Tabla de stock */}
       {loading ? (
-        <div className="bg-white border border-gray-200 rounded-xl divide-y animate-pulse">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl divide-y animate-pulse">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="px-5 py-4 flex gap-4">
-              <div className="w-10 h-10 bg-gray-200 rounded-lg" />
+              <div className="w-10 h-10 bg-gray-700 rounded-lg" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-40" />
-                <div className="h-2 bg-gray-100 rounded w-full" />
+                <div className="h-4 bg-gray-700 rounded w-40" />
+                <div className="h-2 bg-gray-700 rounded w-full" />
               </div>
             </div>
           ))}
         </div>
       ) : !data || data.rows.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl py-16 text-center">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl py-16 text-center">
           <Package className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-400 text-sm">No hay productos con stock semanal</p>
         </div>
       ) : (
         <div className="space-y-4">
           {Object.entries(grouped).map(([category, rows]) => (
-            <div key={category} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <div key={category} className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+              <div className="px-5 py-3 bg-gray-700 border-b border-gray-700">
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
                   {category}
                 </h4>
               </div>
@@ -347,7 +347,7 @@ export default function AdminStockPage() {
                 <div className="col-span-1 text-center">Máx.</div>
               </div>
 
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-gray-700">
                 {rows.map((row) => {
                   const maxStock = getMaxStock(row)
                   const free = Math.max(0, maxStock - row.soldStock - row.reservedStock)
@@ -367,10 +367,10 @@ export default function AdminStockPage() {
                         <img
                           src={row.productImage}
                           alt={row.productName}
-                          className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
+                          className="w-10 h-10 rounded-lg object-cover bg-gray-700 shrink-0"
                         />
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{row.productName}</p>
+                          <p className="text-sm font-medium text-white truncate">{row.productName}</p>
                           {!row.hasStock && (
                             <span className="text-xs text-yellow-600">Sin stock configurado</span>
                           )}
@@ -420,7 +420,7 @@ export default function AdminStockPage() {
                           }}
                           className={cn(
                             'w-16 text-center text-sm font-semibold border rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold',
-                            isEdited ? 'border-brand-gold bg-brand-gold/5' : 'border-gray-200'
+                            isEdited ? 'border-brand-gold bg-brand-gold/5' : 'border-gray-700'
                           )}
                         />
                       </div>

@@ -61,7 +61,7 @@ const STATUS_STYLES: Record<string, string> = {
   PAID:      'bg-blue-100 text-blue-700',
   BAKING:    'bg-orange-100 text-orange-700',
   READY:     'bg-green-100 text-green-700',
-  DELIVERED: 'bg-gray-100 text-gray-600',
+  DELIVERED: 'bg-gray-700 text-gray-300',
   CANCELLED: 'bg-red-100 text-red-700',
 }
 
@@ -164,9 +164,9 @@ function PedidosContent() {
       {/* Cabecera */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Pedidos</h2>
+          <h2 className="text-xl font-bold text-white">Pedidos</h2>
           {data && (
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-gray-400 mt-0.5">
               {data.pagination.total} pedido{data.pagination.total !== 1 ? 's' : ''} en total
             </p>
           )}
@@ -174,7 +174,7 @@ function PedidosContent() {
         <button
           onClick={fetchOrders}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 bg-gray-900 text-white border border-gray-700 rounded-lg hover:bg-gray-700 transition-colors"
         >
           <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin')} />
           Actualizar
@@ -182,13 +182,13 @@ function PedidosContent() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+        <div className="bg-red-900/30 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
           {error}
         </div>
       )}
 
       {/* Filtros */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">
         <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-3">
           {/* Búsqueda */}
           <div className="flex-1 relative">
@@ -198,7 +198,7 @@ function PedidosContent() {
               placeholder="Buscar por nº pedido, nombre o email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-700 rounded-lg bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold"
             />
           </div>
 
@@ -208,7 +208,7 @@ function PedidosContent() {
             <select
               value={status}
               onChange={(e) => handleFilterChange(setStatus)(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-white"
+              className="text-sm border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-gray-900 text-white"
             >
               {STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -220,7 +220,7 @@ function PedidosContent() {
           <select
             value={paymentStatus}
             onChange={(e) => handleFilterChange(setPaymentStatus)(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-white"
+            className="text-sm border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-gray-900 text-white"
           >
             {PAYMENT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -237,16 +237,16 @@ function PedidosContent() {
       </div>
 
       {/* Tabla */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
         {loading ? (
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-700">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="px-5 py-4 flex gap-4 animate-pulse">
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-32" />
-                  <div className="h-3 bg-gray-100 rounded w-48" />
+                  <div className="h-4 bg-gray-700 rounded w-32" />
+                  <div className="h-3 bg-gray-700 rounded w-48" />
                 </div>
-                <div className="h-6 bg-gray-200 rounded w-20" />
+                <div className="h-6 bg-gray-700 rounded w-20" />
               </div>
             ))}
           </div>
@@ -257,7 +257,7 @@ function PedidosContent() {
         ) : (
           <>
             {/* Cabecera tabla (desktop) */}
-            <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
+            <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-700 text-xs font-medium text-gray-400 uppercase tracking-wide border-b border-gray-700">
               <div className="col-span-2">Número</div>
               <div className="col-span-3">Cliente</div>
               <div className="col-span-2">Estado</div>
@@ -266,7 +266,7 @@ function PedidosContent() {
               <div className="col-span-1 text-right">Total</div>
             </div>
 
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-700">
               {data.orders.map((order) => {
                 const totalItems = order.items.reduce((s, i) => s + i.quantity, 0)
 
@@ -291,7 +291,7 @@ function PedidosContent() {
                     >
                       {/* Número */}
                       <div className="md:col-span-2 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-gold-dark transition-colors">
+                        <p className="text-sm font-semibold text-white group-hover:text-brand-gold-dark transition-colors">
                           {order.orderNumber}
                         </p>
                         <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
@@ -299,7 +299,7 @@ function PedidosContent() {
 
                       {/* Cliente */}
                       <div className="md:col-span-3 min-w-0 hidden md:block">
-                        <p className="text-sm text-gray-800 truncate">{order.customerName}</p>
+                        <p className="text-sm text-white truncate">{order.customerName}</p>
                         <p className="text-xs text-gray-400 truncate">{order.customerEmail}</p>
                       </div>
 
@@ -308,7 +308,7 @@ function PedidosContent() {
                         <span
                           className={cn(
                             'inline-block text-xs px-2 py-1 rounded-full font-medium',
-                            STATUS_STYLES[order.status] ?? 'bg-gray-100 text-gray-600'
+                            STATUS_STYLES[order.status] ?? 'bg-gray-700 text-gray-300'
                           )}
                         >
                           {STATUS_LABELS[order.status] ?? order.status}
@@ -320,7 +320,7 @@ function PedidosContent() {
                         <span
                           className={cn(
                             'inline-block text-xs px-2 py-1 rounded-full font-medium',
-                            PAYMENT_STYLES[order.paymentStatus] ?? 'bg-gray-100 text-gray-600'
+                            PAYMENT_STYLES[order.paymentStatus] ?? 'bg-gray-700 text-gray-300'
                           )}
                         >
                           {PAYMENT_LABELS[order.paymentStatus] ?? order.paymentStatus}
@@ -329,7 +329,7 @@ function PedidosContent() {
 
                       {/* Entrega */}
                       <div className="md:col-span-2 hidden md:block">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-300">
                           {DELIVERY_LABELS[order.deliveryMethod] ?? order.deliveryMethod}
                         </p>
                         <p className="text-xs text-gray-400">{totalItems} ud{totalItems !== 1 ? 's' : ''}.</p>
@@ -337,7 +337,7 @@ function PedidosContent() {
 
                       {/* Total + icono */}
                       <div className="md:col-span-1 flex items-center justify-end gap-1 ml-auto md:ml-0">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-white">
                           {formatCurrency(order.total)}
                         </span>
                         <ArrowUpRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-gold transition-colors" />
@@ -345,7 +345,7 @@ function PedidosContent() {
                     </Link>
                     <button
                       onClick={handleDeleteOrder}
-                      className="px-3 flex items-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="px-3 flex items-center text-gray-300 hover:text-red-500 hover:bg-red-900/30 transition-colors"
                       title="Eliminar pedido"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -357,22 +357,22 @@ function PedidosContent() {
 
             {/* Paginación */}
             {data.pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50">
-                <p className="text-xs text-gray-500">
+              <div className="flex items-center justify-between px-5 py-3 border-t border-gray-700 bg-gray-700">
+                <p className="text-xs text-gray-400">
                   Página {data.pagination.page} de {data.pagination.totalPages} · {data.pagination.total} resultados
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page <= 1}
-                    className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg border border-gray-700 text-gray-300 hover:bg-gray-900 text-white disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setPage((p) => Math.min(data.pagination.totalPages, p + 1))}
                     disabled={page >= data.pagination.totalPages}
-                    className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg border border-gray-700 text-gray-300 hover:bg-gray-900 text-white disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>

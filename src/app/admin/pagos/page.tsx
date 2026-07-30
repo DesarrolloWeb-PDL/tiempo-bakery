@@ -145,22 +145,22 @@ export default function AdminPagosPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <CreditCard className="w-6 h-6 text-brand-gold" /> Pagos
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-400 mt-1">
           Configura metodos de pago para checkout y defini el proveedor por defecto.
         </p>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900 text-sm">Metodos disponibles</h2>
+      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-700">
+          <h2 className="font-semibold text-white text-sm">Metodos disponibles</h2>
         </div>
 
         <div className="px-5 py-4 space-y-4">
           {loading ? (
-            <p className="text-sm text-gray-500">Cargando configuracion...</p>
+            <p className="text-sm text-gray-400">Cargando configuracion...</p>
           ) : (
             <>
               <div className="space-y-2">
@@ -175,17 +175,17 @@ export default function AdminPagosPage() {
                           : false
 
                   return (
-                    <div key={option.value} className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+                    <div key={option.value} className="flex items-center justify-between rounded-lg border border-gray-700 px-3 py-2">
                       <div>
-                        <p className="text-sm font-medium text-gray-800">{option.label}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm font-medium text-white">{option.label}</p>
+                        <p className="text-xs text-gray-400">
                           {option.value === 'BANK_TRANSFER'
                             ? available ? 'Configurado' : 'Completa los datos para habilitarlo'
                             : available ? 'Habilitado' : 'Deshabilitado'}
                         </p>
                       </div>
                       <span
-                        className={'text-xs font-medium px-2 py-1 rounded-full ' + (available ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500')}
+                        className={'text-xs font-medium px-2 py-1 rounded-full ' + (available ? 'bg-green-900/30 text-green-400' : 'bg-gray-700 text-gray-400')}
                       >
                         {available ? 'Disponible' : 'Inactivo'}
                       </span>
@@ -194,9 +194,9 @@ export default function AdminPagosPage() {
                 })}
               </div>
 
-              <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4 space-y-4">
+              <div className="rounded-lg border border-gray-700 bg-gray-700/60 p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-gray-900">Credenciales de API</p>
+                  <p className="text-sm font-semibold text-white">Credenciales de API</p>
                   <button
                     type="button"
                     onClick={() => setShowKeys(!showKeys)}
@@ -207,10 +207,10 @@ export default function AdminPagosPage() {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-3 border border-gray-200 rounded-lg p-3 bg-white">
+                  <div className="space-y-3 border border-gray-700 rounded-lg p-3 bg-gray-800">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-medium text-gray-700">Stripe</label>
-                      <label className="flex items-center gap-2 text-sm text-gray-600">
+                      <label className="text-xs font-medium text-gray-300">Stripe</label>
+                      <label className="flex items-center gap-2 text-sm text-gray-300">
                         <input
                           type="checkbox"
                           checked={paymentSettings.stripeEnabled}
@@ -226,7 +226,7 @@ export default function AdminPagosPage() {
                       </label>
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">Secret Key</label>
+                      <label className="block text-xs text-gray-400 mb-1">Secret Key</label>
                       <input
                         type={showKeys ? 'text' : 'password'}
                         value={paymentSettings.stripeSecretKey}
@@ -237,15 +237,15 @@ export default function AdminPagosPage() {
                           }))
                         }
                         disabled={!paymentSettings.stripeEnabled}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono disabled:opacity-50 disabled:bg-gray-100"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white font-mono disabled:opacity-50 disabled:bg-gray-700"
                         placeholder={paymentSettings.hasStripe ? '(Ya configurada - ingresa solo para cambiarla)' : 'sk_live_...'}
                       />
                     </div>
                   </div>
-                  <div className="space-y-3 border border-gray-200 rounded-lg p-3 bg-white">
+                  <div className="space-y-3 border border-gray-700 rounded-lg p-3 bg-gray-800">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-medium text-gray-700">Mercado Pago</label>
-                      <label className="flex items-center gap-2 text-sm text-gray-600">
+                      <label className="text-xs font-medium text-gray-300">Mercado Pago</label>
+                      <label className="flex items-center gap-2 text-sm text-gray-300">
                         <input
                           type="checkbox"
                           checked={paymentSettings.mercadopagoEnabled}
@@ -261,7 +261,7 @@ export default function AdminPagosPage() {
                       </label>
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">Access Token</label>
+                      <label className="block text-xs text-gray-400 mb-1">Access Token</label>
                       <input
                         type={showKeys ? 'text' : 'password'}
                         value={paymentSettings.mercadopagoAccessToken}
@@ -272,7 +272,7 @@ export default function AdminPagosPage() {
                           }))
                         }
                         disabled={!paymentSettings.mercadopagoEnabled}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono disabled:opacity-50 disabled:bg-gray-100"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white font-mono disabled:opacity-50 disabled:bg-gray-700"
                         placeholder={paymentSettings.hasMercadoPago ? '(Ya configurado - ingresa solo para cambiarlo)' : 'APP_USR-...'}
                       />
                     </div>
@@ -281,7 +281,7 @@ export default function AdminPagosPage() {
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Proveedor por defecto en checkout</label>
+                <label className="block text-xs text-gray-400 mb-1">Proveedor por defecto en checkout</label>
                 <select
                   value={paymentSettings.defaultProvider}
                   disabled={loading || saving}
@@ -291,7 +291,7 @@ export default function AdminPagosPage() {
                       defaultProvider: e.target.value as 'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER',
                     }))
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
                 >
                   {paymentSettings.options.map((option) => {
                     const available =
@@ -314,10 +314,10 @@ export default function AdminPagosPage() {
               <div className="rounded-lg border border-brand-gold/20 bg-brand-gold/5 p-4 space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Transferencia bancaria</p>
-                    <p className="text-xs text-gray-500">Se muestra como opcion manual en checkout y confirmacion.</p>
+                    <p className="text-sm font-semibold text-white">Transferencia bancaria</p>
+                    <p className="text-xs text-gray-400">Se muestra como opcion manual en checkout y confirmacion.</p>
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-gray-700 shrink-0">
+                  <label className="flex items-center gap-2 text-sm text-gray-300 shrink-0">
                     <input
                       type="checkbox"
                       checked={paymentSettings.bankTransfer.enabled}
@@ -337,7 +337,7 @@ export default function AdminPagosPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Banco</label>
+                    <label className="block text-xs text-gray-400 mb-1">Banco</label>
                     <input
                       type="text"
                       value={paymentSettings.bankTransfer.bankName}
@@ -347,12 +347,12 @@ export default function AdminPagosPage() {
                           bankTransfer: { ...prev.bankTransfer, bankName: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
                       placeholder="Banco Nacion, Galicia, etc."
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Titular</label>
+                    <label className="block text-xs text-gray-400 mb-1">Titular</label>
                     <input
                       type="text"
                       value={paymentSettings.bankTransfer.accountHolder}
@@ -362,12 +362,12 @@ export default function AdminPagosPage() {
                           bankTransfer: { ...prev.bankTransfer, accountHolder: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
                       placeholder="Nombre del titular"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Alias</label>
+                    <label className="block text-xs text-gray-400 mb-1">Alias</label>
                     <input
                       type="text"
                       value={paymentSettings.bankTransfer.alias}
@@ -377,12 +377,12 @@ export default function AdminPagosPage() {
                           bankTransfer: { ...prev.bankTransfer, alias: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
                       placeholder="alias.tiempo.bakery"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">CBU</label>
+                    <label className="block text-xs text-gray-400 mb-1">CBU</label>
                     <input
                       type="text"
                       value={paymentSettings.bankTransfer.cbu}
@@ -392,12 +392,12 @@ export default function AdminPagosPage() {
                           bankTransfer: { ...prev.bankTransfer, cbu: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
                       placeholder="22 digitos"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">CUIT</label>
+                    <label className="block text-xs text-gray-400 mb-1">CUIT</label>
                     <input
                       type="text"
                       value={paymentSettings.bankTransfer.cuit}
@@ -407,12 +407,12 @@ export default function AdminPagosPage() {
                           bankTransfer: { ...prev.bankTransfer, cuit: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
                       placeholder="20-12345678-9"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs text-gray-500 mb-1">Notas / instrucciones</label>
+                    <label className="block text-xs text-gray-400 mb-1">Notas / instrucciones</label>
                     <textarea
                       value={paymentSettings.bankTransfer.notes}
                       onChange={(e) =>
@@ -422,18 +422,18 @@ export default function AdminPagosPage() {
                         }))
                       }
                       rows={3}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
                       placeholder="Indica cuando enviar comprobante, horarios de confirmacion, etc."
                     />
                   </div>
                 </div>
               </div>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-400">
                 Activa cada proveedor con su toggle, ingresa la credencial correspondiente y guarda. Si desactivas un proveedor, su credencial se elimina de la base de datos. La transferencia bancaria no usa credenciales externas.
               </p>
 
-              {message && <p className="text-sm text-gray-600">{message}</p>}
+              {message && <p className="text-sm text-gray-300">{message}</p>}
 
               <button
                 onClick={handleSave}
