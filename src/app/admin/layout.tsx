@@ -128,6 +128,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 style={{
                   color: isActive ? 'var(--brand-primary)' : 'var(--brand-sidebar-text)',
                   backgroundColor: isActive ? 'color-mix(in srgb, var(--brand-primary) 10%, transparent)' : 'transparent',
+                  borderLeft: isActive ? '3px solid var(--brand-primary)' : '3px solid transparent',
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
@@ -140,7 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   }
                 }}
               >
-                <Icon className="w-5 h-5" style={{ color: isActive ? 'var(--brand-primary)' : 'var(--brand-text-muted)' }} />
+                <Icon className="w-5 h-5 shrink-0" style={{ color: isActive ? 'var(--brand-primary)' : 'var(--brand-text-muted)' }} />
                 {item.label}
               </Link>
             )
