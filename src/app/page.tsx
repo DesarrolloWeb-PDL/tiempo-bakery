@@ -3,6 +3,7 @@ import { TimeGatingBanner } from '@/components/time-gating-banner';
 import { Badge } from '@/components/ui/badge';
 import { prisma } from '@/lib/db';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
+import { getThemeConfig } from '@/lib/app-theme';
 import Image from 'next/image';
 import { Calendar, Map } from 'lucide-react';
 
@@ -135,9 +136,10 @@ async function getTimeGatingData() {
 }
 
 export default async function HomePage() {
-  const [productsData, timeGatingData] = await Promise.all([
+  const [productsData, timeGatingData, themeConfig] = await Promise.all([
     getProducts(),
     getTimeGatingData(),
+    getThemeConfig(),
   ]);
 
   return (
@@ -240,13 +242,27 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="text-center">
-              <Image
-                src="/img/espiga.png"
-                alt="Masa Madre Natural"
-                width={40}
-                height={40}
-                className="mx-auto mb-3 object-contain"
-              />
+              {themeConfig.logoUrl ? (
+                <Image
+                  src={themeConfig.logoUrl}
+                  alt="Masa Madre Natural"
+                  width={40}
+                  height={40}
+                  className="mx-auto mb-3 object-contain"
+                />
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10 mx-auto mb-3 text-brand-gold">
+                  <path d="M12 22V8" />
+                  <path d="M12 8c2-2 4-2.5 4-4" />
+                  <path d="M12 8c-2-2-4-2.5-4-4" />
+                  <path d="M8 12c2-1 3-1.5 4-3" />
+                  <path d="M16 12c-2-1-3-1.5-4-3" />
+                  <path d="M7 16c1.5-1 3-2 4-3" />
+                  <path d="M17 16c-1.5-1-3-2-4-3" />
+                  <path d="M6 19l2-2" />
+                  <path d="M18 19l-2-2" />
+                </svg>
+              )}
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Masa Madre Natural
               </h3>
