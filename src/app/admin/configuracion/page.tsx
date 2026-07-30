@@ -1405,388 +1405,404 @@ export default function AdminConfigPage() {
           <Palette className="w-4 h-4 text-brand-gold" />
           <h3 className="font-semibold text-gray-900 text-sm">Personalización de la app</h3>
         </div>
-        <div className="px-5 py-4 space-y-4">
-          {/* Título */}
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Título de la tienda</label>
-            <input
-              type="text"
-              value={theme.appTitle}
-              disabled={loadingTheme || savingTheme}
-              onChange={(e) => setTheme({ ...theme, appTitle: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-              placeholder="Ej: Tiempo Bakery"
-            />
-          </div>
-
-          {/* Subtítulo */}
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Subtítulo/Lema</label>
-            <input
-              type="text"
-              value={theme.appSubtitle}
-              disabled={loadingTheme || savingTheme}
-              onChange={(e) => setTheme({ ...theme, appSubtitle: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-              placeholder="Ej: Micropanadería artesanal por encargo semanal"
-            />
-          </div>
-
-          {/* Logo */}
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Logo de la tienda</label>
-            <div className="space-y-2">
-              {/* Cargar archivo */}
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="logo-upload"
-                  className={`flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {uploadingLogo ? 'Cargando...' : 'Seleccionar imagen'}
-                </label>
-                <input
-                  id="logo-upload"
-                  type="file"
-                  accept="image/*"
-                  disabled={loadingTheme || savingTheme || uploadingLogo}
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                />
-              </div>
-
-              {/* O URL manual */}
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">O ingresa URL manualmente:</label>
-                <input
-                  type="url"
-                  value={theme.logoUrl}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                  placeholder="Ej: /img/logo.png"
-                />
-              </div>
-            </div>
-
-            {/* Preview */}
-            {theme.logoUrl && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
-                <Image
-                  src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
-                  alt="Logo preview"
-                  width={64}
-                  height={64}
-                  className="h-16 object-contain"
-                  priority
-                  unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Tamaño del logo */}
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Tamaño del logo</label>
-            <select
-              value={theme.logoSize}
-              disabled={loadingTheme || savingTheme}
-              onChange={(e) => setTheme({ ...theme, logoSize: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+        <Tabs.Root defaultValue="header" className="px-5 py-4">
+          <Tabs.List className="inline-flex gap-2 bg-gray-100 p-1 rounded-lg mb-4">
+            <Tabs.Trigger
+              value="header"
+              className="px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-gray-600 border border-gray-200 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-50"
             >
-              <option value="24">24px — Chico</option>
-              <option value="32">32px — Mediano-chico</option>
-              <option value="36">36px — Mediano (predeterminado)</option>
-              <option value="40">40px — Mediano-grande</option>
-              <option value="48">48px — Grande</option>
-              <option value="56">56px — Extra grande</option>
-              <option value="64">64px — Máximo</option>
-            </select>
-            <div className="mt-2 flex items-center gap-2">
-              <Image
-                src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
-                alt="Logo preview size"
-                width={Number(theme.logoSize) || 36}
-                height={Number(theme.logoSize) || 36}
-                className="object-contain border border-gray-200 rounded"
-                unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
-              />
-              <span className="text-xs text-gray-400">{theme.logoSize}px</span>
-            </div>
-          </div>
+              Header
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              value="footer"
+              className="px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-gray-600 border border-gray-200 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-50"
+            >
+              Footer
+            </Tabs.Trigger>
+          </Tabs.List>
 
-          {/* Info section texts */}
-          <div className="border-t border-gray-200 pt-4">
-            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Sección de información (home)</p>
-            {([
-              { num: 1, titleKey: 'infoTitle1' as const, subKey: 'infoSubtitle1' as const, titleLabel: 'Título 1', subLabel: 'Subtítulo 1' },
-              { num: 2, titleKey: 'infoTitle2' as const, subKey: 'infoSubtitle2' as const, titleLabel: 'Título 2', subLabel: 'Subtítulo 2' },
-              { num: 3, titleKey: 'infoTitle3' as const, subKey: 'infoSubtitle3' as const, titleLabel: 'Título 3', subLabel: 'Subtítulo 3' },
-            ]).map(({ num, titleKey, subKey, titleLabel, subLabel }) => (
-              <div key={num} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0 last:mb-0 last:pb-0">
-                <p className="text-xs text-gray-400 mb-2">Columna {num}</p>
-                <div className="space-y-2">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">{titleLabel}</label>
-                    <input
-                      type="text"
-                      value={(theme as any)[titleKey]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [titleKey]: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                      placeholder="Título"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">{subLabel}</label>
-                    <input
-                      type="text"
-                      value={(theme as any)[subKey]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [subKey]: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                      placeholder="Subtítulo"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Colores */}
-          <div>
-            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Colores de la marca</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {([
-                { key: 'primaryColor', label: 'Primario (botones, links, acentos)' },
-                { key: 'primaryHover', label: 'Primario hover' },
-                { key: 'secondaryColor', label: 'Secundario (headers)' },
-                { key: 'accentColor', label: 'Acento' },
-                { key: 'bgBody', label: 'Fondo del body' },
-                { key: 'bgCard', label: 'Fondo de tarjetas' },
-                { key: 'textPrimary', label: 'Texto principal' },
-                { key: 'textMuted', label: 'Texto secundario' },
-              ] as const).map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={(theme as any)[key]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                      className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
-                    />
-                    <input
-                      type="text"
-                      value={(theme as any)[key]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
-                      placeholder="#000000"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Superficies y bordes</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {([
-                { key: 'borderColor', label: 'Color de bordes' },
-                { key: 'mutedBg', label: 'Fondo de superficies secundarias' },
-                { key: 'hoverBg', label: 'Fondo al pasar el mouse' },
-                { key: 'sidebarBg', label: 'Fondo del panel lateral' },
-                { key: 'sidebarText', label: 'Texto del panel lateral' },
-              ] as const).map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={(theme as any)[key]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                      className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
-                    />
-                    <input
-                      type="text"
-                      value={(theme as any)[key]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
-                      placeholder="#000000"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Estados y feedback</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {([
-                { key: 'successColor', label: 'Éxito / confirmación' },
-                { key: 'warningColor', label: 'Advertencia' },
-                { key: 'errorColor', label: 'Error / peligro' },
-              ] as const).map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={(theme as any)[key]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                      className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
-                    />
-                    <input
-                      type="text"
-                      value={(theme as any)[key]}
-                      disabled={loadingTheme || savingTheme}
-                      onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
-                      placeholder="#000000"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Tipografía */}
-          <div>
-            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Tipografía</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Fuente para títulos</label>
-                <select
-                  value={theme.fontHeading}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, fontHeading: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                >
-                  <optgroup label="Sistema">
-                    <option value="system-ui">system-ui (predeterminado)</option>
-                    <option value="serif">Serif</option>
-                    <option value="sans-serif">Sans-serif</option>
-                    <option value="monospace">Monospace</option>
-                  </optgroup>
-                  <optgroup label="Google Fonts (títulos)">
-                    <option value="'Playfair Display', serif">Playfair Display</option>
-                    <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
-                    <option value="'Libre Baskerville', serif">Libre Baskerville</option>
-                    <option value="'DM Serif Display', serif">DM Serif Display</option>
-                    <option value="'Lora', serif">Lora</option>
-                  </optgroup>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Fuente para cuerpo de texto</label>
-                <select
-                  value={theme.fontBody}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, fontBody: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                >
-                  <optgroup label="Sistema">
-                    <option value="system-ui">system-ui (predeterminado)</option>
-                    <option value="serif">Serif</option>
-                    <option value="sans-serif">Sans-serif</option>
-                    <option value="monospace">Monospace</option>
-                  </optgroup>
-                  <optgroup label="Google Fonts (cuerpo)">
-                    <option value="'Lato', sans-serif">Lato</option>
-                    <option value="'Montserrat', sans-serif">Montserrat</option>
-                    <option value="'Open Sans', sans-serif">Open Sans</option>
-                    <option value="'Raleway', sans-serif">Raleway</option>
-                    <option value="'Nunito', sans-serif">Nunito</option>
-                    <option value="'Work Sans', sans-serif">Work Sans</option>
-                  </optgroup>
-                </select>
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className="block text-xs text-gray-500 mb-1">Tamaño del nombre de la app</label>
-              <select
-                value={theme.fontSizeTitle}
+          <Tabs.Content value="header" className="space-y-4 outline-none">
+            {/* Título */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Título de la tienda</label>
+              <input
+                type="text"
+                value={theme.appTitle}
                 disabled={loadingTheme || savingTheme}
-                onChange={(e) => setTheme({ ...theme, fontSizeTitle: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-              >
-                <option value="clamp(0.875rem, 2vw, 1.125rem)">Pequeño</option>
-                <option value="clamp(1rem, 2.5vw, 1.5rem)">Normal (predeterminado)</option>
-                <option value="clamp(1.125rem, 3vw, 1.75rem)">Mediano</option>
-                <option value="clamp(1.25rem, 3.5vw, 2rem)">Grande</option>
-                <option value="clamp(1.375rem, 4vw, 2.25rem)">Extra grande</option>
-                <option value="clamp(1.5rem, 4.5vw, 2.5rem)">Muy grande</option>
-              </select>
-              <p className="text-[10px] text-gray-400 mt-0.5">
-                El tamaño se adapta automáticamente al ancho de pantalla. El máximo evita que se desborde.
-              </p>
+                onChange={(e) => setTheme({ ...theme, appTitle: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                placeholder="Ej: Tiempo Bakery"
+              />
             </div>
-            <div className="mt-3">
-              <label className="block text-xs text-gray-500 mb-1">Alineación del título</label>
-              <div className="flex gap-2">
-                {(['left', 'center', 'right'] as const).map((align) => (
-                  <button
-                    key={align}
-                    type="button"
-                    disabled={loadingTheme || savingTheme}
-                    onClick={() => setTheme({ ...theme, titleAlign: align })}
-                    className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
-                      theme.titleAlign === align
-                        ? 'border-brand-gold bg-brand-gold/10 text-brand-gold-dark font-medium'
-                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+
+            {/* Subtítulo */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Subtítulo/Lema</label>
+              <input
+                type="text"
+                value={theme.appSubtitle}
+                disabled={loadingTheme || savingTheme}
+                onChange={(e) => setTheme({ ...theme, appSubtitle: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                placeholder="Ej: Micropanadería artesanal por encargo semanal"
+              />
+            </div>
+
+            {/* Logo */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Logo de la tienda</label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="logo-upload"
+                    className={`flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors ${
+                      uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
-                    {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centrado' : 'Derecha'}
-                  </button>
+                    {uploadingLogo ? 'Cargando...' : 'Seleccionar imagen'}
+                  </label>
+                  <input
+                    id="logo-upload"
+                    type="file"
+                    accept="image/*"
+                    disabled={loadingTheme || savingTheme || uploadingLogo}
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">O ingresa URL manualmente:</label>
+                  <input
+                    type="url"
+                    value={theme.logoUrl}
+                    disabled={loadingTheme || savingTheme}
+                    onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                    placeholder="Ej: /img/logo.png"
+                  />
+                </div>
+              </div>
+              {theme.logoUrl && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
+                  <Image
+                    src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
+                    alt="Logo preview"
+                    width={64}
+                    height={64}
+                    className="h-16 object-contain"
+                    priority
+                    unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Tamaño del logo */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Tamaño del logo</label>
+              <select
+                value={theme.logoSize}
+                disabled={loadingTheme || savingTheme}
+                onChange={(e) => setTheme({ ...theme, logoSize: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+              >
+                <option value="24">24px — Chico</option>
+                <option value="32">32px — Mediano-chico</option>
+                <option value="36">36px — Mediano (predeterminado)</option>
+                <option value="40">40px — Mediano-grande</option>
+                <option value="48">48px — Grande</option>
+                <option value="56">56px — Extra grande</option>
+                <option value="64">64px — Máximo</option>
+              </select>
+              <div className="mt-2 flex items-center gap-2">
+                <Image
+                  src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
+                  alt="Logo preview size"
+                  width={Number(theme.logoSize) || 36}
+                  height={Number(theme.logoSize) || 36}
+                  className="object-contain border border-gray-200 rounded"
+                  unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
+                />
+                <span className="text-xs text-gray-400">{theme.logoSize}px</span>
+              </div>
+            </div>
+
+            {/* Tipografía */}
+            <div>
+              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Tipografía</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Fuente para títulos</label>
+                  <select
+                    value={theme.fontHeading}
+                    disabled={loadingTheme || savingTheme}
+                    onChange={(e) => setTheme({ ...theme, fontHeading: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  >
+                    <optgroup label="Sistema">
+                      <option value="system-ui">system-ui (predeterminado)</option>
+                      <option value="serif">Serif</option>
+                      <option value="sans-serif">Sans-serif</option>
+                      <option value="monospace">Monospace</option>
+                    </optgroup>
+                    <optgroup label="Google Fonts (títulos)">
+                      <option value="'Playfair Display', serif">Playfair Display</option>
+                      <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
+                      <option value="'Libre Baskerville', serif">Libre Baskerville</option>
+                      <option value="'DM Serif Display', serif">DM Serif Display</option>
+                      <option value="'Lora', serif">Lora</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Fuente para cuerpo de texto</label>
+                  <select
+                    value={theme.fontBody}
+                    disabled={loadingTheme || savingTheme}
+                    onChange={(e) => setTheme({ ...theme, fontBody: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  >
+                    <optgroup label="Sistema">
+                      <option value="system-ui">system-ui (predeterminado)</option>
+                      <option value="serif">Serif</option>
+                      <option value="sans-serif">Sans-serif</option>
+                      <option value="monospace">Monospace</option>
+                    </optgroup>
+                    <optgroup label="Google Fonts (cuerpo)">
+                      <option value="'Lato', sans-serif">Lato</option>
+                      <option value="'Montserrat', sans-serif">Montserrat</option>
+                      <option value="'Open Sans', sans-serif">Open Sans</option>
+                      <option value="'Raleway', sans-serif">Raleway</option>
+                      <option value="'Nunito', sans-serif">Nunito</option>
+                      <option value="'Work Sans', sans-serif">Work Sans</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-xs text-gray-500 mb-1">Tamaño del nombre de la app</label>
+                <select
+                  value={theme.fontSizeTitle}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, fontSizeTitle: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                >
+                  <option value="clamp(0.875rem, 2vw, 1.125rem)">Pequeño</option>
+                  <option value="clamp(1rem, 2.5vw, 1.5rem)">Normal (predeterminado)</option>
+                  <option value="clamp(1.125rem, 3vw, 1.75rem)">Mediano</option>
+                  <option value="clamp(1.25rem, 3.5vw, 2rem)">Grande</option>
+                  <option value="clamp(1.375rem, 4vw, 2.25rem)">Extra grande</option>
+                  <option value="clamp(1.5rem, 4.5vw, 2.5rem)">Muy grande</option>
+                </select>
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  El tamaño se adapta automáticamente al ancho de pantalla. El máximo evita que se desborde.
+                </p>
+              </div>
+              <div className="mt-3">
+                <label className="block text-xs text-gray-500 mb-1">Alineación del título</label>
+                <div className="flex gap-2">
+                  {(['left', 'center', 'right'] as const).map((align) => (
+                    <button
+                      key={align}
+                      type="button"
+                      disabled={loadingTheme || savingTheme}
+                      onClick={() => setTheme({ ...theme, titleAlign: align })}
+                      className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
+                        theme.titleAlign === align
+                          ? 'border-brand-gold bg-brand-gold/10 text-brand-gold-dark font-medium'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centrado' : 'Derecha'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-3 flex flex-col gap-0.5 text-xs text-gray-400">
+                <span>Vista previa:</span>
+                <div style={{ textAlign: theme.titleAlign as any }}>
+                  <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate block">
+                    {theme.appTitle || 'Tiempo Bakery'}
+                  </span>
+                  {theme.appSubtitle && (
+                    <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-500 truncate block">
+                      {theme.appSubtitle}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Tabs.Content>
+
+          <Tabs.Content value="footer" className="space-y-4 outline-none">
+            {/* Colores */}
+            <div>
+              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Colores de la marca</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {([
+                  { key: 'primaryColor', label: 'Primario (botones, links, acentos)' },
+                  { key: 'primaryHover', label: 'Primario hover' },
+                  { key: 'secondaryColor', label: 'Secundario (headers)' },
+                  { key: 'accentColor', label: 'Acento' },
+                  { key: 'bgBody', label: 'Fondo del body' },
+                  { key: 'bgCard', label: 'Fondo de tarjetas' },
+                  { key: 'textPrimary', label: 'Texto principal' },
+                  { key: 'textMuted', label: 'Texto secundario' },
+                ] as const).map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={(theme as any)[key]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                        className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={(theme as any)[key]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                        placeholder="#000000"
+                      />
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
-            <div className="mt-3 flex flex-col gap-0.5 text-xs text-gray-400">
-              <span>Vista previa:</span>
-              <div style={{ textAlign: theme.titleAlign as any }}>
-                <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate block">
-                  {theme.appTitle || 'Tiempo Bakery'}
-                </span>
-                {theme.appSubtitle && (
-                  <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-500 truncate block">
-                    {theme.appSubtitle}
-                  </span>
-                )}
+
+            <div className="border-t border-gray-200 pt-4">
+              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Superficies y bordes</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {([
+                  { key: 'borderColor', label: 'Color de bordes' },
+                  { key: 'mutedBg', label: 'Fondo de superficies secundarias' },
+                  { key: 'hoverBg', label: 'Fondo al pasar el mouse' },
+                  { key: 'sidebarBg', label: 'Fondo del panel lateral' },
+                  { key: 'sidebarText', label: 'Texto del panel lateral' },
+                ] as const).map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={(theme as any)[key]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                        className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={(theme as any)[key]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                        placeholder="#000000"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          {themeMsg && (
+            <div className="border-t border-gray-200 pt-4">
+              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Estados y feedback</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {([
+                  { key: 'successColor', label: 'Éxito / confirmación' },
+                  { key: 'warningColor', label: 'Advertencia' },
+                  { key: 'errorColor', label: 'Error / peligro' },
+                ] as const).map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={(theme as any)[key]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                        className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={(theme as any)[key]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                        placeholder="#000000"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Info section texts */}
+            <div className="border-t border-gray-200 pt-4">
+              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Sección de información (home)</p>
+              {([
+                { num: 1, titleKey: 'infoTitle1' as const, subKey: 'infoSubtitle1' as const, titleLabel: 'Título 1', subLabel: 'Subtítulo 1' },
+                { num: 2, titleKey: 'infoTitle2' as const, subKey: 'infoSubtitle2' as const, titleLabel: 'Título 2', subLabel: 'Subtítulo 2' },
+                { num: 3, titleKey: 'infoTitle3' as const, subKey: 'infoSubtitle3' as const, titleLabel: 'Título 3', subLabel: 'Subtítulo 3' },
+              ]).map(({ num, titleKey, subKey, titleLabel, subLabel }) => (
+                <div key={num} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0 last:mb-0 last:pb-0">
+                  <p className="text-xs text-gray-400 mb-2">Columna {num}</p>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">{titleLabel}</label>
+                      <input
+                        type="text"
+                        value={(theme as any)[titleKey]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [titleKey]: e.target.value })}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        placeholder="Título"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">{subLabel}</label>
+                      <input
+                        type="text"
+                        value={(theme as any)[subKey]}
+                        disabled={loadingTheme || savingTheme}
+                        onChange={(e) => setTheme({ ...theme, [subKey]: e.target.value })}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        placeholder="Subtítulo"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Tabs.Content>
+        </Tabs.Root>
+
+        {themeMsg && (
+          <div className="px-5 pb-2">
             <p className={`text-sm ${typeof themeMsg === 'string' && themeMsg?.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
               {themeMsg}
             </p>
-          )}
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleSaveTheme}
-              disabled={loadingTheme || savingTheme}
-              className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
-            >
-              {savingTheme ? 'Guardando...' : 'Guardar personalización'}
-            </button>
-            <button
-              onClick={handleResetTheme}
-              disabled={loadingTheme || savingTheme}
-              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
-            >
-              Restablecer
-            </button>
           </div>
+        )}
+
+        <div className="px-5 py-4 border-t border-gray-100 flex gap-2">
+          <button
+            onClick={handleSaveTheme}
+            disabled={loadingTheme || savingTheme}
+            className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
+          >
+            {savingTheme ? 'Guardando...' : 'Guardar personalización'}
+          </button>
+          <button
+            onClick={handleResetTheme}
+            disabled={loadingTheme || savingTheme}
+            className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+          >
+            Restablecer
+          </button>
         </div>
       </div>
     </div>
