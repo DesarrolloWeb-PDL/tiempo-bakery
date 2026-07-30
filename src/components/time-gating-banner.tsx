@@ -59,28 +59,28 @@ export function TimeGatingBanner({
   }
 
   return (
-    <Card className="bg-brand-gold/5 border-brand-gold/20">
+    <Card className="bg-red-900/80 border-red-700">
       <CardContent className="flex items-center gap-3 p-4">
         <div className="flex-shrink-0">
-          <div className="h-10 w-10 rounded-full bg-brand-gold/10 flex items-center justify-center">
-            <AlertCircle className="h-5 w-5 text-brand-gold" />
+          <div className="h-10 w-10 rounded-full bg-red-800/60 flex items-center justify-center">
+            <AlertCircle className="h-5 w-5 text-red-300" />
           </div>
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold text-brand-gold-dark">
+          <h3 className="font-semibold text-red-100">
             Temporalmente cerrado
           </h3>
           {timeRemaining && (
-            <p className="text-sm text-brand-gold-dark">
+            <p className="text-sm text-red-200">
               Abrimos en: {timeRemaining.days}d {timeRemaining.hours}h{' '}
               {timeRemaining.minutes}m
             </p>
           )}
-          <p className="text-xs text-brand-gold-dark mt-2">
+          <p className="text-xs text-red-300 mt-2">
             Horario de pedidos: {openingDayLabel} {String(openingHour).padStart(2, '0')}:{String(openingMinute).padStart(2, '0')} a {closingDayLabel} {String(closingHour).padStart(2, '0')}:{String(closingMinute).padStart(2, '0')}
           </p>
         </div>
-        <Badge variant="warning" className="shrink-0">
+        <Badge variant="destructive" className="shrink-0">
           Cerrado
         </Badge>
       </CardContent>
