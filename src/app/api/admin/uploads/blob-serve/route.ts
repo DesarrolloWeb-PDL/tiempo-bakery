@@ -35,7 +35,6 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Blob Serve] Error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to serve blob' },
       { status: 500 }

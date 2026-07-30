@@ -62,7 +62,6 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Upload Serve] Error:', error)
     return readFallbackImage()
   }
 }

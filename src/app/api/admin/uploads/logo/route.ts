@@ -76,10 +76,7 @@ async function uploadLogoLocally(file: File, req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('[Logo Upload] Request received')
-
     if (!(await hasAdminSession(req.cookies))) {
-      console.log('[Logo Upload] Unauthorized - no admin session')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -87,15 +84,11 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const file = formData.get('file') as File
     if (!file) {
-      console.log('[Logo Upload] No file provided')
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    console.log(`[Logo Upload] File: ${file.name}, Size: ${file.size}, Type: ${file.type}`)
-
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      console.log(`[Logo Upload] Invalid type: ${file.type}`)
       return NextResponse.json(
         { error: `Invalid file type. Allowed: ${ALLOWED_TYPES.join(', ')}` },
         { status: 400 }
@@ -104,7 +97,6 @@ export async function POST(req: NextRequest) {
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      console.log(`[Logo Upload] File too large: ${file.size}`)
       return NextResponse.json(
         { error: 'File too large (max 5MB)' },
         { status: 400 }
@@ -123,8 +115,6 @@ export async function POST(req: NextRequest) {
       upload = await uploadLogoLocally(file, req)
     }
 
-    console.log(`[Logo Upload] Success, URL: ${upload.publicUrl}`)
-
     return NextResponse.json({
       url: upload.publicUrl,
       filename: upload.filePath,
@@ -132,7 +122,6 @@ export async function POST(req: NextRequest) {
       type: file.type,
     })
   } catch (error) {
-    console.error('[Logo Upload] Error:', error)
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Upload failed',
@@ -170,7 +159,6 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Logo Serve] Error:', error)
     return readFallbackLogo()
   }
 }
