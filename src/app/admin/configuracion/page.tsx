@@ -1221,23 +1221,29 @@ export default function AdminConfigPage() {
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <Settings className="w-6 h-6 text-brand-gold" /> Configuración
       </h1>
+
       <Tabs.Root defaultValue="entrega" className="w-full">
-        <Tabs.List className="flex gap-2 border-b mb-6 overflow-x-auto flex-nowrap -mx-4 px-4 scrollbar-none">
-          <Tabs.Trigger value="entrega" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
-            <Truck className="w-4 h-4" /> Entrega
-          </Tabs.Trigger>
-          <Tabs.Trigger value="footer" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
-            <Layout className="w-4 h-4" /> Footer
-          </Tabs.Trigger>
-          <Tabs.Trigger value="nav" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
-            <Palette className="w-4 h-4" /> Nav
-          </Tabs.Trigger>
-          <Tabs.Trigger value="sobre" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
-            <Info className="w-4 h-4" /> Nosotros
-          </Tabs.Trigger>
-          <Tabs.Trigger value="contacto" className="shrink-0 px-4 py-2 font-medium text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-gold data-[state=active]:text-brand-gold-dark flex items-center gap-1">
-            <Mail className="w-4 h-4" /> Contacto
-          </Tabs.Trigger>
+        <Tabs.List className="inline-flex flex-wrap gap-2 bg-gray-100 p-1 rounded-lg mb-6 overflow-x-auto">
+          {([
+            { value: 'entrega', icon: Truck, label: 'Entrega' },
+            { value: 'header', icon: Layout, label: 'Header' },
+            { value: 'footer', icon: Palette, label: 'Footer' },
+            { value: 'nav', icon: Info, label: 'Nav' },
+            { value: 'sobre', icon: Info, label: 'Nosotros' },
+            { value: 'contacto', icon: Mail, label: 'Contacto' },
+            { value: 'pagos', icon: Settings, label: 'Pagos' },
+          ] as const).map((tab) => {
+            const Icon = tab.icon
+            return (
+              <Tabs.Trigger
+                key={tab.value}
+                value={tab.value}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-gray-600 border border-gray-200 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-50"
+              >
+                <Icon className="w-4 h-4" /> {tab.label}
+              </Tabs.Trigger>
+            )
+          })}
         </Tabs.List>
 
         <Tabs.Content value="entrega">
@@ -1271,7 +1277,247 @@ export default function AdminConfigPage() {
             onDeletePickupPoint={handleDeletePickupPoint}
           />
         </Tabs.Content>
-        <Tabs.Content value="footer">
+
+        <Tabs.Content value="header" className="space-y-4">
+          {/* Título */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Título de la tienda</label>
+            <input
+              type="text"
+              value={theme.appTitle}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, appTitle: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              placeholder="Ej: Tiempo Bakery"
+            />
+          </div>
+
+          {/* Subtítulo */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Subtítulo/Lema</label>
+            <input
+              type="text"
+              value={theme.appSubtitle}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, appSubtitle: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              placeholder="Ej: Micropanadería artesanal por encargo semanal"
+            />
+          </div>
+
+          {/* Logo */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Logo de la tienda</label>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="logo-upload"
+                  className={`flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {uploadingLogo ? 'Cargando...' : 'Seleccionar imagen'}
+                </label>
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  disabled={loadingTheme || savingTheme || uploadingLogo}
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">O ingresa URL manualmente:</label>
+                <input
+                  type="url"
+                  value={theme.logoUrl}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                  placeholder="Ej: /img/logo.png"
+                />
+              </div>
+            </div>
+            {theme.logoUrl && (
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
+                <Image
+                  src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
+                  alt="Logo preview"
+                  width={64}
+                  height={64}
+                  className="h-16 object-contain"
+                  priority
+                  unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Tamaño del logo */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Tamaño del logo</label>
+            <select
+              value={theme.logoSize}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, logoSize: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+            >
+              <option value="24">24px — Chico</option>
+              <option value="32">32px — Mediano-chico</option>
+              <option value="36">36px — Mediano (predeterminado)</option>
+              <option value="40">40px — Mediano-grande</option>
+              <option value="48">48px — Grande</option>
+              <option value="56">56px — Extra grande</option>
+              <option value="64">64px — Máximo</option>
+            </select>
+            <div className="mt-2 flex items-center gap-2">
+              <Image
+                src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
+                alt="Logo preview size"
+                width={Number(theme.logoSize) || 36}
+                height={Number(theme.logoSize) || 36}
+                className="object-contain border border-gray-200 rounded"
+                unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
+              />
+              <span className="text-xs text-gray-400">{theme.logoSize}px</span>
+            </div>
+          </div>
+
+          {/* Tipografía */}
+          <div>
+            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Tipografía</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Fuente para títulos</label>
+                <select
+                  value={theme.fontHeading}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, fontHeading: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                >
+                  <optgroup label="Sistema">
+                    <option value="system-ui">system-ui (predeterminado)</option>
+                    <option value="serif">Serif</option>
+                    <option value="sans-serif">Sans-serif</option>
+                    <option value="monospace">Monospace</option>
+                  </optgroup>
+                  <optgroup label="Google Fonts (títulos)">
+                    <option value="'Playfair Display', serif">Playfair Display</option>
+                    <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
+                    <option value="'Libre Baskerville', serif">Libre Baskerville</option>
+                    <option value="'DM Serif Display', serif">DM Serif Display</option>
+                    <option value="'Lora', serif">Lora</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Fuente para cuerpo de texto</label>
+                <select
+                  value={theme.fontBody}
+                  disabled={loadingTheme || savingTheme}
+                  onChange={(e) => setTheme({ ...theme, fontBody: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                >
+                  <optgroup label="Sistema">
+                    <option value="system-ui">system-ui (predeterminado)</option>
+                    <option value="serif">Serif</option>
+                    <option value="sans-serif">Sans-serif</option>
+                    <option value="monospace">Monospace</option>
+                  </optgroup>
+                  <optgroup label="Google Fonts (cuerpo)">
+                    <option value="'Lato', sans-serif">Lato</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                    <option value="'Raleway', sans-serif">Raleway</option>
+                    <option value="'Nunito', sans-serif">Nunito</option>
+                    <option value="'Work Sans', sans-serif">Work Sans</option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="block text-xs text-gray-500 mb-1">Tamaño del nombre de la app</label>
+              <select
+                value={theme.fontSizeTitle}
+                disabled={loadingTheme || savingTheme}
+                onChange={(e) => setTheme({ ...theme, fontSizeTitle: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+              >
+                <option value="clamp(0.875rem, 2vw, 1.125rem)">Pequeño</option>
+                <option value="clamp(1rem, 2.5vw, 1.5rem)">Normal (predeterminado)</option>
+                <option value="clamp(1.125rem, 3vw, 1.75rem)">Mediano</option>
+                <option value="clamp(1.25rem, 3.5vw, 2rem)">Grande</option>
+                <option value="clamp(1.375rem, 4vw, 2.25rem)">Extra grande</option>
+                <option value="clamp(1.5rem, 4.5vw, 2.5rem)">Muy grande</option>
+              </select>
+              <p className="text-[10px] text-gray-400 mt-0.5">
+                El tamaño se adapta automáticamente al ancho de pantalla. El máximo evita que se desborde.
+              </p>
+            </div>
+            <div className="mt-3">
+              <label className="block text-xs text-gray-500 mb-1">Alineación del título</label>
+              <div className="flex gap-2">
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    type="button"
+                    disabled={loadingTheme || savingTheme}
+                    onClick={() => setTheme({ ...theme, titleAlign: align })}
+                    className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
+                      theme.titleAlign === align
+                        ? 'border-brand-gold bg-brand-gold/10 text-brand-gold-dark font-medium'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centrado' : 'Derecha'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 flex flex-col gap-0.5 text-xs text-gray-400">
+              <span>Vista previa:</span>
+              <div style={{ textAlign: theme.titleAlign as any }}>
+                <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate block">
+                  {theme.appTitle || 'Tiempo Bakery'}
+                </span>
+                {theme.appSubtitle && (
+                  <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-500 truncate block">
+                    {theme.appSubtitle}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {themeMsg && (
+            <div>
+              <p className={`text-sm ${typeof themeMsg === 'string' && themeMsg?.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
+                {themeMsg}
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={handleSaveTheme}
+              disabled={loadingTheme || savingTheme}
+              className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
+            >
+              {savingTheme ? 'Guardando...' : 'Guardar header'}
+            </button>
+            <button
+              onClick={handleResetTheme}
+              disabled={loadingTheme || savingTheme}
+              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+            >
+              Restablecer
+            </button>
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content value="footer" className="space-y-4">
           <FooterConfigAdmin
             siteContent={siteContent}
             setSiteContent={setSiteContent}
@@ -1281,361 +1527,9 @@ export default function AdminConfigPage() {
             onSave={handleSaveSiteContent}
             onReset={handleResetSiteContent}
           />
-        </Tabs.Content>
-        <Tabs.Content value="nav">
-          <NavConfigAdmin
-            siteContent={siteContent}
-            setSiteContent={setSiteContent}
-            loading={loadingSiteContent}
-            saving={savingSiteContent}
-            message={siteContentMsg}
-            onSave={handleSaveSiteContent}
-            onReset={handleResetSiteContent}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="sobre">
-          <SobreNosotrosConfigAdmin
-            siteContent={siteContent}
-            setSiteContent={setSiteContent}
-            loading={loadingSiteContent}
-            saving={savingSiteContent}
-            message={siteContentMsg}
-            onSave={handleSaveSiteContent}
-            onReset={handleResetSiteContent}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="contacto">
-          <ContactoConfigAdmin
-            siteContent={siteContent}
-            setSiteContent={setSiteContent}
-            loading={loadingSiteContent}
-            saving={savingSiteContent}
-            message={siteContentMsg}
-            onSave={handleSaveSiteContent}
-            onReset={handleResetSiteContent}
-          />
-        </Tabs.Content>
-      </Tabs.Root>
 
-      {/* Seguridad */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-10">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Key className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-gray-900 text-sm">Seguridad</h3>
-        </div>
-        <div className="px-5 py-4 space-y-4">
-          <div>
-            <p className="text-sm text-gray-700 font-medium mb-1">Contraseña de administrador</p>
-            <p className="text-sm text-gray-500">
-              Configura la variable de entorno{' '}
-              <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">ADMIN_PASSWORD</code>{' '}
-              y <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">JWT_SECRET</code>{' '}
-              en tu archivo <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">.env.local</code>
-            </p>
-            <p className="text-xs text-yellow-600 bg-yellow-50 px-3 py-2 rounded-lg mt-2">
-              ⚠️ La contraseña por defecto <strong>admin123</strong> solo aplica en desarrollo local.
-              En despliegue necesitás definir <code>ADMIN_PASSWORD</code> y <code>JWT_SECRET</code>.
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors border border-red-200 disabled:opacity-50"
-          >
-            {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-            Cerrar sesión
-          </button>
-        </div>
-      </div>
-
-      {/* Info del sistema */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-6">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Settings className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-gray-900 text-sm">Información del sistema</h3>
-        </div>
-        <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[
-            { label: 'Versión', value: '1.0.0' },
-            { label: 'Stack', value: 'Next.js 14 + Prisma' },
-            { label: 'Base de datos', value: 'SQLite (dev) / PostgreSQL (prod)' },
-            { label: 'Pagos', value: paymentSettings.enabledProviders.length ? paymentSettings.enabledProviders.join(' + ') : 'Sin configurar' },
-          ].map((item) => (
-            <div key={item.label}>
-              <p className="text-xs text-gray-400">{item.label}</p>
-              <p className="text-sm text-gray-800">{item.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-6">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Settings className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-gray-900 text-sm">Pagos</h3>
-        </div>
-        <div className="px-5 py-4 space-y-3">
-          <p className="text-sm text-gray-600">
-            La configuración de métodos de pago ahora vive en una pantalla dedicada para mantener el panel más ordenado.
-          </p>
-          <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
-            <div>
-              <p className="text-sm font-medium text-gray-800">Estado actual</p>
-              <p className="text-xs text-gray-500">
-                {loadingPayments
-                  ? 'Cargando proveedores...'
-                  : paymentSettings.enabledProviders.length
-                    ? paymentSettings.enabledProviders.join(' + ')
-                    : 'Sin proveedores activos'}
-              </p>
-            </div>
-            <button
-              onClick={() => router.push('/admin/pagos')}
-              className="px-3 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark"
-            >
-              Ir a Pagos
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Personalización de la app */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <Palette className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-gray-900 text-sm">Personalización de la app</h3>
-        </div>
-        <Tabs.Root defaultValue="header" className="px-5 py-4">
-          <Tabs.List className="inline-flex gap-2 bg-gray-100 p-1 rounded-lg mb-4">
-            <Tabs.Trigger
-              value="header"
-              className="px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-gray-600 border border-gray-200 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-50"
-            >
-              Header
-            </Tabs.Trigger>
-            <Tabs.Trigger
-              value="footer"
-              className="px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-gray-600 border border-gray-200 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-50"
-            >
-              Footer
-            </Tabs.Trigger>
-          </Tabs.List>
-
-          <Tabs.Content value="header" className="space-y-4 outline-none">
-            {/* Título */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Título de la tienda</label>
-              <input
-                type="text"
-                value={theme.appTitle}
-                disabled={loadingTheme || savingTheme}
-                onChange={(e) => setTheme({ ...theme, appTitle: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                placeholder="Ej: Tiempo Bakery"
-              />
-            </div>
-
-            {/* Subtítulo */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Subtítulo/Lema</label>
-              <input
-                type="text"
-                value={theme.appSubtitle}
-                disabled={loadingTheme || savingTheme}
-                onChange={(e) => setTheme({ ...theme, appSubtitle: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                placeholder="Ej: Micropanadería artesanal por encargo semanal"
-              />
-            </div>
-
-            {/* Logo */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Logo de la tienda</label>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <label
-                    htmlFor="logo-upload"
-                    className={`flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {uploadingLogo ? 'Cargando...' : 'Seleccionar imagen'}
-                  </label>
-                  <input
-                    id="logo-upload"
-                    type="file"
-                    accept="image/*"
-                    disabled={loadingTheme || savingTheme || uploadingLogo}
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">O ingresa URL manualmente:</label>
-                  <input
-                    type="url"
-                    value={theme.logoUrl}
-                    disabled={loadingTheme || savingTheme}
-                    onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                    placeholder="Ej: /img/logo.png"
-                  />
-                </div>
-              </div>
-              {theme.logoUrl && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                  <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
-                  <Image
-                    src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
-                    alt="Logo preview"
-                    width={64}
-                    height={64}
-                    className="h-16 object-contain"
-                    priority
-                    unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Tamaño del logo */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Tamaño del logo</label>
-              <select
-                value={theme.logoSize}
-                disabled={loadingTheme || savingTheme}
-                onChange={(e) => setTheme({ ...theme, logoSize: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-              >
-                <option value="24">24px — Chico</option>
-                <option value="32">32px — Mediano-chico</option>
-                <option value="36">36px — Mediano (predeterminado)</option>
-                <option value="40">40px — Mediano-grande</option>
-                <option value="48">48px — Grande</option>
-                <option value="56">56px — Extra grande</option>
-                <option value="64">64px — Máximo</option>
-              </select>
-              <div className="mt-2 flex items-center gap-2">
-                <Image
-                  src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
-                  alt="Logo preview size"
-                  width={Number(theme.logoSize) || 36}
-                  height={Number(theme.logoSize) || 36}
-                  className="object-contain border border-gray-200 rounded"
-                  unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
-                />
-                <span className="text-xs text-gray-400">{theme.logoSize}px</span>
-              </div>
-            </div>
-
-            {/* Tipografía */}
-            <div>
-              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Tipografía</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Fuente para títulos</label>
-                  <select
-                    value={theme.fontHeading}
-                    disabled={loadingTheme || savingTheme}
-                    onChange={(e) => setTheme({ ...theme, fontHeading: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                  >
-                    <optgroup label="Sistema">
-                      <option value="system-ui">system-ui (predeterminado)</option>
-                      <option value="serif">Serif</option>
-                      <option value="sans-serif">Sans-serif</option>
-                      <option value="monospace">Monospace</option>
-                    </optgroup>
-                    <optgroup label="Google Fonts (títulos)">
-                      <option value="'Playfair Display', serif">Playfair Display</option>
-                      <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
-                      <option value="'Libre Baskerville', serif">Libre Baskerville</option>
-                      <option value="'DM Serif Display', serif">DM Serif Display</option>
-                      <option value="'Lora', serif">Lora</option>
-                    </optgroup>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Fuente para cuerpo de texto</label>
-                  <select
-                    value={theme.fontBody}
-                    disabled={loadingTheme || savingTheme}
-                    onChange={(e) => setTheme({ ...theme, fontBody: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                  >
-                    <optgroup label="Sistema">
-                      <option value="system-ui">system-ui (predeterminado)</option>
-                      <option value="serif">Serif</option>
-                      <option value="sans-serif">Sans-serif</option>
-                      <option value="monospace">Monospace</option>
-                    </optgroup>
-                    <optgroup label="Google Fonts (cuerpo)">
-                      <option value="'Lato', sans-serif">Lato</option>
-                      <option value="'Montserrat', sans-serif">Montserrat</option>
-                      <option value="'Open Sans', sans-serif">Open Sans</option>
-                      <option value="'Raleway', sans-serif">Raleway</option>
-                      <option value="'Nunito', sans-serif">Nunito</option>
-                      <option value="'Work Sans', sans-serif">Work Sans</option>
-                    </optgroup>
-                  </select>
-                </div>
-              </div>
-              <div className="mt-4">
-                <label className="block text-xs text-gray-500 mb-1">Tamaño del nombre de la app</label>
-                <select
-                  value={theme.fontSizeTitle}
-                  disabled={loadingTheme || savingTheme}
-                  onChange={(e) => setTheme({ ...theme, fontSizeTitle: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                >
-                  <option value="clamp(0.875rem, 2vw, 1.125rem)">Pequeño</option>
-                  <option value="clamp(1rem, 2.5vw, 1.5rem)">Normal (predeterminado)</option>
-                  <option value="clamp(1.125rem, 3vw, 1.75rem)">Mediano</option>
-                  <option value="clamp(1.25rem, 3.5vw, 2rem)">Grande</option>
-                  <option value="clamp(1.375rem, 4vw, 2.25rem)">Extra grande</option>
-                  <option value="clamp(1.5rem, 4.5vw, 2.5rem)">Muy grande</option>
-                </select>
-                <p className="text-[10px] text-gray-400 mt-0.5">
-                  El tamaño se adapta automáticamente al ancho de pantalla. El máximo evita que se desborde.
-                </p>
-              </div>
-              <div className="mt-3">
-                <label className="block text-xs text-gray-500 mb-1">Alineación del título</label>
-                <div className="flex gap-2">
-                  {(['left', 'center', 'right'] as const).map((align) => (
-                    <button
-                      key={align}
-                      type="button"
-                      disabled={loadingTheme || savingTheme}
-                      onClick={() => setTheme({ ...theme, titleAlign: align })}
-                      className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
-                        theme.titleAlign === align
-                          ? 'border-brand-gold bg-brand-gold/10 text-brand-gold-dark font-medium'
-                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centrado' : 'Derecha'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-3 flex flex-col gap-0.5 text-xs text-gray-400">
-                <span>Vista previa:</span>
-                <div style={{ textAlign: theme.titleAlign as any }}>
-                  <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate block">
-                    {theme.appTitle || 'Tiempo Bakery'}
-                  </span>
-                  {theme.appSubtitle && (
-                    <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-500 truncate block">
-                      {theme.appSubtitle}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Tabs.Content>
-
-          <Tabs.Content value="footer" className="space-y-4 outline-none">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+            <h2 className="text-lg font-bold text-gray-900">Colores y estilos</h2>
             {/* Colores */}
             <div>
               <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Colores de la marca</p>
@@ -1777,32 +1671,152 @@ export default function AdminConfigPage() {
                 </div>
               ))}
             </div>
-          </Tabs.Content>
-        </Tabs.Root>
 
-        {themeMsg && (
-          <div className="px-5 pb-2">
-            <p className={`text-sm ${typeof themeMsg === 'string' && themeMsg?.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
-              {themeMsg}
+            {themeMsg && (
+              <div>
+                <p className={`text-sm ${typeof themeMsg === 'string' && themeMsg?.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>
+                  {themeMsg}
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={handleSaveTheme}
+                disabled={loadingTheme || savingTheme}
+                className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
+              >
+                {savingTheme ? 'Guardando...' : 'Guardar footer'}
+              </button>
+              <button
+                onClick={handleResetTheme}
+                disabled={loadingTheme || savingTheme}
+                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+              >
+                Restablecer
+              </button>
+            </div>
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content value="nav">
+          <NavConfigAdmin
+            siteContent={siteContent}
+            setSiteContent={setSiteContent}
+            loading={loadingSiteContent}
+            saving={savingSiteContent}
+            message={siteContentMsg}
+            onSave={handleSaveSiteContent}
+            onReset={handleResetSiteContent}
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="sobre">
+          <SobreNosotrosConfigAdmin
+            siteContent={siteContent}
+            setSiteContent={setSiteContent}
+            loading={loadingSiteContent}
+            saving={savingSiteContent}
+            message={siteContentMsg}
+            onSave={handleSaveSiteContent}
+            onReset={handleResetSiteContent}
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="contacto">
+          <ContactoConfigAdmin
+            siteContent={siteContent}
+            setSiteContent={setSiteContent}
+            loading={loadingSiteContent}
+            saving={savingSiteContent}
+            message={siteContentMsg}
+            onSave={handleSaveSiteContent}
+            onReset={handleResetSiteContent}
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="pagos">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+              <Settings className="w-4 h-4 text-brand-gold" />
+              <h3 className="font-semibold text-gray-900 text-sm">Pagos</h3>
+            </div>
+            <div className="px-5 py-4 space-y-3">
+              <p className="text-sm text-gray-600">
+                La configuración de métodos de pago ahora vive en una pantalla dedicada para mantener el panel más ordenado.
+              </p>
+              <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-800">Estado actual</p>
+                  <p className="text-xs text-gray-500">
+                    {loadingPayments
+                      ? 'Cargando proveedores...'
+                      : paymentSettings.enabledProviders.length
+                        ? paymentSettings.enabledProviders.join(' + ')
+                        : 'Sin proveedores activos'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => router.push('/admin/pagos')}
+                  className="px-3 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark"
+                >
+                  Ir a Pagos
+                </button>
+              </div>
+            </div>
+          </div>
+        </Tabs.Content>
+      </Tabs.Root>
+
+      {/* Seguridad */}
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-10">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+          <Key className="w-4 h-4 text-brand-gold" />
+          <h3 className="font-semibold text-gray-900 text-sm">Seguridad</h3>
+        </div>
+        <div className="px-5 py-4 space-y-4">
+          <div>
+            <p className="text-sm text-gray-700 font-medium mb-1">Contraseña de administrador</p>
+            <p className="text-sm text-gray-500">
+              Configura la variable de entorno{' '}
+              <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">ADMIN_PASSWORD</code>{' '}
+              y <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">JWT_SECRET</code>{' '}
+              en tu archivo <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">.env.local</code>
+            </p>
+            <p className="text-xs text-yellow-600 bg-yellow-50 px-3 py-2 rounded-lg mt-2">
+              ⚠️ La contraseña por defecto <strong>admin123</strong> solo aplica en desarrollo local.
+              En despliegue necesitás definir <code>ADMIN_PASSWORD</code> y <code>JWT_SECRET</code>.
             </p>
           </div>
-        )}
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors border border-red-200 disabled:opacity-50"
+          >
+            {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
 
-        <div className="px-5 py-4 border-t border-gray-100 flex gap-2">
-          <button
-            onClick={handleSaveTheme}
-            disabled={loadingTheme || savingTheme}
-            className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
-          >
-            {savingTheme ? 'Guardando...' : 'Guardar personalización'}
-          </button>
-          <button
-            onClick={handleResetTheme}
-            disabled={loadingTheme || savingTheme}
-            className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
-          >
-            Restablecer
-          </button>
+      {/* Info del sistema */}
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-6">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+          <Settings className="w-4 h-4 text-brand-gold" />
+          <h3 className="font-semibold text-gray-900 text-sm">Información del sistema</h3>
+        </div>
+        <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[
+            { label: 'Versión', value: '1.0.0' },
+            { label: 'Stack', value: 'Next.js 14 + Prisma' },
+            { label: 'Base de datos', value: 'SQLite (dev) / PostgreSQL (prod)' },
+            { label: 'Pagos', value: paymentSettings.enabledProviders.length ? paymentSettings.enabledProviders.join(' + ') : 'Sin configurar' },
+          ].map((item) => (
+            <div key={item.label}>
+              <p className="text-xs text-gray-400">{item.label}</p>
+              <p className="text-sm text-gray-800">{item.value}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
