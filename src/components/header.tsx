@@ -68,7 +68,7 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
             <div className="min-w-0 truncate" style={{ textAlign: theme.titleAlign as any }}>
               <span
                 className="font-bold block leading-tight truncate"
-                style={{ color: theme.primaryColor, fontSize: theme.fontSizeTitle }}
+                style={{ color: theme.primaryColor, fontSize: theme.fontSizeTitle, fontFamily: theme.fontHeading }}
               >
                 {theme.appTitle}
               </span>
