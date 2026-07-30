@@ -5,7 +5,7 @@ const hasAdminSessionEdgeMock = vi.fn()
 const isAdminAuthConfiguredMock = vi.fn()
 const getAdminAuthConfigErrorMock = vi.fn()
 
-vi.mock('@/lib/admin-auth', () => ({
+vi.mock('@/lib/admin-auth-edge', () => ({
   hasAdminSessionEdge: hasAdminSessionEdgeMock,
   isAdminAuthConfigured: isAdminAuthConfiguredMock,
   getAdminAuthConfigError: getAdminAuthConfigErrorMock,

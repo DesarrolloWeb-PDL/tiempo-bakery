@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminAuthConfigError, hasAdminSessionEdge, isAdminAuthConfigured } from '@/lib/admin-auth'
+import { getAdminAuthConfigError, hasAdminSessionEdge, isAdminAuthConfigured } from '@/lib/admin-auth-edge'
 import { consumeRateLimitEdge } from '@/lib/rate-limit-edge'
 import { applySecurityHeaders } from '@/lib/security-headers'
 
