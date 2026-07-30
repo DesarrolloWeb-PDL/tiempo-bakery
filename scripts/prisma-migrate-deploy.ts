@@ -56,8 +56,12 @@ function shouldSkipMigrations() {
     return 'SKIP_DB_MIGRATIONS=true'
   }
 
-  if (process.env.CI === 'true' && process.env.VERCEL === '1' && process.env.RUN_DB_MIGRATIONS !== 'true') {
+  if (process.env.VERCEL === '1' && process.env.RUN_DB_MIGRATIONS !== 'true') {
     return 'build de Vercel sin RUN_DB_MIGRATIONS=true'
+  }
+
+  if (process.env.CI === 'true' && !process.env.RUN_DB_MIGRATIONS) {
+    return 'CI sin RUN_DB_MIGRATIONS'
   }
 
   return null
