@@ -6,7 +6,7 @@ import {
   ShoppingBag,
   TrendingUp,
   Users,
-  Euro,
+  DollarSign,
   Clock,
   ArrowUpRight,
   ArrowDownRight,
@@ -95,6 +95,7 @@ function MetricCard({
   subtitle,
   icon: Icon,
   growth,
+  href,
   iconColor,
 }: {
   title: string
@@ -102,10 +103,11 @@ function MetricCard({
   subtitle?: string
   icon: React.ElementType
   growth?: number | null
+  href?: string
   iconColor: string
 }) {
-  return (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 p-5">
+  const card = (
+    <div className="bg-gray-800 rounded-xl border border-gray-700 p-5 h-full">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-gray-400">{title}</p>
@@ -131,6 +133,12 @@ function MetricCard({
       )}
     </div>
   )
+
+  if (href) {
+    return <Link href={href} className="block hover:opacity-80 transition-opacity">{card}</Link>
+  }
+
+  return card
 }
 
 // ─────────────────────────────────────────────
@@ -262,7 +270,7 @@ export default function AdminDashboard() {
               title="Ventas este mes"
               value={formatCurrency(data.summary.monthRevenue)}
               subtitle={`${data.summary.monthOrders} pedidos pagados`}
-              icon={Euro}
+              icon={DollarSign}
               growth={data.summary.revenueGrowth}
               iconColor="bg-green-900/30 text-green-400"
             />
@@ -286,6 +294,7 @@ export default function AdminDashboard() {
               value={data.summary.totalCustomers}
               subtitle={`${data.summary.totalOrders} pedidos totales`}
               icon={Users}
+              href="/admin/clientes"
               iconColor="bg-purple-900/30 text-purple-400"
             />
           </div>

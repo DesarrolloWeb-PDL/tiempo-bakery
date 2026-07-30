@@ -11,6 +11,7 @@ import {
   BarChart2,
   Database,
   Clock3,
+  Users,
   Settings,
   Menu,
   X,
@@ -45,6 +46,11 @@ const navItems = [
     label: 'Base de datos',
     href: '/admin/datos',
     icon: Database,
+  },
+  {
+    label: 'Clientes',
+    href: '/admin/clientes',
+    icon: Users,
   },
   {
     label: 'Preventa',
