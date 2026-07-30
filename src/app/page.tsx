@@ -3,6 +3,7 @@ import { TimeGatingBanner } from '@/components/time-gating-banner';
 import { Badge } from '@/components/ui/badge';
 import { prisma } from '@/lib/db';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
+import { Calendar, Wheat, Map } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -229,30 +230,30 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="text-4xl mb-3">⏰</div>
+              <Calendar className="w-10 h-10 mx-auto mb-3 text-brand-gold-dark" />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Preventa Semanal
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white/80">
                 Pedidos de miércoles a domingo. Entrega en fin de semana.
               </p>
             </div>
             <div className="text-center">
-              <div className="text-4xl mb-3">🌾</div>
+              <Wheat className="w-10 h-10 mx-auto mb-3 text-brand-gold-dark" />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
                 Masa Madre Natural
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white/80">
                 Sin levadura industrial. Fermentación lenta y natural.
               </p>
             </div>
             <div className="text-center">
-              <div className="text-4xl mb-3">📍</div>
+              <Map className="w-10 h-10 mx-auto mb-3 text-brand-gold-dark" />
               <h3 className="font-semibold text-brand-gold-dark mb-2">
-                Recogida Local
+                Retirada Local
               </h3>
-              <p className="text-sm text-gray-600">
-                Puntos de recogida en Utrera o envío a domicilio.
+              <p className="text-sm text-white/80">
+                Puntos de retirada en Utrera o envío a domicilio.
               </p>
             </div>
           </div>
