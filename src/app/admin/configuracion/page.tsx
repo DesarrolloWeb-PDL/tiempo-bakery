@@ -801,6 +801,7 @@ export default function AdminConfigPage() {
     fontBody: 'system-ui',
     fontSizeTitle: 'clamp(1rem, 2.5vw, 1.5rem)',
     logoSize: '36',
+    titleAlign: 'left',
     borderColor: '#544A37',
     mutedBg: '#433D32',
     hoverBg: '#4D4535',
@@ -1685,14 +1686,38 @@ export default function AdminConfigPage() {
                 El tamaño se adapta automáticamente al ancho de pantalla. El máximo evita que se desborde.
               </p>
             </div>
-            <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+            <div className="mt-3">
+              <label className="block text-xs text-gray-500 mb-1">Alineación del título</label>
+              <div className="flex gap-2">
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    type="button"
+                    disabled={loadingTheme || savingTheme}
+                    onClick={() => setTheme({ ...theme, titleAlign: align })}
+                    className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
+                      theme.titleAlign === align
+                        ? 'border-brand-gold bg-brand-gold/10 text-brand-gold-dark font-medium'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centrado' : 'Derecha'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 flex flex-col gap-0.5 text-xs text-gray-400">
               <span>Vista previa:</span>
-              <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate max-w-[200px]">
-                {theme.appTitle || 'Tiempo Bakery'}
-              </span>
-              <span style={{ fontFamily: theme.fontBody }} className="text-sm text-gray-600">
-                — Texto de cuerpo de ejemplo
-              </span>
+              <div style={{ textAlign: theme.titleAlign as any }}>
+                <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate block">
+                  {theme.appTitle || 'Tiempo Bakery'}
+                </span>
+                {theme.appSubtitle && (
+                  <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-500 truncate block">
+                    {theme.appSubtitle}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

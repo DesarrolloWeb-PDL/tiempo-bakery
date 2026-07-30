@@ -53,19 +53,19 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 min-w-0">
+          <Link href="/" className="flex items-center space-x-2 min-w-0 max-w-[60%] sm:max-w-none">
             {theme.logoUrl && (
               <Image
                 src={logoSrc}
                 alt={theme.appTitle}
-                className="shrink-0 object-contain"
-                style={{ width: 'var(--brand-logo-size)', height: 'var(--brand-logo-size)' }}
+                className="object-contain shrink-0"
+                style={{ width: 'var(--brand-logo-size)', height: 'var(--brand-logo-size)', maxWidth: '35vw' }}
                 width={Number(theme.logoSize) || 36}
                 height={Number(theme.logoSize) || 36}
                 unoptimized={logoIsExternal}
               />
             )}
-            <div className="min-w-0 max-w-[200px] sm:max-w-none">
+            <div className="min-w-0 truncate" style={{ textAlign: theme.titleAlign as any }}>
               <span
                 className="font-bold block leading-tight truncate"
                 style={{ color: theme.primaryColor, fontSize: theme.fontSizeTitle }}
@@ -73,7 +73,7 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
                 {theme.appTitle}
               </span>
               {theme.appSubtitle && (
-                <span className="hidden sm:block text-xs truncate" style={{ color: theme.textMuted }}>
+                <span className="text-[10px] sm:text-xs truncate block" style={{ color: theme.textMuted }}>
                   {theme.appSubtitle}
                 </span>
               )}

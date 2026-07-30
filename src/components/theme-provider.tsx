@@ -19,6 +19,7 @@ export type ThemeSettings = {
   fontBody: string
   fontSizeTitle: string
   logoSize: string
+  titleAlign: string
   borderColor: string
   mutedBg: string
   hoverBg: string
@@ -45,6 +46,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   fontBody: 'system-ui',
   fontSizeTitle: 'clamp(1rem, 2.5vw, 1.5rem)',
   logoSize: '36',
+  titleAlign: 'left',
   borderColor: '#544A37',
   mutedBg: '#433D32',
   hoverBg: '#4D4535',
