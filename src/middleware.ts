@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminAuthConfigError, hasAdminSessionEdge, isAdminAuthConfigured } from '@/lib/admin-auth'
-import { consumeRateLimit } from '@/lib/rate-limit'
+import { consumeRateLimitEdge } from '@/lib/rate-limit-edge'
 import { applySecurityHeaders } from '@/lib/security-headers'
 
 type SensitiveRateLimit = {
@@ -83,7 +83,7 @@ export async function middleware(req: NextRequest) {
 
   if (sensitiveLimit) {
     const ip = getClientIp(req)
-    const rateLimit = await consumeRateLimit({
+    const rateLimit = consumeRateLimitEdge({
       key: `${req.method}:${pathname}:${ip}`,
       limit: sensitiveLimit.limit,
       windowMs: sensitiveLimit.windowMs,
