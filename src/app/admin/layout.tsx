@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -64,7 +64,18 @@ const navItems = [
 ]
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [logoSrc, setLogoSrc] = useState<string | null>(null)
   const pathname = usePathname()
+
+  useEffect(() => {
+    fetch('/api/admin/tema')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.logoUrl) setLogoSrc(data.logoUrl)
+        else setLogoSrc(null)
+      })
+      .catch(() => setLogoSrc(null))
+  }, [])
 
   const currentPage = navItems.find((n) =>
     n.href === '/admin' ? pathname === '/admin' : pathname.startsWith(n.href)
@@ -97,13 +108,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo en el sidebar */}
         <div className="p-6" style={{ borderBottomColor: 'var(--brand-border)', borderBottomWidth: '1px' }}>
           <Link href="/admin" className="flex items-center gap-3">
-            <Image
-              src="/img/espiga.png"
-              alt="Tiempo Bakery Admin"
-              width={36}
-              height={36}
-              className="h-9 w-9 shrink-0 object-contain"
-            />
+            {logoSrc && (
+              <Image
+                src={logoSrc}
+                alt="Tiempo Bakery Admin"
+                width={36}
+                height={36}
+                className="h-9 w-9 shrink-0 object-contain"
+              />
+            )}
             <div>
               <p className="font-bold text-sm leading-none" style={{ color: 'var(--brand-text-primary)' }}>Tiempo Bakery</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--brand-text-muted)' }}>Panel de Admin</p>
