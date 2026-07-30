@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminAuthConfigError, hasAdminSession, isAdminAuthConfigured } from '@/lib/admin-auth'
+import { getAdminAuthConfigError, hasAdminSessionEdge, isAdminAuthConfigured } from '@/lib/admin-auth'
 import { consumeRateLimit } from '@/lib/rate-limit'
 import { applySecurityHeaders } from '@/lib/security-headers'
 
@@ -134,7 +134,7 @@ export async function middleware(req: NextRequest) {
     return finalizeResponse(req, NextResponse.json(payload, { status: 503 }))
   }
 
-  if (await hasAdminSession(req.cookies)) {
+  if (await hasAdminSessionEdge(req.cookies)) {
     return finalizeResponse(req, NextResponse.next())
   }
 

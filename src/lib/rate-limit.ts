@@ -1,6 +1,3 @@
-import { Redis } from "@upstash/redis"
-import { Ratelimit } from "@upstash/ratelimit"
-
 type RateLimitOptions = {
   key: string
   limit: number
@@ -28,11 +25,13 @@ function getRedisToken(): string | undefined {
   return process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN
 }
 
-function createRatelimit(windowMs: number, limit: number) {
+async function createRatelimit(windowMs: number, limit: number) {
   const redisUrl = getRedisUrl()
   const redisToken = getRedisToken()
 
   if (redisUrl && redisToken) {
+    const { Redis } = await import("@upstash/redis")
+    const { Ratelimit } = await import("@upstash/ratelimit")
     const redis = new Redis({ url: redisUrl, token: redisToken })
     return new Ratelimit({
       redis,
@@ -92,7 +91,7 @@ function fallbackConsume(options: RateLimitOptions): RateLimitResult {
 }
 
 export async function consumeRateLimit(options: RateLimitOptions): Promise<RateLimitResult> {
-  const ratelimit = createRatelimit(options.windowMs, options.limit)
+  const ratelimit = await createRatelimit(options.windowMs, options.limit)
 
   if (!ratelimit) {
     return fallbackConsume(options)

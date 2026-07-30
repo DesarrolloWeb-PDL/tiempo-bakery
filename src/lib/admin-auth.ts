@@ -237,6 +237,45 @@ export async function hasAdminSession(cookies: CookieReader): Promise<boolean> {
   return true
 }
 
+export async function hasAdminSessionEdge(cookies: CookieReader): Promise<boolean> {
+  const adminPassword = getAdminPassword()
+  const sessionSecret = getAdminSessionSecret()
+  const token = cookies.get(ADMIN_COOKIE)?.value
+
+  if (!adminPassword || !sessionSecret || !token) {
+    return false
+  }
+
+  const [payloadSegment, signatureSegment] = token.split('.')
+
+  if (!payloadSegment || !signatureSegment) {
+    return false
+  }
+
+  const expectedSignature = await signValue(payloadSegment, sessionSecret)
+
+  if (signatureSegment !== expectedSignature) {
+    return false
+  }
+
+  const payload = parseSessionPayload(token)
+
+  if (!payload) {
+    return false
+  }
+
+  if (payload.exp <= Math.floor(Date.now() / 1000)) {
+    return false
+  }
+
+  const expectedFingerprint = await getPasswordFingerprint(adminPassword, sessionSecret)
+  if (payload.passwordFingerprint !== expectedFingerprint) {
+    return false
+  }
+
+  return true
+}
+
 export function extractJtiFromCookie(cookies: CookieReader): string | null {
   const token = cookies.get(ADMIN_COOKIE)?.value
   if (!token) return null

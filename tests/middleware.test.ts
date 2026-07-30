@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
-const hasAdminSessionMock = vi.fn()
+const hasAdminSessionEdgeMock = vi.fn()
 const isAdminAuthConfiguredMock = vi.fn()
 const getAdminAuthConfigErrorMock = vi.fn()
 
 vi.mock('@/lib/admin-auth', () => ({
-  hasAdminSession: hasAdminSessionMock,
+  hasAdminSessionEdge: hasAdminSessionEdgeMock,
   isAdminAuthConfigured: isAdminAuthConfiguredMock,
   getAdminAuthConfigError: getAdminAuthConfigErrorMock,
 }))
@@ -16,7 +16,7 @@ describe('middleware', () => {
     vi.resetModules()
     vi.clearAllMocks()
     isAdminAuthConfiguredMock.mockReturnValue(true)
-    hasAdminSessionMock.mockResolvedValue(true)
+    hasAdminSessionEdgeMock.mockResolvedValue(true)
     getAdminAuthConfigErrorMock.mockReturnValue('faltan credenciales')
   })
 
@@ -56,7 +56,7 @@ describe('middleware', () => {
   })
 
   it('permite endpoints públicos de logo sin sesión admin', async () => {
-    hasAdminSessionMock.mockResolvedValue(false)
+    hasAdminSessionEdgeMock.mockResolvedValue(false)
 
     const { middleware } = await import('@/middleware')
     const response = await middleware(new NextRequest('https://localhost/api/admin/uploads/logo?file=test.png'))
