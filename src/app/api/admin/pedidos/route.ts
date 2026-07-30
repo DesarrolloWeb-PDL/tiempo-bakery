@@ -6,7 +6,6 @@ export const dynamic = 'force-dynamic'
 function mapDbError(error: unknown, fallback: string) {
   const payload: Record<string, string> = { error: fallback }
   if (!(error instanceof Error)) return payload
-  payload.details = error.message
 
   if (error.message.includes('Environment variable not found: DATABASE_URL')) {
     payload.error = 'Configuracion incompleta: falta DATABASE_URL'
@@ -41,7 +40,7 @@ export async function GET(req: NextRequest) {
       }>
     }
 
-    const where: WhereClause = {}
+    const where: Record<string, unknown> = { deletedAt: null }
     if (status && status !== 'ALL') where.status = status
     if (paymentStatus && paymentStatus !== 'ALL') where.paymentStatus = paymentStatus
     if (search) {

@@ -8,6 +8,8 @@ type PaymentSettingsState = {
   enabledProviders: Array<'STRIPE' | 'MERCADO_PAGO' | 'BANK_TRANSFER'>
   stripeEnabled: boolean
   mercadopagoEnabled: boolean
+  hasStripe: boolean
+  hasMercadoPago: boolean
   stripeSecretKey: string
   mercadopagoAccessToken: string
   options: Array<{
@@ -32,6 +34,8 @@ const DEFAULT_PAYMENT_SETTINGS: PaymentSettingsState = {
   enabledProviders: [],
   stripeEnabled: false,
   mercadopagoEnabled: false,
+  hasStripe: false,
+  hasMercadoPago: false,
   stripeSecretKey: '',
   mercadopagoAccessToken: '',
   options: [],
@@ -79,18 +83,22 @@ export default function AdminPagosPage() {
     setMessage(null)
     try {
       const res = await fetch('/api/admin/pagos')
-      if (!res.ok) throw new Error('No se pudo cargar la configuración de pagos')
+      if (!res.ok) throw new Error('No se pudo cargar la configuracion de pagos')
       const data = await res.json()
       setPaymentSettings({
         ...DEFAULT_PAYMENT_SETTINGS,
         ...data,
+        hasStripe: !!data.hasStripe,
+        hasMercadoPago: !!data.hasMercadoPago,
+        stripeSecretKey: '',
+        mercadopagoAccessToken: '',
         bankTransfer: {
           ...DEFAULT_PAYMENT_SETTINGS.bankTransfer,
           ...(data.bankTransfer ?? {}),
         },
       })
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'No se pudo cargar la configuración de pagos')
+      setMessage(error instanceof Error ? error.message : 'No se pudo cargar la configuracion de pagos')
     } finally {
       setLoading(false)
     }
@@ -123,12 +131,12 @@ export default function AdminPagosPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'No se pudo guardar la configuración de pagos')
+      if (!res.ok) throw new Error(data.error || 'No se pudo guardar la configuracion de pagos')
 
-      setMessage(`Configuración guardada. Proveedor por defecto: ${data.label}`)
+      setMessage('Configuracion guardada. Proveedor por defecto: ' + data.label)
       await fetchPaymentSettings()
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'No se pudo guardar la configuración de pagos')
+      setMessage(error instanceof Error ? error.message : 'No se pudo guardar la configuracion de pagos')
     } finally {
       setSaving(false)
     }
@@ -141,18 +149,18 @@ export default function AdminPagosPage() {
           <CreditCard className="w-6 h-6 text-brand-gold" /> Pagos
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Configurá métodos de pago para checkout y definí el proveedor por defecto.
+          Configura metodos de pago para checkout y defini el proveedor por defecto.
         </p>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900 text-sm">Métodos disponibles</h2>
+          <h2 className="font-semibold text-gray-900 text-sm">Metodos disponibles</h2>
         </div>
 
         <div className="px-5 py-4 space-y-4">
           {loading ? (
-            <p className="text-sm text-gray-500">Cargando configuración...</p>
+            <p className="text-sm text-gray-500">Cargando configuracion...</p>
           ) : (
             <>
               <div className="space-y-2">
@@ -172,15 +180,12 @@ export default function AdminPagosPage() {
                         <p className="text-sm font-medium text-gray-800">{option.label}</p>
                         <p className="text-xs text-gray-500">
                           {option.value === 'BANK_TRANSFER'
-                            ? available ? 'Configurado' : 'Completá los datos para habilitarlo'
+                            ? available ? 'Configurado' : 'Completa los datos para habilitarlo'
                             : available ? 'Habilitado' : 'Deshabilitado'}
                         </p>
-                        {option.description && <p className="text-[11px] text-gray-400 mt-1">{option.description}</p>}
                       </div>
                       <span
-                        className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          available ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
-                        }`}
+                        className={'text-xs font-medium px-2 py-1 rounded-full ' + (available ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500')}
                       >
                         {available ? 'Disponible' : 'Inactivo'}
                       </span>
@@ -233,7 +238,7 @@ export default function AdminPagosPage() {
                         }
                         disabled={!paymentSettings.stripeEnabled}
                         className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono disabled:opacity-50 disabled:bg-gray-100"
-                        placeholder="sk_live_..."
+                        placeholder={paymentSettings.hasStripe ? '(Ya configurada - ingresa solo para cambiarla)' : 'sk_live_...'}
                       />
                     </div>
                   </div>
@@ -268,7 +273,7 @@ export default function AdminPagosPage() {
                         }
                         disabled={!paymentSettings.mercadopagoEnabled}
                         className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white font-mono disabled:opacity-50 disabled:bg-gray-100"
-                        placeholder="APP_USR-..."
+                        placeholder={paymentSettings.hasMercadoPago ? '(Ya configurado - ingresa solo para cambiarlo)' : 'APP_USR-...'}
                       />
                     </div>
                   </div>
@@ -310,7 +315,7 @@ export default function AdminPagosPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">Transferencia bancaria</p>
-                    <p className="text-xs text-gray-500">Se muestra como opción manual en checkout y confirmación.</p>
+                    <p className="text-xs text-gray-500">Se muestra como opcion manual en checkout y confirmacion.</p>
                   </div>
                   <label className="flex items-center gap-2 text-sm text-gray-700 shrink-0">
                     <input
@@ -343,7 +348,7 @@ export default function AdminPagosPage() {
                         }))
                       }
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                      placeholder="Banco Nación, Galicia, etc."
+                      placeholder="Banco Nacion, Galicia, etc."
                     />
                   </div>
                   <div>
@@ -388,7 +393,7 @@ export default function AdminPagosPage() {
                         }))
                       }
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                      placeholder="22 dígitos"
+                      placeholder="22 digitos"
                     />
                   </div>
                   <div>
@@ -418,14 +423,14 @@ export default function AdminPagosPage() {
                       }
                       rows={3}
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
-                      placeholder="Indicá cuándo enviar comprobante, horarios de confirmación, etc."
+                      placeholder="Indica cuando enviar comprobante, horarios de confirmacion, etc."
                     />
                   </div>
                 </div>
               </div>
 
               <p className="text-xs text-gray-500">
-                Activá cada proveedor con su toggle, ingresá la credencial correspondiente y guardá. Si desactivás un proveedor, su credencial se elimina de la base de datos. La transferencia bancaria no usa credenciales externas.
+                Activa cada proveedor con su toggle, ingresa la credencial correspondiente y guarda. Si desactivas un proveedor, su credencial se elimina de la base de datos. La transferencia bancaria no usa credenciales externas.
               </p>
 
               {message && <p className="text-sm text-gray-600">{message}</p>}

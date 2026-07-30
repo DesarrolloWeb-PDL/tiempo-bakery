@@ -3,8 +3,11 @@ import {
   ADMIN_COOKIE,
   ADMIN_SESSION_MAX_AGE,
   createAdminSessionToken,
+  extractJtiFromCookie,
   getAdminAuthConfigError,
   getAdminPassword,
+  persistAdminSession,
+  revokeAdminSession,
 } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -29,11 +32,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: getAdminAuthConfigError() }, { status: 503 })
     }
 
+    const jti = extractJtiFromCookie({ get: () => ({ value: sessionToken }) })
+    if (jti) {
+      await persistAdminSession(jti)
+    }
+
     const response = NextResponse.json({ ok: true })
     response.cookies.set(ADMIN_COOKIE, sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: ADMIN_SESSION_MAX_AGE,
       path: '/',
     })
@@ -44,12 +52,17 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
+  const jti = extractJtiFromCookie(req.cookies)
+  if (jti) {
+    await revokeAdminSession(jti)
+  }
+
   const response = NextResponse.json({ ok: true })
   response.cookies.set(ADMIN_COOKIE, '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
     maxAge: 0,
     path: '/',
   })

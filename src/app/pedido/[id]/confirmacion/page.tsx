@@ -72,6 +72,8 @@ export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const orderId = params.id as string;
   const sessionId = searchParams.get('session_id');
+  const mpStatus = searchParams.get('status');
+  const mpProvider = searchParams.get('provider');
 
   const [order, setOrder] = React.useState<Order | null>(null);
   const [bankTransfer, setBankTransfer] = React.useState<BankTransferSettings | null>(null);
@@ -168,21 +170,38 @@ export default function OrderConfirmationPage() {
       `}</style>
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Success Header */}
-        <div className="text-center mb-8 no-print">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+        {/* Header according to payment status */}
+        {mpProvider === 'mercadopago' && mpStatus === 'failure' ? (
+          <div className="text-center mb-8 no-print">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-4">
+              <AlertCircle className="h-10 w-10 text-yellow-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Pago pendiente
+            </h1>
+            <p className="text-lg text-gray-600">
+              El pago con Mercado Pago no se completó o fue cancelado.
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Pedido: <strong>{order.orderNumber}</strong> — Podés volver a intentar el pago desde la sección de pedidos.
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            ¡Pedido confirmado!
-          </h1>
-          <p className="text-lg text-gray-600">
-            Gracias por tu compra, {order.customerName}
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Número de pedido: <strong>{order.orderNumber}</strong>
-          </p>
-        </div>
+        ) : (
+          <div className="text-center mb-8 no-print">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              ¡Pedido confirmado!
+            </h1>
+            <p className="text-lg text-gray-600">
+              Gracias por tu compra, {order.customerName}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Número de pedido: <strong>{order.orderNumber}</strong>
+            </p>
+          </div>
+        )}
 
         {/* Print Button */}
         <div className="flex justify-center mb-6 gap-4 no-print">

@@ -8,6 +8,7 @@ type CookieReader = {
 
 type AdminSessionPayload = {
   role: 'admin'
+  jti: string
   iat: number
   exp: number
   passwordFingerprint: string
@@ -69,6 +70,12 @@ async function getPasswordFingerprint(password: string, secret: string): Promise
   return signValue(password, secret)
 }
 
+function generateJti(): string {
+  const bytes = new Uint8Array(16)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
 function parseSessionPayload(token: string): AdminSessionPayload | null {
   try {
     const [payloadSegment] = token.split('.')
@@ -82,6 +89,7 @@ function parseSessionPayload(token: string): AdminSessionPayload | null {
 
     if (
       payload.role !== 'admin' ||
+      typeof payload.jti !== 'string' ||
       typeof payload.iat !== 'number' ||
       typeof payload.exp !== 'number' ||
       typeof payload.passwordFingerprint !== 'string'
@@ -118,8 +126,10 @@ export async function createAdminSessionToken(): Promise<string | null> {
   }
 
   const now = Math.floor(Date.now() / 1000)
+  const jti = generateJti()
   const payload: AdminSessionPayload = {
     role: 'admin',
+    jti,
     iat: now,
     exp: now + ADMIN_SESSION_MAX_AGE,
     passwordFingerprint: await getPasswordFingerprint(adminPassword, sessionSecret),
@@ -129,6 +139,37 @@ export async function createAdminSessionToken(): Promise<string | null> {
   const signature = await signValue(payloadSegment, sessionSecret)
 
   return `${payloadSegment}.${signature}`
+}
+
+export async function persistAdminSession(jti: string): Promise<void> {
+  const expiresAt = new Date(Date.now() + ADMIN_SESSION_MAX_AGE * 1000)
+  const { prisma } = await import('@/lib/db')
+  await prisma.adminSession.create({
+    data: { jti, expiresAt },
+  })
+}
+
+export async function revokeAdminSession(jti: string): Promise<void> {
+  const { prisma } = await import('@/lib/db')
+  await prisma.adminSession.updateMany({
+    where: { jti, revokedAt: null },
+    data: { revokedAt: new Date() },
+  })
+}
+
+export async function revokeAllAdminSessions(): Promise<void> {
+  const { prisma } = await import('@/lib/db')
+  await prisma.adminSession.updateMany({
+    where: { revokedAt: null },
+    data: { revokedAt: new Date() },
+  })
+}
+
+async function cleanupExpiredSessions(): Promise<void> {
+  const { prisma } = await import('@/lib/db')
+  await prisma.adminSession.deleteMany({
+    where: { expiresAt: { lt: new Date() } },
+  })
 }
 
 export function getAdminAuthConfigError(): string {
@@ -175,5 +216,30 @@ export async function hasAdminSession(cookies: CookieReader): Promise<boolean> {
   }
 
   const expectedFingerprint = await getPasswordFingerprint(adminPassword, sessionSecret)
-  return payload.passwordFingerprint === expectedFingerprint
+  if (payload.passwordFingerprint !== expectedFingerprint) {
+    return false
+  }
+
+  try {
+    const { prisma } = await import('@/lib/db')
+    const session = await prisma.adminSession.findUnique({
+      where: { jti: payload.jti },
+      select: { revokedAt: true },
+    })
+
+    if (!session || session.revokedAt) {
+      return false
+    }
+  } catch {
+    return true
+  }
+
+  return true
+}
+
+export function extractJtiFromCookie(cookies: CookieReader): string | null {
+  const token = cookies.get(ADMIN_COOKIE)?.value
+  if (!token) return null
+  const payload = parseSessionPayload(token)
+  return payload?.jti ?? null
 }

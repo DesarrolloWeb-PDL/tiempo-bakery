@@ -71,7 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+    <div className="min-h-screen lg:flex" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
       {/* Overlay móvil */}
       {sidebarOpen && (
         <div
@@ -176,7 +176,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar simple con hamburguesa y título de página */}
         <header
           className="sticky top-0 z-10 px-4 py-3 flex items-center gap-4 lg:px-6"

@@ -41,8 +41,10 @@ export async function GET() {
 
   return NextResponse.json({
     ...settings,
-    stripeSecretKey: stripeSecretKey ?? '',
-    mercadopagoAccessToken: mercadopagoAccessToken ?? '',
+    hasStripe: !!stripeSecretKey,
+    hasMercadoPago: !!mercadopagoAccessToken,
+    stripeSecretKey: '',
+    mercadopagoAccessToken: '',
     stripeEnabled: settings.enabledProviders.includes('STRIPE'),
     mercadopagoEnabled: settings.enabledProviders.includes('MERCADO_PAGO'),
     options: PAYMENT_PROVIDERS.map((provider) => ({

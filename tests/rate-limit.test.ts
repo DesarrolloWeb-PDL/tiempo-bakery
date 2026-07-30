@@ -6,10 +6,10 @@ describe('consumeRateLimit', () => {
     resetRateLimitStore()
   })
 
-  it('permite solicitudes hasta el límite y bloquea la siguiente', () => {
-    const first = consumeRateLimit({ key: 'login:127.0.0.1', limit: 2, windowMs: 60_000, now: 1_000 })
-    const second = consumeRateLimit({ key: 'login:127.0.0.1', limit: 2, windowMs: 60_000, now: 2_000 })
-    const third = consumeRateLimit({ key: 'login:127.0.0.1', limit: 2, windowMs: 60_000, now: 3_000 })
+  it('permite solicitudes hasta el limite y bloquea la siguiente', async () => {
+    const first = await consumeRateLimit({ key: 'login:127.0.0.1', limit: 2, windowMs: 60_000, now: 1_000 })
+    const second = await consumeRateLimit({ key: 'login:127.0.0.1', limit: 2, windowMs: 60_000, now: 2_000 })
+    const third = await consumeRateLimit({ key: 'login:127.0.0.1', limit: 2, windowMs: 60_000, now: 3_000 })
 
     expect(first.allowed).toBe(true)
     expect(first.remaining).toBe(1)
@@ -19,9 +19,9 @@ describe('consumeRateLimit', () => {
     expect(third.retryAfterSeconds).toBeGreaterThan(0)
   })
 
-  it('reinicia la ventana cuando expira', () => {
-    consumeRateLimit({ key: 'checkout:127.0.0.1', limit: 1, windowMs: 1_000, now: 1_000 })
-    const nextWindow = consumeRateLimit({ key: 'checkout:127.0.0.1', limit: 1, windowMs: 1_000, now: 2_100 })
+  it('reinicia la ventana cuando expira', async () => {
+    await consumeRateLimit({ key: 'checkout:127.0.0.1', limit: 1, windowMs: 1_000, now: 1_000 })
+    const nextWindow = await consumeRateLimit({ key: 'checkout:127.0.0.1', limit: 1, windowMs: 1_000, now: 2_100 })
 
     expect(nextWindow.allowed).toBe(true)
     expect(nextWindow.remaining).toBe(0)

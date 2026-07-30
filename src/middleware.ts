@@ -22,6 +22,28 @@ const PUBLIC_ADMIN_API_PATHS = new Set([
   '/api/admin/uploads/blob-serve',
 ])
 
+const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
+function getAllowedOrigin(req: NextRequest): string {
+  return process.env.NEXT_PUBLIC_URL ?? `${req.nextUrl.protocol}//${req.nextUrl.host}`
+}
+
+function isAllowedOrigin(req: NextRequest): boolean {
+  const origin = req.headers.get('origin')
+  const referer = req.headers.get('referer')
+  const allowed = getAllowedOrigin(req)
+
+  if (origin) {
+    return origin === allowed || origin === 'http://localhost:3000'
+  }
+
+  if (referer) {
+    return referer.startsWith(allowed) || referer.startsWith('http://localhost:3000')
+  }
+
+  return false
+}
+
 function getClientIp(req: NextRequest) {
   const forwardedFor = req.headers.get('x-forwarded-for')
   if (forwardedFor) {
@@ -39,7 +61,7 @@ function finalizeResponse(req: NextRequest, response: NextResponse) {
   return applySecurityHeaders(response, req)
 }
 
-function buildRateLimitedResponse(req: NextRequest, limit: ReturnType<typeof consumeRateLimit>) {
+function buildRateLimitedResponse(req: NextRequest, limit: { retryAfterSeconds: number; limit: number; remaining: number; resetAt: number }) {
   const response = NextResponse.json(
     { error: 'Demasiadas solicitudes. Probá nuevamente en unos minutos.' },
     { status: 429 }
@@ -61,7 +83,7 @@ export async function middleware(req: NextRequest) {
 
   if (sensitiveLimit) {
     const ip = getClientIp(req)
-    const rateLimit = consumeRateLimit({
+    const rateLimit = await consumeRateLimit({
       key: `${req.method}:${pathname}:${ip}`,
       limit: sensitiveLimit.limit,
       windowMs: sensitiveLimit.windowMs,
@@ -69,6 +91,24 @@ export async function middleware(req: NextRequest) {
 
     if (!rateLimit.allowed) {
       return buildRateLimitedResponse(req, rateLimit)
+    }
+  }
+
+  if (isAdminApi && MUTATION_METHODS.has(req.method)) {
+    const allowedOrigin = getAllowedOrigin(req)
+    const origin = req.headers.get('origin')
+    const referer = req.headers.get('referer')
+
+    if (!origin && !referer) {
+      return NextResponse.json({ error: 'CSRF: faltan headers de origen' }, { status: 403 })
+    }
+
+    if (origin && origin !== allowedOrigin && origin !== 'http://localhost:3000') {
+      return NextResponse.json({ error: 'CSRF: origen no permitido' }, { status: 403 })
+    }
+
+    if (!origin && referer && !referer.startsWith(allowedOrigin) && !referer.startsWith('http://localhost:3000')) {
+      return NextResponse.json({ error: 'CSRF: referer no permitido' }, { status: 403 })
     }
   }
 

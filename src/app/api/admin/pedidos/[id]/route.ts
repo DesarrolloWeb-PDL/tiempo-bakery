@@ -20,7 +20,7 @@ export async function GET(
 ) {
   try {
     const order = await db.order.findUnique({
-      where: { id: params.id },
+      where: { id: params.id, deletedAt: null },
       include: {
         items: {
           include: {
@@ -110,7 +110,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
     }
 
-    await db.order.delete({ where: { id: params.id } })
+    await db.order.update({
+      where: { id: params.id },
+      data: { deletedAt: new Date() },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

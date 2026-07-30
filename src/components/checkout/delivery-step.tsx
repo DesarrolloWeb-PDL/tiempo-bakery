@@ -51,6 +51,27 @@ export function DeliveryStep({
   onBack,
 }: DeliveryStepProps) {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [autoAdvance, setAutoAdvance] = React.useState(false);
+
+  const isDeliveryValid =
+    selectedMethod === DeliveryMethod.PICKUP_POINT
+      ? !!pickupLocationId
+      : !!(address && city && postalCode);
+
+  React.useEffect(() => {
+    if (!isDeliveryValid) {
+      setAutoAdvance(false);
+      return;
+    }
+    const timer = setTimeout(() => setAutoAdvance(true), 1000);
+    return () => clearTimeout(timer);
+  }, [selectedMethod, pickupLocationId, address, city, postalCode, isDeliveryValid]);
+
+  React.useEffect(() => {
+    if (autoAdvance && Object.keys(errors).length === 0) {
+      onNext();
+    }
+  }, [autoAdvance, errors, onNext]);
 
   const handleMethodChange = (method: DeliveryMethod) => {
     onUpdate({ method, pickupLocationId: undefined, address: '', city: '', postalCode: '' });

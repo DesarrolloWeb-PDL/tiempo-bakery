@@ -1,7 +1,5 @@
-type RateLimitEntry = {
-  count: number
-  resetAt: number
-}
+import { Redis } from "@upstash/redis"
+import { Ratelimit } from "@upstash/ratelimit"
 
 type RateLimitOptions = {
   key: string
@@ -19,37 +17,55 @@ type RateLimitResult = {
 }
 
 declare global {
-  var __tiempoBakeryRateLimitStore: Map<string, RateLimitEntry> | undefined
+  var __tiempoBakeryRateLimitStore: Map<string, { count: number; resetAt: number }> | undefined
 }
 
-function getStore() {
-  if (!globalThis.__tiempoBakeryRateLimitStore) {
-    globalThis.__tiempoBakeryRateLimitStore = new Map<string, RateLimitEntry>()
+function getRedisUrl(): string | undefined {
+  return process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL
+}
+
+function getRedisToken(): string | undefined {
+  return process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN
+}
+
+function createRatelimit(windowMs: number, limit: number) {
+  const redisUrl = getRedisUrl()
+  const redisToken = getRedisToken()
+
+  if (redisUrl && redisToken) {
+    const redis = new Redis({ url: redisUrl, token: redisToken })
+    return new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(limit, windowMs < 1000 ? '1 s' : `${windowMs / 1000} s`),
+      analytics: false,
+    })
   }
 
+  return null
+}
+
+function getFallbackStore() {
+  if (!globalThis.__tiempoBakeryRateLimitStore) {
+    globalThis.__tiempoBakeryRateLimitStore = new Map()
+  }
   return globalThis.__tiempoBakeryRateLimitStore
 }
 
-function cleanupExpiredEntries(store: Map<string, RateLimitEntry>, now: number) {
+function fallbackConsume(options: RateLimitOptions): RateLimitResult {
+  const now = options.now ?? Date.now()
+  const store = getFallbackStore()
+
   for (const [key, entry] of store.entries()) {
     if (entry.resetAt <= now) {
       store.delete(key)
     }
   }
-}
-
-export function consumeRateLimit(options: RateLimitOptions): RateLimitResult {
-  const now = options.now ?? Date.now()
-  const store = getStore()
-
-  cleanupExpiredEntries(store, now)
 
   const existing = store.get(options.key)
 
   if (!existing || existing.resetAt <= now) {
     const resetAt = now + options.windowMs
     store.set(options.key, { count: 1, resetAt })
-
     return {
       allowed: true,
       limit: options.limit,
@@ -75,6 +91,24 @@ export function consumeRateLimit(options: RateLimitOptions): RateLimitResult {
   }
 }
 
+export async function consumeRateLimit(options: RateLimitOptions): Promise<RateLimitResult> {
+  const ratelimit = createRatelimit(options.windowMs, options.limit)
+
+  if (!ratelimit) {
+    return fallbackConsume(options)
+  }
+
+  const result = await ratelimit.limit(options.key)
+
+  return {
+    allowed: result.success,
+    limit: options.limit,
+    remaining: result.remaining,
+    retryAfterSeconds: Math.ceil(result.reset / 1000),
+    resetAt: result.reset,
+  }
+}
+
 export function resetRateLimitStore() {
-  getStore().clear()
+  getFallbackStore().clear()
 }

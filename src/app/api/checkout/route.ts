@@ -43,6 +43,15 @@ async function rollbackPendingOrder(orderId: string) {
   })
 }
 
+function randomOrderSuffix(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let result = ''
+  for (let i = 0; i < 6; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return result
+}
+
 const checkoutSchema = z.object({
   customerEmail: z.string().email(),
   customerName: z.string().min(2),
@@ -158,10 +167,7 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      const orderCount = await tx.order.count();
-      const orderNumber = `TBK-${new Date().getFullYear()}-${String(
-        orderCount + 1
-      ).padStart(4, '0')}`;
+      const orderNumber = `TBK-${new Date().getFullYear()}-${randomOrderSuffix()}`;
 
       let pickupDetails = null;
       if (data.deliveryMethod === 'PICKUP_POINT' && data.pickupLocationId) {

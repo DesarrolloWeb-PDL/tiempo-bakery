@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { hasAdminSession } from '@/lib/admin-auth';
 
-const GITHUB_REPO = 'DesarrolloWeb-PDL/img-tiempo-bakery'; // Reemplaza con tu repositorio
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Configura este token en tus variables de entorno
+const GITHUB_REPO = 'DesarrolloWeb-PDL/img-tiempo-bakery';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const BRANCH = 'main';
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const cookies = { get: (name: string) => req.cookies.get(name) }
+  const isAdmin = await hasAdminSession(cookies)
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (!GITHUB_TOKEN) {
+    return NextResponse.json({ error: 'GitHub token no configurado' }, { status: 500 })
+  }
+
   const formData = await req.formData();
   const file = formData.get('file');
 
@@ -12,8 +26,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No file uploaded or invalid file type' }, { status: 400 });
   }
 
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return NextResponse.json({ error: 'Tipo de archivo no permitido. Solo JPG, PNG, WebP y AVIF.' }, { status: 400 });
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return NextResponse.json({ error: 'El archivo excede el tamaño máximo de 5MB' }, { status: 400 });
+  }
+
   const fileName = `productos/${Date.now()}-${file.name}`;
-  const fileContent = await file.text();
+  const fileBuffer = await file.arrayBuffer();
 
   try {
     const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${fileName}`, {
@@ -24,7 +46,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         message: `Add ${fileName}`,
-        content: Buffer.from(fileContent).toString('base64'),
+        content: Buffer.from(fileBuffer).toString('base64'),
         branch: BRANCH,
       }),
     });

@@ -107,6 +107,7 @@ model Order {
   updatedAt       DateTime    @updatedAt
   paidAt          DateTime?
   deliveredAt     DateTime?
+  deletedAt       DateTime?
   user            User?       @relation(fields: [userId], references: [id])
   items           OrderItem[]
 
@@ -166,4 +167,15 @@ model ProductImage {
 
   @@index([productId])
   @@index([order])
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  jti       String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  @@index([jti])
+  @@index([expiresAt])
 }

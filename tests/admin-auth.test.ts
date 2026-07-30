@@ -24,11 +24,23 @@ describe('admin auth session', () => {
   })
 
   it('crea una sesión válida verificable por cookie', async () => {
-    const { ADMIN_COOKIE, createAdminSessionToken, hasAdminSession } = await import('@/lib/admin-auth')
+    const { loadPrismaEnv } = await import('@/lib/env-loader')
+    loadPrismaEnv()
+
+    const { ADMIN_COOKIE, createAdminSessionToken, hasAdminSession, persistAdminSession, extractJtiFromCookie } = await import('@/lib/admin-auth')
 
     const token = await createAdminSessionToken()
-
     expect(token).toBeTruthy()
+
+    const jti = extractJtiFromCookie({
+      get(name: string) {
+        if (name !== ADMIN_COOKIE) return undefined
+        return { value: token }
+      },
+    })
+    expect(jti).toBeTruthy()
+    await persistAdminSession(jti!)
+
     await expect(
       hasAdminSession({
         get(name: string) {
@@ -37,6 +49,9 @@ describe('admin auth session', () => {
         },
       })
     ).resolves.toBe(true)
+
+    const { prisma } = await import('@/lib/db')
+    await prisma.adminSession.delete({ where: { jti: jti! } })
   })
 
   it('invalida la sesión si cambia la contraseña del admin', async () => {

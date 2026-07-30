@@ -52,11 +52,8 @@ export async function createMercadoPagoPreference(input: {
   accessToken?: string;
 }) {
   const baseUrl = process.env.NEXT_PUBLIC_URL
-    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
-
-  if (!baseUrl) {
-    throw new Error('Falta NEXT_PUBLIC_URL o VERCEL_URL para generar los retornos de pago');
-  }
+    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined)
+    ?? 'http://localhost:3000'
 
   const client = getMercadoPagoClient(input.accessToken);
   const preference = new Preference(client);

@@ -48,6 +48,15 @@ function formatCurrency(amount: number) {
   }).format(amount)
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY?.trim()
 
@@ -81,7 +90,7 @@ function renderItems(order: OrderEmailPayload) {
       const slicedText = item.sliced ? 'Rebanado' : 'Sin rebanar'
       return `
         <tr>
-          <td style="padding:8px 0;border-bottom:1px solid #e5e7eb;">${item.productName}<br /><span style="color:#6b7280;font-size:12px;">${slicedText}</span></td>
+          <td style="padding:8px 0;border-bottom:1px solid #e5e7eb;">${escapeHtml(item.productName)}<br /><span style="color:#6b7280;font-size:12px;">${slicedText}</span></td>
           <td style="padding:8px 0;border-bottom:1px solid #e5e7eb;text-align:center;">${item.quantity}</td>
           <td style="padding:8px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${formatCurrency(item.subtotal)}</td>
         </tr>
@@ -95,18 +104,18 @@ function renderDeliveryDetails(order: OrderEmailPayload) {
 
   if (order.deliveryMethod === 'PICKUP_POINT') {
     return `
-      <p style="margin:0 0 4px;"><strong>Método:</strong> ${deliveryLabel}</p>
-      <p style="margin:0 0 4px;"><strong>Punto:</strong> ${order.pickupLocation ?? '-'}</p>
-      <p style="margin:0 0 4px;"><strong>Dirección:</strong> ${order.pickupAddress ?? '-'}</p>
-      <p style="margin:0;"><strong>Horario:</strong> ${order.pickupSchedule ?? '-'}</p>
+      <p style="margin:0 0 4px;"><strong>Método:</strong> ${escapeHtml(deliveryLabel)}</p>
+      <p style="margin:0 0 4px;"><strong>Punto:</strong> ${escapeHtml(order.pickupLocation ?? '-')}</p>
+      <p style="margin:0 0 4px;"><strong>Dirección:</strong> ${escapeHtml(order.pickupAddress ?? '-')}</p>
+      <p style="margin:0;"><strong>Horario:</strong> ${escapeHtml(order.pickupSchedule ?? '-')}</p>
     `
   }
 
   return `
-    <p style="margin:0 0 4px;"><strong>Método:</strong> ${deliveryLabel}</p>
-    <p style="margin:0 0 4px;"><strong>Dirección:</strong> ${order.shippingAddress ?? '-'}</p>
-    <p style="margin:0 0 4px;"><strong>Ciudad:</strong> ${order.shippingCity ?? '-'}</p>
-    <p style="margin:0;"><strong>Código postal:</strong> ${order.shippingPostal ?? '-'}</p>
+    <p style="margin:0 0 4px;"><strong>Método:</strong> ${escapeHtml(deliveryLabel)}</p>
+    <p style="margin:0 0 4px;"><strong>Dirección:</strong> ${escapeHtml(order.shippingAddress ?? '-')}</p>
+    <p style="margin:0 0 4px;"><strong>Ciudad:</strong> ${escapeHtml(order.shippingCity ?? '-')}</p>
+    <p style="margin:0;"><strong>Código postal:</strong> ${escapeHtml(order.shippingPostal ?? '-')}</p>
   `
 }
 
@@ -114,7 +123,7 @@ function renderCustomerEmailHtml(order: OrderEmailPayload, contactEmail: string)
   return `
     <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;">
       <h1 style="margin:0 0 16px;font-size:28px;color:#92400e;">Tiempo Bakery</h1>
-      <p style="margin:0 0 16px;">Hola ${order.customerName}, recibimos tu pedido <strong>${order.orderNumber}</strong> y el pago quedó confirmado.</p>
+      <p style="margin:0 0 16px;">Hola ${escapeHtml(order.customerName)}, recibimos tu pedido <strong>${escapeHtml(order.orderNumber)}</strong> y el pago quedó confirmado.</p>
       <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin:0 0 20px;">
         ${renderDeliveryDetails(order)}
       </div>
@@ -133,8 +142,8 @@ function renderCustomerEmailHtml(order: OrderEmailPayload, contactEmail: string)
         <p style="margin:0 0 4px;"><strong>Envío:</strong> ${formatCurrency(order.shippingCost)}</p>
         <p style="margin:0;font-size:18px;"><strong>Total:</strong> ${formatCurrency(order.total)}</p>
       </div>
-      ${order.customerNotes ? `<p style="margin:0 0 16px;"><strong>Notas:</strong> ${order.customerNotes}</p>` : ''}
-      <p style="margin:0;color:#4b5563;">Si necesitás ayuda con tu pedido, respondé este email o escribinos a ${contactEmail}.</p>
+      ${order.customerNotes ? `<p style="margin:0 0 16px;"><strong>Notas:</strong> ${escapeHtml(order.customerNotes)}</p>` : ''}
+      <p style="margin:0;color:#4b5563;">Si necesitás ayuda con tu pedido, respondé este email o escribinos a ${escapeHtml(contactEmail)}.</p>
     </div>
   `
 }
@@ -143,8 +152,8 @@ function renderAdminEmailHtml(order: OrderEmailPayload) {
   return `
     <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;">
       <h1 style="margin:0 0 16px;font-size:24px;color:#111827;">Nuevo pedido pagado</h1>
-      <p style="margin:0 0 12px;"><strong>${order.orderNumber}</strong> de ${order.customerName} (${order.customerEmail})</p>
-      <p style="margin:0 0 4px;"><strong>Teléfono:</strong> ${order.customerPhone}</p>
+      <p style="margin:0 0 12px;"><strong>${escapeHtml(order.orderNumber)}</strong> de ${escapeHtml(order.customerName)} (${escapeHtml(order.customerEmail)})</p>
+      <p style="margin:0 0 4px;"><strong>Teléfono:</strong> ${escapeHtml(order.customerPhone)}</p>
       <p style="margin:0 0 16px;"><strong>Total:</strong> ${formatCurrency(order.total)}</p>
       <div style="background:#f9fafb;border-radius:12px;padding:16px;margin:0 0 16px;">
         ${renderDeliveryDetails(order)}
@@ -159,7 +168,7 @@ function renderAdminEmailHtml(order: OrderEmailPayload) {
         </thead>
         <tbody>${renderItems(order)}</tbody>
       </table>
-      ${order.customerNotes ? `<p style="margin:0;"><strong>Notas del cliente:</strong> ${order.customerNotes}</p>` : ''}
+      ${order.customerNotes ? `<p style="margin:0;"><strong>Notas del cliente:</strong> ${escapeHtml(order.customerNotes)}</p>` : ''}
     </div>
   `
 }

@@ -129,7 +129,8 @@ export async function getEnabledPaymentProviders(): Promise<PaymentProvider[]> {
 
 export function getSiteUrl(): string {
   return process.env.NEXT_PUBLIC_URL
-    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
+    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined)
+    ?? 'http://localhost:3000'
 }
 
 export async function getBankTransferSettings(): Promise<BankTransferSettings> {
