@@ -140,7 +140,7 @@ function SiteContentActions({ loading, saving, message, onSave, onReset }: Omit<
         <button
           onClick={onReset}
           disabled={loading || saving}
-          className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+          className="px-4 py-2 bg-gray-700 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-600 disabled:opacity-50"
         >
           Restablecer
         </button>
@@ -151,71 +151,71 @@ function SiteContentActions({ loading, saving, message, onSave, onReset }: Omit<
 
 function FooterConfigAdmin({ siteContent, setSiteContent, loading, saving, message, onSave, onReset }: SiteContentEditorProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-gray-900">Footer</h2>
-        <p className="text-sm text-gray-500 mt-1">Editá el bloque descriptivo, horarios y datos de contacto del pie del sitio.</p>
+        <h2 className="text-lg font-bold text-white">Footer</h2>
+        <p className="text-sm text-gray-400 mt-1">Editá el bloque descriptivo, horarios y datos de contacto del pie del sitio.</p>
       </div>
 
       <div>
-        <label className="block text-xs text-gray-500 mb-1">Descripción</label>
+        <label className="block text-xs text-gray-400 mb-1">Descripción</label>
         <textarea
           value={siteContent.footerDescription}
           disabled={loading || saving}
           onChange={(e) => setSiteContent((prev) => ({ ...prev, footerDescription: e.target.value }))}
-          className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+          className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-700 text-sm"
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Título del bloque de horario</label>
+          <label className="block text-xs text-gray-400 mb-1">Título del bloque de horario</label>
           <input
             type="text"
             value={siteContent.footerScheduleTitle}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, footerScheduleTitle: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Título del bloque de contacto</label>
+          <label className="block text-xs text-gray-400 mb-1">Título del bloque de contacto</label>
           <input
             type="text"
             value={siteContent.footerContactTitle}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, footerContactTitle: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Horario visible</label>
+          <label className="block text-xs text-gray-400 mb-1">Horario visible</label>
           <input
             type="text"
             value={siteContent.footerScheduleText}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, footerScheduleText: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Texto de entregas</label>
+          <label className="block text-xs text-gray-400 mb-1">Texto de entregas</label>
           <input
             type="text"
             value={siteContent.footerDeliveryText}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, footerDeliveryText: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs text-gray-500 mb-1">Nota legal o institucional del pie</label>
+          <label className="block text-xs text-gray-400 mb-1">Nota legal o institucional del pie</label>
           <input
             type="text"
             value={siteContent.footerLegalNote}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, footerLegalNote: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
       </div>
@@ -233,41 +233,41 @@ function FooterConfigAdmin({ siteContent, setSiteContent, loading, saving, messa
 
 function NavConfigAdmin({ siteContent, setSiteContent, loading, saving, message, onSave, onReset }: SiteContentEditorProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-gray-900">Navegación</h2>
-        <p className="text-sm text-gray-500 mt-1">Definí los textos visibles en el menú principal del sitio.</p>
+        <h2 className="text-lg font-bold text-white">Navegación</h2>
+        <p className="text-sm text-gray-400 mt-1">Definí los textos visibles en el menú principal del sitio.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Link a productos</label>
+          <label className="block text-xs text-gray-400 mb-1">Link a productos</label>
           <input
             type="text"
             value={siteContent.navProductsLabel}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, navProductsLabel: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Link a sobre nosotros</label>
+          <label className="block text-xs text-gray-400 mb-1">Link a sobre nosotros</label>
           <input
             type="text"
             value={siteContent.navAboutLabel}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, navAboutLabel: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Link a contacto</label>
+          <label className="block text-xs text-gray-400 mb-1">Link a contacto</label>
           <input
             type="text"
             value={siteContent.navContactLabel}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, navContactLabel: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
       </div>
@@ -285,40 +285,40 @@ function NavConfigAdmin({ siteContent, setSiteContent, loading, saving, message,
 
 function SobreNosotrosConfigAdmin({ siteContent, setSiteContent, loading, saving, message, onSave, onReset }: SiteContentEditorProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-gray-900">Sobre Nosotros</h2>
-        <p className="text-sm text-gray-500 mt-1">Configurá el contenido principal de la página institucional.</p>
+        <h2 className="text-lg font-bold text-white">Sobre Nosotros</h2>
+        <p className="text-sm text-gray-400 mt-1">Configurá el contenido principal de la página institucional.</p>
       </div>
 
       <div>
-        <label className="block text-xs text-gray-500 mb-1">Título</label>
+        <label className="block text-xs text-gray-400 mb-1">Título</label>
         <input
           type="text"
           value={siteContent.aboutTitle}
           disabled={loading || saving}
           onChange={(e) => setSiteContent((prev) => ({ ...prev, aboutTitle: e.target.value }))}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
         />
       </div>
 
       <div>
-        <label className="block text-xs text-gray-500 mb-1">Texto principal</label>
+        <label className="block text-xs text-gray-400 mb-1">Texto principal</label>
         <textarea
           value={siteContent.aboutBody}
           disabled={loading || saving}
           onChange={(e) => setSiteContent((prev) => ({ ...prev, aboutBody: e.target.value }))}
-          className="w-full min-h-32 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+          className="w-full min-h-32 px-3 py-2 rounded-lg border border-gray-700 text-sm"
         />
       </div>
 
       <div>
-        <label className="block text-xs text-gray-500 mb-1">Segundo párrafo institucional</label>
+        <label className="block text-xs text-gray-400 mb-1">Segundo párrafo institucional</label>
         <textarea
           value={siteContent.aboutSecondaryBody}
           disabled={loading || saving}
           onChange={(e) => setSiteContent((prev) => ({ ...prev, aboutSecondaryBody: e.target.value }))}
-          className="w-full min-h-28 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+          className="w-full min-h-28 px-3 py-2 rounded-lg border border-gray-700 text-sm"
         />
       </div>
 
@@ -335,97 +335,97 @@ function SobreNosotrosConfigAdmin({ siteContent, setSiteContent, loading, saving
 
 function ContactoConfigAdmin({ siteContent, setSiteContent, loading, saving, message, onSave, onReset }: SiteContentEditorProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-gray-900">Contacto</h2>
-        <p className="text-sm text-gray-500 mt-1">Centralizá el texto introductorio y los datos que se muestran en la página y en el footer.</p>
+        <h2 className="text-lg font-bold text-white">Contacto</h2>
+        <p className="text-sm text-gray-400 mt-1">Centralizá el texto introductorio y los datos que se muestran en la página y en el footer.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">
-          <label className="block text-xs text-gray-500 mb-1">Título de la página</label>
+          <label className="block text-xs text-gray-400 mb-1">Título de la página</label>
           <input
             type="text"
             value={siteContent.contactTitle}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, contactTitle: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs text-gray-500 mb-1">Texto introductorio</label>
+          <label className="block text-xs text-gray-400 mb-1">Texto introductorio</label>
           <textarea
             value={siteContent.contactIntro}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, contactIntro: e.target.value }))}
-            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Email</label>
+          <label className="block text-xs text-gray-400 mb-1">Email</label>
           <input
             type="email"
             value={siteContent.contactEmail}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, contactEmail: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Teléfono</label>
+          <label className="block text-xs text-gray-400 mb-1">Teléfono</label>
           <input
             type="text"
             value={siteContent.contactPhone}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, contactPhone: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">WhatsApp</label>
+          <label className="block text-xs text-gray-400 mb-1">WhatsApp</label>
           <input
             type="text"
             value={siteContent.contactWhatsapp}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, contactWhatsapp: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs text-gray-500 mb-1">Dirección u obrador</label>
+          <label className="block text-xs text-gray-400 mb-1">Dirección u obrador</label>
           <input
             type="text"
             value={siteContent.contactAddress}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, contactAddress: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs text-gray-500 mb-1">Texto de recogida</label>
+          <label className="block text-xs text-gray-400 mb-1">Texto de recogida</label>
           <textarea
             value={siteContent.deliveryPickupText}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, deliveryPickupText: e.target.value }))}
-            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs text-gray-500 mb-1">Texto de reparto local</label>
+          <label className="block text-xs text-gray-400 mb-1">Texto de reparto local</label>
           <textarea
             value={siteContent.deliveryLocalText}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, deliveryLocalText: e.target.value }))}
-            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs text-gray-500 mb-1">Texto de mensajería urgente</label>
+          <label className="block text-xs text-gray-400 mb-1">Texto de mensajería urgente</label>
           <textarea
             value={siteContent.deliveryCourierText}
             disabled={loading || saving}
             onChange={(e) => setSiteContent((prev) => ({ ...prev, deliveryCourierText: e.target.value }))}
-            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
       </div>
@@ -483,24 +483,24 @@ function DeliveryConfigAdmin({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-gray-700">
           <div>
-            <h2 className="font-semibold text-gray-900 text-sm">Ventana semanal de preventa</h2>
-            <p className="text-xs text-gray-500 mt-1">Configura cuándo abre y cierra el período de pedidos.</p>
+            <h2 className="font-semibold text-white text-sm">Ventana semanal de preventa</h2>
+            <p className="text-xs text-gray-400 mt-1">Configura cuándo abre y cierra el período de pedidos.</p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={onRefreshPreventa}
               disabled={loadingPreventa || savingPreventa}
-              className="px-3 py-2 bg-white text-gray-600 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+              className="px-3 py-2 bg-white text-gray-300 text-sm rounded-lg border border-gray-700 hover:bg-gray-100 disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${loadingPreventa ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={onResetPreventa}
               disabled={loadingPreventa || savingPreventa}
-              className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200 hover:bg-red-100 disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 bg-red-900/30 text-red-400 text-sm rounded-lg border border-red-800 hover:bg-red-900/50 disabled:opacity-50"
             >
               <RotateCcw className="w-4 h-4" /> Restablecer
             </button>
@@ -514,7 +514,7 @@ function DeliveryConfigAdmin({
           </div>
         </div>
         <div className="px-5 py-4 space-y-4">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
             <input
               type="checkbox"
               checked={preventa.enabled}
@@ -526,13 +526,13 @@ function DeliveryConfigAdmin({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Apertura</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Apertura</p>
               <div className="grid grid-cols-3 gap-2">
                 <select
                   value={preventa.openingDay}
                   onChange={(e) => updatePreventa('openingDay', Number(e.target.value))}
                   disabled={loadingPreventa || savingPreventa}
-                  className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="col-span-2 px-3 py-2 rounded-lg border border-gray-700 text-sm"
                 >
                   {DAY_OPTIONS.map((day) => (
                     <option key={day.value} value={day.value}>{day.label}</option>
@@ -543,7 +543,7 @@ function DeliveryConfigAdmin({
                     value={preventa.openingHour}
                     onChange={(e) => updatePreventa('openingHour', Number(e.target.value))}
                     disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
                   >
                     {timeOptions.map((hour) => (
                       <option key={hour} value={hour}>{String(hour).padStart(2, '0')}</option>
@@ -553,7 +553,7 @@ function DeliveryConfigAdmin({
                     value={preventa.openingMinute}
                     onChange={(e) => updatePreventa('openingMinute', Number(e.target.value))}
                     disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
                   >
                     {minuteOptions.map((minute) => (
                       <option key={minute} value={minute}>{String(minute).padStart(2, '0')}</option>
@@ -564,13 +564,13 @@ function DeliveryConfigAdmin({
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Cierre</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Cierre</p>
               <div className="grid grid-cols-3 gap-2">
                 <select
                   value={preventa.closingDay}
                   onChange={(e) => updatePreventa('closingDay', Number(e.target.value))}
                   disabled={loadingPreventa || savingPreventa}
-                  className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="col-span-2 px-3 py-2 rounded-lg border border-gray-700 text-sm"
                 >
                   {DAY_OPTIONS.map((day) => (
                     <option key={day.value} value={day.value}>{day.label}</option>
@@ -581,7 +581,7 @@ function DeliveryConfigAdmin({
                     value={preventa.closingHour}
                     onChange={(e) => updatePreventa('closingHour', Number(e.target.value))}
                     disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
                   >
                     {timeOptions.map((hour) => (
                       <option key={hour} value={hour}>{String(hour).padStart(2, '0')}</option>
@@ -591,7 +591,7 @@ function DeliveryConfigAdmin({
                     value={preventa.closingMinute}
                     onChange={(e) => updatePreventa('closingMinute', Number(e.target.value))}
                     disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-200 text-sm"
+                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
                   >
                     {minuteOptions.map((minute) => (
                       <option key={minute} value={minute}>{String(minute).padStart(2, '0')}</option>
@@ -602,7 +602,7 @@ function DeliveryConfigAdmin({
             </div>
           </div>
 
-          <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 flex items-center gap-2">
+          <div className="text-xs text-gray-400 bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 flex items-center gap-2">
             <Clock3 className="w-4 h-4 text-gray-400" />
             Apertura {DAY_OPTIONS.find((d) => d.value === preventa.openingDay)?.label} {String(preventa.openingHour).padStart(2, '0')}:{String(preventa.openingMinute).padStart(2, '0')} · cierre {DAY_OPTIONS.find((d) => d.value === preventa.closingDay)?.label} {String(preventa.closingHour).padStart(2, '0')}:{String(preventa.closingMinute).padStart(2, '0')}
           </div>
@@ -611,15 +611,15 @@ function DeliveryConfigAdmin({
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-700">
           <Truck className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-gray-900 text-sm">Costos de envío</h3>
+          <h3 className="font-semibold text-white text-sm">Costos de envío</h3>
         </div>
         <div className="px-5 py-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Envío local (AR$)</label>
+              <label className="block text-xs text-gray-400 mb-1">Envío local (AR$)</label>
               <input
                 type="number"
                 min={0}
@@ -627,12 +627,12 @@ function DeliveryConfigAdmin({
                 value={shippingCosts.localDelivery}
                 disabled={loadingShipping || savingShipping}
                 onChange={(e) => setShippingCosts((prev) => ({ ...prev, localDelivery: Number(e.target.value) }))}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
               />
               <p className="text-xs text-gray-400 mt-1">{formatCurrency(shippingCosts.localDelivery)}</p>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Mensajería nacional (AR$)</label>
+              <label className="block text-xs text-gray-400 mb-1">Mensajería nacional (AR$)</label>
               <input
                 type="number"
                 min={0}
@@ -640,14 +640,14 @@ function DeliveryConfigAdmin({
                 value={shippingCosts.nationalCourier}
                 disabled={loadingShipping || savingShipping}
                 onChange={(e) => setShippingCosts((prev) => ({ ...prev, nationalCourier: Number(e.target.value) }))}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
               />
               <p className="text-xs text-gray-400 mt-1">{formatCurrency(shippingCosts.nationalCourier)}</p>
             </div>
           </div>
 
-          <p className="text-xs text-gray-500">Recogida en punto siempre se mantiene en <strong>gratis</strong>.</p>
-          {shippingMsg && <p className="text-sm text-gray-600">{shippingMsg}</p>}
+          <p className="text-xs text-gray-400">Recogida en punto siempre se mantiene en <strong>gratis</strong>.</p>
+          {shippingMsg && <p className="text-sm text-gray-300">{shippingMsg}</p>}
 
           <div className="flex gap-2">
             <button
@@ -660,7 +660,7 @@ function DeliveryConfigAdmin({
             <button
               onClick={onResetShipping}
               disabled={loadingShipping || savingShipping}
-              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+              className="px-4 py-2 bg-gray-700 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-600 disabled:opacity-50"
             >
               Restablecer
             </button>
@@ -668,16 +668,16 @@ function DeliveryConfigAdmin({
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-gray-700">
           <div>
-            <h3 className="font-semibold text-gray-900 text-sm">Puntos de recogida</h3>
-            <p className="text-xs text-gray-500 mt-1">Administrá los puntos visibles en checkout y su orden.</p>
+            <h3 className="font-semibold text-white text-sm">Puntos de recogida</h3>
+            <p className="text-xs text-gray-400 mt-1">Administrá los puntos visibles en checkout y su orden.</p>
           </div>
           <button
             onClick={onRefreshPickupPoints}
             disabled={loadingPickupPoints || savingPickupPoint}
-            className="px-3 py-2 bg-white text-gray-600 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+            className="px-3 py-2 bg-white text-gray-300 text-sm rounded-lg border border-gray-700 hover:bg-gray-100 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${loadingPickupPoints ? 'animate-spin' : ''}`} />
           </button>
@@ -685,36 +685,36 @@ function DeliveryConfigAdmin({
         <div className="px-5 py-4 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Nombre</label>
-              <input type="text" value={pickupDraft.name} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('name', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              <label className="block text-xs text-gray-400 mb-1">Nombre</label>
+              <input type="text" value={pickupDraft.name} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('name', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Horario</label>
-              <input type="text" value={pickupDraft.schedule} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('schedule', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" placeholder="Ej: Viernes 10:00 a 14:00" />
+              <label className="block text-xs text-gray-400 mb-1">Horario</label>
+              <input type="text" value={pickupDraft.schedule} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('schedule', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" placeholder="Ej: Viernes 10:00 a 14:00" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Dirección</label>
-              <input type="text" value={pickupDraft.address} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('address', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              <label className="block text-xs text-gray-400 mb-1">Dirección</label>
+              <input type="text" value={pickupDraft.address} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('address', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Ciudad</label>
-              <input type="text" value={pickupDraft.city} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('city', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              <label className="block text-xs text-gray-400 mb-1">Ciudad</label>
+              <input type="text" value={pickupDraft.city} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('city', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Código postal</label>
-              <input type="text" value={pickupDraft.postalCode} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('postalCode', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              <label className="block text-xs text-gray-400 mb-1">Código postal</label>
+              <input type="text" value={pickupDraft.postalCode} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('postalCode', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Orden</label>
-              <input type="number" min={0} step="1" value={pickupDraft.order} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('order', Number(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              <label className="block text-xs text-gray-400 mb-1">Orden</label>
+              <input type="number" min={0} step="1" value={pickupDraft.order} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('order', Number(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">Instrucciones</label>
-              <textarea value={pickupDraft.instructions} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('instructions', e.target.value)} className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              <label className="block text-xs text-gray-400 mb-1">Instrucciones</label>
+              <textarea value={pickupDraft.instructions} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('instructions', e.target.value)} className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-700 text-sm" />
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-gray-700">
+          <label className="flex items-center gap-2 text-sm text-gray-300">
             <input type="checkbox" checked={pickupDraft.isActive} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('isActive', e.target.checked)} />
             Punto activo en checkout
           </label>
@@ -726,7 +726,7 @@ function DeliveryConfigAdmin({
               {editingPickupId ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {savingPickupPoint ? 'Guardando...' : editingPickupId ? 'Actualizar punto' : 'Agregar punto'}
             </button>
             {editingPickupId && (
-              <button onClick={onCancelEditPickupPoint} disabled={savingPickupPoint} className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 disabled:opacity-50">
+              <button onClick={onCancelEditPickupPoint} disabled={savingPickupPoint} className="px-4 py-2 bg-gray-700 text-gray-300 text-sm rounded-lg hover:bg-gray-600 disabled:opacity-50">
                 Cancelar edición
               </button>
             )}
@@ -734,22 +734,22 @@ function DeliveryConfigAdmin({
 
           <div className="space-y-3">
             {pickupPoints.map((point) => (
-              <div key={point.id} className="rounded-lg border border-gray-200 p-4">
+              <div key={point.id} className="rounded-lg border border-gray-700 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                    <p className="text-sm font-medium text-white flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-brand-gold" /> {point.name}
                     </p>
-                    <p className="text-sm text-gray-600">{point.address}, {point.city} {point.postalCode}</p>
-                    <p className="text-xs text-gray-500">{point.schedule}</p>
-                    {point.instructions && <p className="text-xs text-gray-500">{point.instructions}</p>}
+                    <p className="text-sm text-gray-300">{point.address}, {point.city} {point.postalCode}</p>
+                    <p className="text-xs text-gray-400">{point.schedule}</p>
+                    {point.instructions && <p className="text-xs text-gray-400">{point.instructions}</p>}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${point.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${point.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-700 text-gray-400'}`}>
                       {point.isActive ? 'Activo' : 'Oculto'}
                     </span>
-                    <button onClick={() => onEditPickupPoint(point)} disabled={savingPickupPoint} className="px-3 py-2 bg-gray-100 text-gray-700 text-xs rounded-lg hover:bg-gray-200 disabled:opacity-50">Editar</button>
-                    <button onClick={() => onDeletePickupPoint(point.id)} disabled={savingPickupPoint} className="px-3 py-2 bg-red-50 text-red-700 text-xs rounded-lg hover:bg-red-100 disabled:opacity-50">
+                    <button onClick={() => onEditPickupPoint(point)} disabled={savingPickupPoint} className="px-3 py-2 bg-gray-700 text-gray-300 text-xs rounded-lg hover:bg-gray-600 disabled:opacity-50">Editar</button>
+                    <button onClick={() => onDeletePickupPoint(point.id)} disabled={savingPickupPoint} className="px-3 py-2 bg-red-900/30 text-red-400 text-xs rounded-lg hover:bg-red-900/50 disabled:opacity-50">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -757,7 +757,7 @@ function DeliveryConfigAdmin({
               </div>
             ))}
             {!pickupPoints.length && !loadingPickupPoints && (
-              <div className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500">
+              <div className="rounded-lg border border-dashed border-gray-600 p-4 text-sm text-gray-400">
                 Todavía no hay puntos de recogida cargados.
               </div>
             )}
@@ -1217,13 +1217,13 @@ export default function AdminConfigPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+    <div className="max-w-3xl mx-auto px-4 py-8 admin-config">
+      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2" style={{ color: 'white' }}>
         <Settings className="w-6 h-6 text-brand-gold" /> Configuración
       </h1>
 
       <Tabs.Root defaultValue="entrega" className="w-full">
-        <Tabs.List className="inline-flex flex-wrap gap-2 bg-gray-100 p-1 rounded-lg mb-6 overflow-x-auto">
+        <Tabs.List className="inline-flex flex-wrap gap-2 bg-gray-700 p-1 rounded-lg mb-6 overflow-x-auto">
           {([
             { value: 'entrega', icon: Truck, label: 'Entrega' },
             { value: 'header', icon: Layout, label: 'Header' },
@@ -1238,7 +1238,7 @@ export default function AdminConfigPage() {
               <Tabs.Trigger
                 key={tab.value}
                 value={tab.value}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-gray-600 border border-gray-200 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-50"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-gray-300 border border-gray-700 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-100"
               >
                 <Icon className="w-4 h-4" /> {tab.label}
               </Tabs.Trigger>
@@ -1281,38 +1281,38 @@ export default function AdminConfigPage() {
         <Tabs.Content value="header" className="space-y-4">
           {/* Título */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Título de la tienda</label>
+            <label className="block text-xs text-gray-400 mb-1">Título de la tienda</label>
             <input
               type="text"
               value={theme.appTitle}
               disabled={loadingTheme || savingTheme}
               onChange={(e) => setTheme({ ...theme, appTitle: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
               placeholder="Ej: Tiempo Bakery"
             />
           </div>
 
           {/* Subtítulo */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Subtítulo/Lema</label>
+            <label className="block text-xs text-gray-400 mb-1">Subtítulo/Lema</label>
             <input
               type="text"
               value={theme.appSubtitle}
               disabled={loadingTheme || savingTheme}
               onChange={(e) => setTheme({ ...theme, appSubtitle: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
               placeholder="Ej: Micropanadería artesanal por encargo semanal"
             />
           </div>
 
           {/* Logo */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Logo de la tienda</label>
+            <label className="block text-xs text-gray-400 mb-1">Logo de la tienda</label>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <label
                   htmlFor="logo-upload"
-                  className={`flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors ${
+                  className={`flex-1 px-3 py-2 rounded-lg border border-gray-700 text-sm text-gray-300 cursor-pointer hover:bg-gray-100 transition-colors ${
                     uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
@@ -1334,14 +1334,14 @@ export default function AdminConfigPage() {
                   value={theme.logoUrl}
                   disabled={loadingTheme || savingTheme}
                   onChange={(e) => setTheme({ ...theme, logoUrl: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
                   placeholder="Ej: /img/logo.png"
                 />
               </div>
             </div>
             {theme.logoUrl && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-xs text-gray-500 mb-2">Vista previa:</p>
+              <div className="mt-3 p-3 bg-gray-700 rounded-lg border border-gray-700">
+                <p className="text-xs text-gray-400 mb-2">Vista previa:</p>
                 <Image
                   src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
                   alt="Logo preview"
@@ -1357,12 +1357,12 @@ export default function AdminConfigPage() {
 
           {/* Tamaño del logo */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Tamaño del logo</label>
+            <label className="block text-xs text-gray-400 mb-1">Tamaño del logo</label>
             <select
               value={theme.logoSize}
               disabled={loadingTheme || savingTheme}
               onChange={(e) => setTheme({ ...theme, logoSize: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+              className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
             >
               <option value="24">24px — Chico</option>
               <option value="32">32px — Mediano-chico</option>
@@ -1378,7 +1378,7 @@ export default function AdminConfigPage() {
                 alt="Logo preview size"
                 width={Number(theme.logoSize) || 36}
                 height={Number(theme.logoSize) || 36}
-                className="object-contain border border-gray-200 rounded"
+                className="object-contain border border-gray-700 rounded"
                 unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
               />
               <span className="text-xs text-gray-400">{theme.logoSize}px</span>
@@ -1387,15 +1387,15 @@ export default function AdminConfigPage() {
 
           {/* Tipografía */}
           <div>
-            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Tipografía</p>
+            <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Tipografía</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Fuente para títulos</label>
+                <label className="block text-xs text-gray-400 mb-1">Fuente para títulos</label>
                 <select
                   value={theme.fontHeading}
                   disabled={loadingTheme || savingTheme}
                   onChange={(e) => setTheme({ ...theme, fontHeading: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
                 >
                   <optgroup label="Sistema">
                     <option value="system-ui">system-ui (predeterminado)</option>
@@ -1413,12 +1413,12 @@ export default function AdminConfigPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Fuente para cuerpo de texto</label>
+                <label className="block text-xs text-gray-400 mb-1">Fuente para cuerpo de texto</label>
                 <select
                   value={theme.fontBody}
                   disabled={loadingTheme || savingTheme}
                   onChange={(e) => setTheme({ ...theme, fontBody: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
                 >
                   <optgroup label="Sistema">
                     <option value="system-ui">system-ui (predeterminado)</option>
@@ -1438,12 +1438,12 @@ export default function AdminConfigPage() {
               </div>
             </div>
             <div className="mt-4">
-              <label className="block text-xs text-gray-500 mb-1">Tamaño del nombre de la app</label>
+              <label className="block text-xs text-gray-400 mb-1">Tamaño del nombre de la app</label>
               <select
                 value={theme.fontSizeTitle}
                 disabled={loadingTheme || savingTheme}
                 onChange={(e) => setTheme({ ...theme, fontSizeTitle: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
               >
                 <option value="clamp(0.875rem, 2vw, 1.125rem)">Pequeño</option>
                 <option value="clamp(1rem, 2.5vw, 1.5rem)">Normal (predeterminado)</option>
@@ -1457,7 +1457,7 @@ export default function AdminConfigPage() {
               </p>
             </div>
             <div className="mt-3">
-              <label className="block text-xs text-gray-500 mb-1">Alineación del título</label>
+              <label className="block text-xs text-gray-400 mb-1">Alineación del título</label>
               <div className="flex gap-2">
                 {(['left', 'center', 'right'] as const).map((align) => (
                   <button
@@ -1468,7 +1468,7 @@ export default function AdminConfigPage() {
                     className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
                       theme.titleAlign === align
                         ? 'border-brand-gold bg-brand-gold/10 text-brand-gold-dark font-medium'
-                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                        : 'border-gray-700 bg-white text-gray-300 hover:bg-gray-100'
                     }`}
                   >
                     {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centrado' : 'Derecha'}
@@ -1479,11 +1479,11 @@ export default function AdminConfigPage() {
             <div className="mt-3 flex flex-col gap-0.5 text-xs text-gray-400">
               <span>Vista previa:</span>
               <div style={{ textAlign: theme.titleAlign as any }}>
-                <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-gray-800 truncate block">
+                <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-white truncate block">
                   {theme.appTitle || 'Tiempo Bakery'}
                 </span>
                 {theme.appSubtitle && (
-                  <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-500 truncate block">
+                  <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-400 truncate block">
                     {theme.appSubtitle}
                   </span>
                 )}
@@ -1510,7 +1510,7 @@ export default function AdminConfigPage() {
             <button
               onClick={handleResetTheme}
               disabled={loadingTheme || savingTheme}
-              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+              className="px-4 py-2 bg-gray-700 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-600 disabled:opacity-50"
             >
               Restablecer
             </button>
@@ -1528,11 +1528,11 @@ export default function AdminConfigPage() {
             onReset={handleResetSiteContent}
           />
 
-          <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">Colores y estilos</h2>
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+            <h2 className="text-lg font-bold text-white">Colores y estilos</h2>
             {/* Colores */}
             <div>
-              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Colores de la marca</p>
+              <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Colores de la marca</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {([
                   { key: 'primaryColor', label: 'Primario (botones, links, acentos)' },
@@ -1545,21 +1545,21 @@ export default function AdminConfigPage() {
                   { key: 'textMuted', label: 'Texto secundario' },
                 ] as const).map(({ key, label }) => (
                   <div key={key}>
-                    <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                    <label className="block text-xs text-gray-400 mb-1">{label}</label>
                     <div className="flex gap-2">
                       <input
                         type="color"
                         value={(theme as any)[key]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                        className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                        className="h-10 w-16 rounded border border-gray-700 cursor-pointer shrink-0"
                       />
                       <input
                         type="text"
                         value={(theme as any)[key]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-700 text-xs font-mono"
                         placeholder="#000000"
                       />
                     </div>
@@ -1568,8 +1568,8 @@ export default function AdminConfigPage() {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-4">
-              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Superficies y bordes</p>
+            <div className="border-t border-gray-700 pt-4">
+              <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Superficies y bordes</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {([
                   { key: 'borderColor', label: 'Color de bordes' },
@@ -1579,21 +1579,21 @@ export default function AdminConfigPage() {
                   { key: 'sidebarText', label: 'Texto del panel lateral' },
                 ] as const).map(({ key, label }) => (
                   <div key={key}>
-                    <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                    <label className="block text-xs text-gray-400 mb-1">{label}</label>
                     <div className="flex gap-2">
                       <input
                         type="color"
                         value={(theme as any)[key]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                        className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                        className="h-10 w-16 rounded border border-gray-700 cursor-pointer shrink-0"
                       />
                       <input
                         type="text"
                         value={(theme as any)[key]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-700 text-xs font-mono"
                         placeholder="#000000"
                       />
                     </div>
@@ -1602,8 +1602,8 @@ export default function AdminConfigPage() {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-4">
-              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Estados y feedback</p>
+            <div className="border-t border-gray-700 pt-4">
+              <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Estados y feedback</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {([
                   { key: 'successColor', label: 'Éxito / confirmación' },
@@ -1611,21 +1611,21 @@ export default function AdminConfigPage() {
                   { key: 'errorColor', label: 'Error / peligro' },
                 ] as const).map(({ key, label }) => (
                   <div key={key}>
-                    <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                    <label className="block text-xs text-gray-400 mb-1">{label}</label>
                     <div className="flex gap-2">
                       <input
                         type="color"
                         value={(theme as any)[key]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                        className="h-10 w-16 rounded border border-gray-200 cursor-pointer shrink-0"
+                        className="h-10 w-16 rounded border border-gray-700 cursor-pointer shrink-0"
                       />
                       <input
                         type="text"
                         value={(theme as any)[key]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [key]: e.target.value })}
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono"
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-700 text-xs font-mono"
                         placeholder="#000000"
                       />
                     </div>
@@ -1635,35 +1635,35 @@ export default function AdminConfigPage() {
             </div>
 
             {/* Info section texts */}
-            <div className="border-t border-gray-200 pt-4">
-              <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Sección de información (home)</p>
+            <div className="border-t border-gray-700 pt-4">
+              <p className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Sección de información (home)</p>
               {([
                 { num: 1, titleKey: 'infoTitle1' as const, subKey: 'infoSubtitle1' as const, titleLabel: 'Título 1', subLabel: 'Subtítulo 1' },
                 { num: 2, titleKey: 'infoTitle2' as const, subKey: 'infoSubtitle2' as const, titleLabel: 'Título 2', subLabel: 'Subtítulo 2' },
                 { num: 3, titleKey: 'infoTitle3' as const, subKey: 'infoSubtitle3' as const, titleLabel: 'Título 3', subLabel: 'Subtítulo 3' },
               ]).map(({ num, titleKey, subKey, titleLabel, subLabel }) => (
-                <div key={num} className="mb-3 pb-3 border-b border-gray-100 last:border-b-0 last:mb-0 last:pb-0">
+                <div key={num} className="mb-3 pb-3 border-b border-gray-700 last:border-b-0 last:mb-0 last:pb-0">
                   <p className="text-xs text-gray-400 mb-2">Columna {num}</p>
                   <div className="space-y-2">
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">{titleLabel}</label>
+                      <label className="block text-xs text-gray-400 mb-1">{titleLabel}</label>
                       <input
                         type="text"
                         value={(theme as any)[titleKey]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [titleKey]: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
                         placeholder="Título"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">{subLabel}</label>
+                      <label className="block text-xs text-gray-400 mb-1">{subLabel}</label>
                       <input
                         type="text"
                         value={(theme as any)[subKey]}
                         disabled={loadingTheme || savingTheme}
                         onChange={(e) => setTheme({ ...theme, [subKey]: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
                         placeholder="Subtítulo"
                       />
                     </div>
@@ -1691,7 +1691,7 @@ export default function AdminConfigPage() {
               <button
                 onClick={handleResetTheme}
                 disabled={loadingTheme || savingTheme}
-                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                className="px-4 py-2 bg-gray-700 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-600 disabled:opacity-50"
               >
                 Restablecer
               </button>
@@ -1736,19 +1736,19 @@ export default function AdminConfigPage() {
         </Tabs.Content>
 
         <Tabs.Content value="pagos">
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-700">
               <Settings className="w-4 h-4 text-brand-gold" />
-              <h3 className="font-semibold text-gray-900 text-sm">Pagos</h3>
+              <h3 className="font-semibold text-white text-sm">Pagos</h3>
             </div>
             <div className="px-5 py-4 space-y-3">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-300">
                 La configuración de métodos de pago ahora vive en una pantalla dedicada para mantener el panel más ordenado.
               </p>
-              <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-gray-700 px-3 py-2">
                 <div>
-                  <p className="text-sm font-medium text-gray-800">Estado actual</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-white">Estado actual</p>
+                  <p className="text-xs text-gray-400">
                     {loadingPayments
                       ? 'Cargando proveedores...'
                       : paymentSettings.enabledProviders.length
@@ -1769,21 +1769,21 @@ export default function AdminConfigPage() {
       </Tabs.Root>
 
       {/* Seguridad */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-10">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden mt-10">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-700">
           <Key className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-gray-900 text-sm">Seguridad</h3>
+          <h3 className="font-semibold text-white text-sm">Seguridad</h3>
         </div>
         <div className="px-5 py-4 space-y-4">
           <div>
-            <p className="text-sm text-gray-700 font-medium mb-1">Contraseña de administrador</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-300 font-medium mb-1">Contraseña de administrador</p>
+            <p className="text-sm text-gray-400">
               Configura la variable de entorno{' '}
-              <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">ADMIN_PASSWORD</code>{' '}
-              y <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">JWT_SECRET</code>{' '}
-              en tu archivo <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">.env.local</code>
+              <code className="bg-gray-700 px-1.5 py-0.5 rounded text-xs font-mono">ADMIN_PASSWORD</code>{' '}
+              y <code className="bg-gray-700 px-1.5 py-0.5 rounded text-xs font-mono">JWT_SECRET</code>{' '}
+              en tu archivo <code className="bg-gray-700 px-1.5 py-0.5 rounded text-xs font-mono">.env.local</code>
             </p>
-            <p className="text-xs text-yellow-600 bg-yellow-50 px-3 py-2 rounded-lg mt-2">
+            <p className="text-xs text-yellow-400 bg-yellow-900/30 px-3 py-2 rounded-lg mt-2">
               ⚠️ La contraseña por defecto <strong>admin123</strong> solo aplica en desarrollo local.
               En despliegue necesitás definir <code>ADMIN_PASSWORD</code> y <code>JWT_SECRET</code>.
             </p>
@@ -1791,7 +1791,7 @@ export default function AdminConfigPage() {
           <button
             onClick={handleLogout}
             disabled={loggingOut}
-            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors border border-red-200 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-red-900/30 text-red-400 text-sm font-medium rounded-lg hover:bg-red-900/50 transition-colors border border-red-800 disabled:opacity-50"
           >
             {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
             Cerrar sesión
@@ -1800,10 +1800,10 @@ export default function AdminConfigPage() {
       </div>
 
       {/* Info del sistema */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-6">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden mt-6">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-700">
           <Settings className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-gray-900 text-sm">Información del sistema</h3>
+          <h3 className="font-semibold text-white text-sm">Información del sistema</h3>
         </div>
         <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
@@ -1814,7 +1814,7 @@ export default function AdminConfigPage() {
           ].map((item) => (
             <div key={item.label}>
               <p className="text-xs text-gray-400">{item.label}</p>
-              <p className="text-sm text-gray-800">{item.value}</p>
+              <p className="text-sm text-white">{item.value}</p>
             </div>
           ))}
         </div>

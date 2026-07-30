@@ -22,7 +22,7 @@ import Image from 'next/image'
 
 const navItems = [
   {
-    label: 'Dashboard',
+    label: 'Panel',
     href: '/admin',
     icon: LayoutDashboard,
   },
@@ -79,10 +79,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       })
       .catch(() => setLogoSrc(null))
   }, [isLoginPage])
-
-  const currentPage = navItems.find((n) =>
-    n.href === '/admin' ? pathname === '/admin' : pathname.startsWith(n.href)
-  )
 
   if (isLoginPage) {
     return <>{children}</>
@@ -196,7 +192,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* Contenido principal */}
+        {/* Contenido principal */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar simple con hamburguesa y título de página */}
         <header
@@ -218,11 +214,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="flex-1">
-            <h1 className="text-base font-semibold" style={{ color: 'var(--brand-text-primary)' }}>
-              {currentPage?.label ?? 'Panel Admin'}
-            </h1>
-          </div>
         </header>
 
         {/* Página */}
