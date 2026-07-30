@@ -54,6 +54,8 @@ export async function GET() {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
 
+    const notDeleted = { deletedAt: null }
+
     const [
       // Pedidos totales / pagados
       totalOrders,
@@ -74,27 +76,29 @@ export async function GET() {
       // Stock de esta semana
       weekStock,
     ] = await Promise.all([
-      db.order.count(),
-      db.order.count({ where: { paymentStatus: 'PAID' } }),
-      db.order.count({ where: { status: 'PENDING', paymentStatus: 'PENDING' } }),
-      db.order.count({ where: { createdAt: { gte: startOfWeek } } }),
-      db.order.count({ where: { createdAt: { gte: startOfMonth }, paymentStatus: 'PAID' } }),
+      db.order.count({ where: notDeleted }),
+      db.order.count({ where: { ...notDeleted, paymentStatus: 'PAID' } }),
+      db.order.count({ where: { ...notDeleted, status: 'PENDING', paymentStatus: 'PENDING' } }),
+      db.order.count({ where: { ...notDeleted, createdAt: { gte: startOfWeek } } }),
+      db.order.count({ where: { ...notDeleted, createdAt: { gte: startOfMonth }, paymentStatus: 'PAID' } }),
       db.order.count({
-        where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth }, paymentStatus: 'PAID' },
+        where: { ...notDeleted, createdAt: { gte: startOfLastMonth, lte: endOfLastMonth }, paymentStatus: 'PAID' },
       }),
       db.order.aggregate({
         _sum: { total: true },
-        where: { createdAt: { gte: startOfMonth }, paymentStatus: 'PAID' },
+        where: { ...notDeleted, createdAt: { gte: startOfMonth }, paymentStatus: 'PAID' },
       }),
       db.order.aggregate({
         _sum: { total: true },
         where: {
+          ...notDeleted,
           createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
           paymentStatus: 'PAID',
         },
       }),
       db.user.count(),
       db.order.findMany({
+        where: notDeleted,
         take: 8,
         orderBy: { createdAt: 'desc' },
         select: {
