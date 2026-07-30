@@ -800,6 +800,7 @@ export default function AdminConfigPage() {
     fontHeading: 'system-ui',
     fontBody: 'system-ui',
     fontSizeTitle: 'clamp(1rem, 2.5vw, 1.5rem)',
+    logoSize: '36',
     borderColor: '#544A37',
     mutedBg: '#433D32',
     hoverBg: '#4D4535',
@@ -1477,6 +1478,36 @@ export default function AdminConfigPage() {
                 />
               </div>
             )}
+          </div>
+
+          {/* Tamaño del logo */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Tamaño del logo</label>
+            <select
+              value={theme.logoSize}
+              disabled={loadingTheme || savingTheme}
+              onChange={(e) => setTheme({ ...theme, logoSize: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+            >
+              <option value="24">24px — Chico</option>
+              <option value="32">32px — Mediano-chico</option>
+              <option value="36">36px — Mediano (predeterminado)</option>
+              <option value="40">40px — Mediano-grande</option>
+              <option value="48">48px — Grande</option>
+              <option value="56">56px — Extra grande</option>
+              <option value="64">64px — Máximo</option>
+            </select>
+            <div className="mt-2 flex items-center gap-2">
+              <Image
+                src={normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png'}
+                alt="Logo preview size"
+                width={Number(theme.logoSize) || 36}
+                height={Number(theme.logoSize) || 36}
+                className="object-contain border border-gray-200 rounded"
+                unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.logoUrl) || '/img/espiga.png')}
+              />
+              <span className="text-xs text-gray-400">{theme.logoSize}px</span>
+            </div>
           </div>
 
           {/* Colores */}

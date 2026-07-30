@@ -43,9 +43,10 @@ export default function Footer({ siteContent }: FooterProps) {
                 <Image
                   src={logoSrc}
                   alt={theme.appTitle}
-                  className="h-6 w-6 inline-block mr-2 object-contain"
-                  width={24}
-                  height={24}
+                  className="inline-block mr-2 object-contain"
+                  style={{ width: 'var(--brand-logo-size)', height: 'var(--brand-logo-size)' }}
+                  width={Number(theme.logoSize) || 36}
+                  height={Number(theme.logoSize) || 36}
                   unoptimized={logoIsExternal}
                 />
               )}

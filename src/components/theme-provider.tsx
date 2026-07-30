@@ -18,6 +18,7 @@ export type ThemeSettings = {
   fontHeading: string
   fontBody: string
   fontSizeTitle: string
+  logoSize: string
   borderColor: string
   mutedBg: string
   hoverBg: string
@@ -43,6 +44,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   fontHeading: 'system-ui',
   fontBody: 'system-ui',
   fontSizeTitle: 'clamp(1rem, 2.5vw, 1.5rem)',
+  logoSize: '36',
   borderColor: '#544A37',
   mutedBg: '#433D32',
   hoverBg: '#4D4535',
@@ -98,6 +100,7 @@ function applyTheme(theme: ThemeSettings) {
   root.style.setProperty('--brand-font-heading', theme.fontHeading)
   root.style.setProperty('--brand-font-body', theme.fontBody)
   root.style.setProperty('--brand-font-size-title', theme.fontSizeTitle)
+  root.style.setProperty('--brand-logo-size', `${theme.logoSize}px`)
 
   const bgHsl = hexToHsl(theme.bgBody)
   const fgHsl = hexToHsl(theme.textPrimary)

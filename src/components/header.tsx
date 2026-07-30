@@ -58,9 +58,10 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
               <Image
                 src={logoSrc}
                 alt={theme.appTitle}
-                className="h-9 w-9 shrink-0 object-contain"
-                width={36}
-                height={36}
+                className="shrink-0 object-contain"
+                style={{ width: 'var(--brand-logo-size)', height: 'var(--brand-logo-size)' }}
+                width={Number(theme.logoSize) || 36}
+                height={Number(theme.logoSize) || 36}
                 unoptimized={logoIsExternal}
               />
             )}
