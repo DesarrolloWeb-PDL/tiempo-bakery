@@ -109,6 +109,7 @@ export default function AdminProductosPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [categoryForm, setCategoryForm] = useState({ id: '', name: '', description: '' })
   const [categoryError, setCategoryError] = useState<string | null>(null)
@@ -548,12 +549,15 @@ export default function AdminProductosPage() {
   const handleDelete = async (product: ProductRow) => {
     if (!window.confirm(`¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`)) return
 
+    setDeletingId(product.id)
     try {
       const res = await fetch(`/api/admin/productos/${product.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
-      await fetchProducts()
+      setProducts((prev) => prev.filter((p) => p.id !== product.id))
     } catch {
       setError('No se pudo eliminar el producto')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -1077,10 +1081,15 @@ export default function AdminProductosPage() {
                     </button>
                     <button
                       onClick={() => handleDelete(p)}
-                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
-                      title="Eliminar"
+                      disabled={deletingId === p.id}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                      title={deletingId === p.id ? 'Eliminando...' : 'Eliminar'}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {deletingId === p.id ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
