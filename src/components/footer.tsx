@@ -28,7 +28,7 @@ export default function Footer({ siteContent }: FooterProps) {
 
   return (
     <footer 
-      className="border-t bg-gray-50"
+      className="border-t bg-gray-50 relative z-10"
       style={{ borderColor: theme.primaryColor + '30' }}
     >
       <div className="container mx-auto px-4 py-8">
