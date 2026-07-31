@@ -144,15 +144,23 @@ export default async function HomePage() {
 
   return (
     <div
-      className="min-h-screen relative"
-      style={{
-        backgroundImage: themeConfig.heroImageUrl ? `url(${themeConfig.heroImageUrl})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      className={`min-h-screen relative ${
+        !themeConfig.heroImageUrl ? 'bg-gradient-to-b from-brand-gold/5 via-white to-brand-gold/5' : ''
+      }`}
     >
       {themeConfig.heroImageUrl && (
-        <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
+        <>
+          <div
+            className="fixed inset-0 z-0"
+            style={{
+              backgroundImage: `url(${themeConfig.heroImageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-0 bg-black/40" aria-hidden="true" />
+        </>
       )}
       <div className="relative z-10">
         {/* Hero Section */}
