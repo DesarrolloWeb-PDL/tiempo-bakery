@@ -1,6 +1,5 @@
-import { ProductCard } from '@/components/productos/product-card';
+import CategoryProductsCard from '@/components/productos/category-products-card';
 import { TimeGatingBanner } from '@/components/time-gating-banner';
-import { Badge } from '@/components/ui/badge';
 import { prisma } from '@/lib/db';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
 import { getThemeConfig } from '@/lib/app-theme';
@@ -211,45 +210,15 @@ export default async function HomePage() {
             </p>
           </div>
         ) : (
-          productsData.porCategoria.map((categoria: any) => (
-            <div key={categoria.id} className="mb-16">
-              {/* Category Header */}
-              <div className="mb-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <h2 className={`text-3xl font-bold ${themeConfig.heroImageUrl ? 'text-white' : 'text-gray-900'}`}>
-                    {categoria.name}
-                  </h2>
-                  <Badge variant="secondary">
-                    {categoria.productos.length} productos
-                  </Badge>
-                </div>
-                {categoria.description && (
-                  <p className={themeConfig.heroImageUrl ? 'text-white/70' : 'text-gray-600'}>{categoria.description}</p>
-                )}
-              </div>
-
-              {/* Products Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {categoria.productos.map((producto: any) => (
-                  <ProductCard
-                    key={producto.id}
-                    id={producto.id}
-                    name={producto.name}
-                    slug={producto.slug}
-                    description={producto.description}
-                    price={producto.price}
-                    weight={producto.weight}
-                    imageUrl={producto.imageUrl}
-                    imageAlt={producto.imageAlt}
-                    images={producto.images}
-                    allergens={producto.allergens}
-                    stock={producto.stock}
-                    category={producto.category}
-                  />
-                ))}
-              </div>
-            </div>
-          ))
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {productsData.porCategoria.map((categoria: any) => (
+              <CategoryProductsCard
+                key={categoria.id}
+                categoria={categoria}
+                dark={!!themeConfig.heroImageUrl}
+              />
+            ))}
+          </div>
         )}
       </section>
 
