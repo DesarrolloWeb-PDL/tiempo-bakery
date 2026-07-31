@@ -143,40 +143,34 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-gold/5 via-white to-brand-gold/5">
-      {/* Hero Section */}
-      <section
-        className={`relative border-b border-brand-gold/20 ${
-          themeConfig.heroImageUrl
-            ? 'flex items-center min-h-[80vh]'
-            : 'bg-gradient-to-r from-brand-gold/15 to-brand-gold/5'
-        }`}
-      >
-        {themeConfig.heroImageUrl && (
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${themeConfig.heroImageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-            aria-hidden="true"
-          />
-        )}
-        {themeConfig.heroImageUrl && (
-          <div
-            className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/60"
-            aria-hidden="true"
-          />
-        )}
-        <div className="container mx-auto px-4 py-12 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${themeConfig.heroImageUrl ? 'text-white' : 'text-brand-gold-dark'}`}>
-              {themeConfig.heroTitle}
-            </h1>
-            <p className={`text-lg mb-6 ${themeConfig.heroImageUrl ? 'text-white/90' : 'text-brand-gold/80'}`}>
-              {themeConfig.heroSubtitle}
-            </p>
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: themeConfig.heroImageUrl ? `url(${themeConfig.heroImageUrl})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {themeConfig.heroImageUrl && (
+        <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
+      )}
+      <div className="relative z-10">
+        {/* Hero Section */}
+        <section
+          className={`relative border-b border-brand-gold/20 ${
+            themeConfig.heroImageUrl
+              ? 'flex items-center min-h-[80vh] bg-black/50'
+              : 'bg-gradient-to-r from-brand-gold/15 to-brand-gold/5'
+          }`}
+        >
+          <div className="container mx-auto px-4 py-12 relative z-10 w-full">
+            <div className="max-w-3xl mx-auto text-center">
+              <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${themeConfig.heroImageUrl ? 'text-white' : 'text-brand-gold-dark'}`}>
+                {themeConfig.heroTitle}
+              </h1>
+              <p className={`text-lg mb-6 ${themeConfig.heroImageUrl ? 'text-white/90' : 'text-brand-gold/80'}`}>
+                {themeConfig.heroSubtitle}
+              </p>
             
             {/* Time Gating Banner */}
             <TimeGatingBanner
@@ -195,14 +189,14 @@ export default async function HomePage() {
       </section>
 
       {/* Products Section */}
-      <section className="container mx-auto px-4 py-12">
+      <section className={`container mx-auto px-4 py-12 ${themeConfig.heroImageUrl ? 'bg-black/25' : ''}`}>
         {productsData.porCategoria.length === 0 ? (
           <div className="text-center py-20">
             <div className="mb-6 text-6xl">🥖</div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h2 className={`text-2xl font-semibold mb-2 ${themeConfig.heroImageUrl ? 'text-white' : 'text-gray-900'}`}>
               No hay productos disponibles
             </h2>
-            <p className="text-gray-600">
+            <p className={themeConfig.heroImageUrl ? 'text-white/70' : 'text-gray-600'}>
               {timeGatingData.isOpen
                 ? 'Pronto agregaremos productos para esta semana.'
                 : 'Vuelve cuando abramos para ver los productos disponibles.'}
@@ -214,7 +208,7 @@ export default async function HomePage() {
               {/* Category Header */}
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-3xl font-bold text-gray-900">
+                  <h2 className={`text-3xl font-bold ${themeConfig.heroImageUrl ? 'text-white' : 'text-gray-900'}`}>
                     {categoria.name}
                   </h2>
                   <Badge variant="secondary">
@@ -222,7 +216,7 @@ export default async function HomePage() {
                   </Badge>
                 </div>
                 {categoria.description && (
-                  <p className="text-gray-600">{categoria.description}</p>
+                  <p className={themeConfig.heroImageUrl ? 'text-white/70' : 'text-gray-600'}>{categoria.description}</p>
                 )}
               </div>
 
@@ -252,7 +246,7 @@ export default async function HomePage() {
       </section>
 
       {/* Info Section */}
-      <section className="bg-black/20 border-t border-brand-gold/15">
+      <section className={`border-t border-brand-gold/15 ${themeConfig.heroImageUrl ? 'bg-black/45' : 'bg-black/20'}`}>
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
@@ -305,6 +299,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }

@@ -1241,7 +1241,7 @@ export default function AdminConfigPage() {
       if (!res.ok) throw new Error(data.error || 'Error al cargar la imagen de fondo del hero')
 
       setTheme({ ...theme, heroImageUrl: data.url })
-      setThemeMsg('Imagen de fondo del hero cargada correctamente')
+      setThemeMsg('Imagen de fondo cargada correctamente')
 
       // Limpiar el input
       const heroImageInput = document.getElementById('hero-image-upload') as HTMLInputElement
@@ -1578,9 +1578,9 @@ export default function AdminConfigPage() {
               </div>
             </div>
 
-            {/* Imagen de fondo del hero */}
+            {/* Imagen de fondo de la página */}
             <div className="mt-3 border-t border-gray-700 pt-3">
-              <label className="block text-xs text-gray-400 mb-1">Imagen de fondo del hero</label>
+              <label className="block text-xs text-gray-400 mb-1">Imagen de fondo de la página</label>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label
