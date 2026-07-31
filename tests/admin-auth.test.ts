@@ -35,7 +35,7 @@ describe('admin auth session', () => {
     const jti = extractJtiFromCookie({
       get(name: string) {
         if (name !== ADMIN_COOKIE) return undefined
-        return { value: token }
+        return { value: token ?? undefined }
       },
     })
     expect(jti).toBeTruthy()

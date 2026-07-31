@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
+import { expirePendingOrders } from '@/lib/order-expiry'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +23,13 @@ function mapDbError(error: unknown, fallback: string) {
 
 export async function GET(req: NextRequest) {
   try {
+    // Expiración lazy: limpiar pedidos PENDING viejos antes de listar
+    try {
+      await expirePendingOrders()
+    } catch (expiryError) {
+      console.error('Error en expiración lazy de pedidos:', expiryError)
+    }
+
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
     const paymentStatus = searchParams.get('paymentStatus')

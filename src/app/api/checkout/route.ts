@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { stockManager } from '@/lib/stock-manager';
+import { expirePendingOrders } from '@/lib/order-expiry';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
 import { getShippingCostByMethod, getShippingCostsRuntime } from '@/lib/shipping-costs';
 import { createMercadoPagoPreference } from '@/lib/mercadopago';
@@ -82,6 +83,13 @@ export async function POST(request: NextRequest) {
         { error: 'El sitio está cerrado para pedidos' },
         { status: 403 }
       );
+    }
+
+    // Expiración lazy: liberar stock de pedidos PENDING viejos antes de crear uno nuevo
+    try {
+      await expirePendingOrders()
+    } catch (expiryError) {
+      console.error('Error en expiración lazy de pedidos:', expiryError)
     }
 
     // 2. Validar datos
@@ -293,37 +301,33 @@ export async function POST(request: NextRequest) {
       }
 
       if (selectedProvider === 'MERCADO_PAGO') {
-        try {
-          const mpToken = await getMercadoPagoAccessToken()
-          const preference = await createMercadoPagoPreference({
-            orderId: order.id,
-            orderNumber: order.orderNumber,
-            customerName: data.customerName,
-            customerEmail: data.customerEmail,
-            customerPhone: data.customerPhone,
-            deliveryMethod: data.deliveryMethod,
-            shippingAddress: data.shippingAddress,
-            shippingPostal: data.shippingPostal,
-            items: order.items.map((item) => ({
-              productId: item.productId,
-              productName: item.productName,
-              quantity: item.quantity,
-              unitPrice: Number(item.unitPrice),
-              sliced: item.sliced,
-            })),
-            shippingCost,
-            accessToken: mpToken ?? undefined,
-          });
+        const mpToken = await getMercadoPagoAccessToken()
+        const preference = await createMercadoPagoPreference({
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          customerName: data.customerName,
+          customerEmail: data.customerEmail,
+          customerPhone: data.customerPhone,
+          deliveryMethod: data.deliveryMethod,
+          shippingAddress: data.shippingAddress,
+          shippingPostal: data.shippingPostal,
+          items: order.items.map((item) => ({
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            unitPrice: Number(item.unitPrice),
+            sliced: item.sliced,
+          })),
+          shippingCost,
+          accessToken: mpToken ?? undefined,
+        });
 
-          checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
+        checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
 
-          await prisma.order.update({
-            where: { id: order.id },
-            data: { mercadopagoPaymentId: preference.id },
-          });
-        } catch (mpError) {
-          console.error('MP error (continuando sin pago):', mpError);
-        }
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { mercadopagoPaymentId: preference.id },
+        });
       }
 
       if (selectedProvider === 'BANK_TRANSFER') {
