@@ -145,8 +145,16 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-gold/5 via-white to-brand-gold/5">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-brand-gold/15 to-brand-gold/5 border-b border-brand-gold/20">
-        <div className="container mx-auto px-4 py-12">
+      <section
+        className="bg-gradient-to-r from-brand-gold/15 to-brand-gold/5 border-b border-brand-gold/20 relative"
+        style={{
+          backgroundImage: themeConfig.heroImageUrl ? `url(${themeConfig.heroImageUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {themeConfig.heroImageUrl && <div className="absolute inset-0 bg-black/50" aria-hidden="true" />}
+        <div className="container mx-auto px-4 py-12 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-brand-gold-dark mb-4">
               {themeConfig.heroTitle}

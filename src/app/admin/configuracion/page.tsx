@@ -784,6 +784,7 @@ export default function AdminConfigPage() {
   const [loadingTheme, setLoadingTheme] = useState(true)
   const [savingTheme, setSavingTheme] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [uploadingHeroImage, setUploadingHeroImage] = useState(false)
   const [themeMsg, setThemeMsg] = useState<string | null>(null)
   const [theme, setTheme] = useState({
     appTitle: 'Tiempo Bakery',
@@ -813,6 +814,7 @@ export default function AdminConfigPage() {
     headerMaxWidth: '1280px',
     heroTitle: 'Pan Artesanal de Masa Madre',
     heroSubtitle: 'Horneado fresco cada semana con ingredientes naturales y tiempo de fermentación tradicional.',
+    heroImageUrl: '/img/hero-bg.png',
     infoTitle1: 'Preventa Semanal',
     infoSubtitle1: 'Pedidos de miércoles a domingo. Entrega en fin de semana.',
     infoTitle2: 'Masa Madre Natural',
@@ -1219,6 +1221,40 @@ export default function AdminConfigPage() {
     }
   }
 
+  const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0]
+    if (!file) return
+
+    setUploadingHeroImage(true)
+    setThemeMsg(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', 'hero')
+
+      const res = await fetch('/api/admin/uploads/logo', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al cargar la imagen de fondo del hero')
+
+      setTheme({ ...theme, heroImageUrl: data.url })
+      setThemeMsg('Imagen de fondo del hero cargada correctamente')
+
+      // Limpiar el input
+      const heroImageInput = document.getElementById('hero-image-upload') as HTMLInputElement
+      if (heroImageInput) {
+        heroImageInput.value = ''
+      }
+    } catch (error) {
+      setThemeMsg(`Error: ${error instanceof Error ? error.message : 'No se pudo cargar la imagen de fondo del hero'}`)
+    } finally {
+      setUploadingHeroImage(false)
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 admin-config">
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2" style={{ color: 'white' }}>
@@ -1540,6 +1576,55 @@ export default function AdminConfigPage() {
                   placeholder="Horneado fresco cada semana..."
                 />
               </div>
+            </div>
+
+            {/* Imagen de fondo del hero */}
+            <div className="mt-3 border-t border-gray-700 pt-3">
+              <label className="block text-xs text-gray-400 mb-1">Imagen de fondo del hero</label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="hero-image-upload"
+                    className={`flex-1 px-3 py-2 rounded-lg border border-gray-700 text-sm text-gray-300 cursor-pointer hover:bg-gray-100 transition-colors ${
+                      uploadingHeroImage ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {uploadingHeroImage ? 'Cargando...' : 'Seleccionar imagen'}
+                  </label>
+                  <input
+                    id="hero-image-upload"
+                    type="file"
+                    accept="image/*"
+                    disabled={loadingTheme || savingTheme || uploadingHeroImage}
+                    onChange={handleHeroImageUpload}
+                    className="hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">O ingresa URL manualmente:</label>
+                  <input
+                    type="url"
+                    value={theme.heroImageUrl}
+                    disabled={loadingTheme || savingTheme}
+                    onChange={(e) => setTheme({ ...theme, heroImageUrl: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+                    placeholder="/img/hero-bg.png"
+                  />
+                </div>
+              </div>
+              {theme.heroImageUrl && (
+                <div className="mt-3 p-3 bg-gray-700 rounded-lg border border-gray-700">
+                  <p className="text-xs text-gray-400 mb-2">Vista previa:</p>
+                  <Image
+                    src={normalizePublicAssetUrl(theme.heroImageUrl) || '/img/hero-bg.png'}
+                    alt="Vista previa de la imagen de fondo del hero"
+                    width={1600}
+                    height={900}
+                    className="h-32 w-full object-cover rounded"
+                    unoptimized={/^https?:\/\//i.test(normalizePublicAssetUrl(theme.heroImageUrl) || '/img/hero-bg.png')}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

@@ -43,6 +43,7 @@ const themeSchema = z.object({
   appTitle: z.string().min(1).max(100),
   appSubtitle: z.string().max(200),
   logoUrl: z.string().min(1).max(500).optional().or(z.literal('')),
+  heroImageUrl: z.string().min(1).max(500).optional().or(z.literal('')),
   primaryColor: hexColor,
   primaryHover: hexColor,
   secondaryColor: hexColor,
@@ -80,6 +81,7 @@ const DEFAULT_THEME: ThemeConfig = {
   appTitle: 'Tiempo Bakery',
   appSubtitle: 'Micropanadería artesanal por encargo semanal',
   logoUrl: '/img/espiga.png',
+  heroImageUrl: '/img/hero-bg.png',
   primaryColor: '#D4A95A',
   primaryHover: '#C49A4A',
   secondaryColor: '#2C2C2C',
@@ -131,8 +133,10 @@ export async function GET() {
       ...DEFAULT_THEME,
       ...theme,
       logoUrl: theme.logoUrl ?? DEFAULT_THEME.logoUrl,
+      heroImageUrl: theme.heroImageUrl ?? DEFAULT_THEME.heroImageUrl,
     }
     const normalizedLogoUrl = normalizePublicAssetUrl(mergedTheme.logoUrl)
+    const normalizedHeroImageUrl = normalizePublicAssetUrl(mergedTheme.heroImageUrl)
 
     if (normalizedLogoUrl !== mergedTheme.logoUrl) {
       await db.siteConfig.upsert({
@@ -141,6 +145,15 @@ export async function GET() {
         update: { value: normalizedLogoUrl },
       })
       mergedTheme.logoUrl = normalizedLogoUrl
+    }
+
+    if (normalizedHeroImageUrl !== mergedTheme.heroImageUrl) {
+      await db.siteConfig.upsert({
+        where: { key: 'theme_heroImageUrl' },
+        create: { key: 'theme_heroImageUrl', value: normalizedHeroImageUrl },
+        update: { value: normalizedHeroImageUrl },
+      })
+      mergedTheme.heroImageUrl = normalizedHeroImageUrl
     }
 
     return NextResponse.json(mergedTheme)
@@ -166,6 +179,7 @@ export async function PUT(req: NextRequest) {
     const normalizedData: ThemeConfig = {
       ...parsed.data,
       logoUrl: normalizePublicAssetUrl(parsed.data.logoUrl ?? ''),
+      heroImageUrl: normalizePublicAssetUrl(parsed.data.heroImageUrl ?? ''),
     }
 
     const updates = Object.entries(normalizedData).map(([key, value]) =>
