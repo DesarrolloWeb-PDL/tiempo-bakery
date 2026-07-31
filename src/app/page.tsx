@@ -146,20 +146,35 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-brand-gold/5 via-white to-brand-gold/5">
       {/* Hero Section */}
       <section
-        className="bg-gradient-to-r from-brand-gold/15 to-brand-gold/5 border-b border-brand-gold/20 relative"
-        style={{
-          backgroundImage: themeConfig.heroImageUrl ? `url(${themeConfig.heroImageUrl})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className={`relative border-b border-brand-gold/20 ${
+          themeConfig.heroImageUrl
+            ? 'flex items-center min-h-[80vh]'
+            : 'bg-gradient-to-r from-brand-gold/15 to-brand-gold/5'
+        }`}
       >
-        {themeConfig.heroImageUrl && <div className="absolute inset-0 bg-black/50" aria-hidden="true" />}
+        {themeConfig.heroImageUrl && (
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url(${themeConfig.heroImageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+            aria-hidden="true"
+          />
+        )}
+        {themeConfig.heroImageUrl && (
+          <div
+            className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/60"
+            aria-hidden="true"
+          />
+        )}
         <div className="container mx-auto px-4 py-12 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-brand-gold-dark mb-4">
+            <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${themeConfig.heroImageUrl ? 'text-white' : 'text-brand-gold-dark'}`}>
               {themeConfig.heroTitle}
             </h1>
-            <p className="text-lg text-brand-gold/80 mb-6">
+            <p className={`text-lg mb-6 ${themeConfig.heroImageUrl ? 'text-white/90' : 'text-brand-gold/80'}`}>
               {themeConfig.heroSubtitle}
             </p>
             
