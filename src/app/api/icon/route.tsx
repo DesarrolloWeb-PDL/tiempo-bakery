@@ -10,15 +10,26 @@ export async function GET(request: NextRequest) {
     const size = parseInt(searchParams.get('size') || '192');
 
     const theme = await getThemeConfig();
-    const logoUrl = theme.logoUrl && /^https?:\/\//i.test(theme.logoUrl) ? theme.logoUrl : '';
-    const primaryColor = theme.primaryColor || '#d89a44';
+
+    const baseUrl = process.env.NEXT_PUBLIC_URL || new URL(request.url).origin;
+    let logoUrl = '';
+    if (theme.logoUrl) {
+      if (/^https?:\/\//i.test(theme.logoUrl)) {
+        logoUrl = theme.logoUrl;
+      } else if (theme.logoUrl.startsWith('/')) {
+        logoUrl = `${baseUrl}${theme.logoUrl}`;
+      }
+    }
+
+    const primaryColor = theme.primaryColor || '#d4a95a';
+    const secondaryColor = theme.secondaryColor || '#383333';
     const appTitle = theme.appTitle || 'Tiempo Bakery';
 
     const response = new ImageResponse(
       (
         <div
           style={{
-            background: primaryColor,
+            background: secondaryColor,
             width: '100%',
             height: '100%',
             display: 'flex',
