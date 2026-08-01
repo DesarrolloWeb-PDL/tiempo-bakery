@@ -48,3 +48,6 @@ prisma/*.db-wal
 nul
 *.lnk
 .env*
+
+# gentle-ai local artifacts
+.atl/
