@@ -11,7 +11,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
 
   return {
     name: theme.appTitle || 'Tiempo Bakery',
-    short_name: (theme.appTitle || 'Tiempo Bakery').substring(0, 12),
+    short_name: 'Tiempo',
     description: 'Micropanadería artesanal por encargo semanal. Panes y dulces elaborados en tandas pequeñas con fermentaciones lentas y producto real.',
     start_url: `/?v=${timestamp}`,
     display: 'standalone',
