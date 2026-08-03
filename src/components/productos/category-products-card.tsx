@@ -27,7 +27,7 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
           ? 'border-white/10'
           : 'shadow-sm'
       )}
-      style={{ backgroundColor: 'rgba(44, 44, 44, 0.75)', borderColor: dark ? 'rgba(255,255,255,0.1)' : 'var(--brand-border)' }}
+      style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: dark ? 'rgba(255,255,255,0.1)' : 'var(--brand-border)' }}
     >
       <button
         type="button"
