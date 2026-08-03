@@ -22,12 +22,12 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
   return (
     <div
       className={cn(
-        'rounded-2xl border overflow-hidden transition-colors',
+        'rounded-2xl border overflow-hidden transition-colors backdrop-blur-sm',
         dark
-          ? 'bg-white/5 border-white/10'
+          ? 'border-white/10'
           : 'shadow-sm'
       )}
-      style={!dark ? { backgroundColor: 'rgba(44, 44, 44, 0.75)', borderColor: 'var(--brand-border)' } : undefined}
+      style={{ backgroundColor: 'rgba(44, 44, 44, 0.75)', borderColor: dark ? 'rgba(255,255,255,0.1)' : 'var(--brand-border)' }}
     >
       <button
         type="button"
@@ -80,8 +80,8 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
       >
         <div className="overflow-hidden">
           <div
-            className={cn('px-5 pb-5 pt-4 border-t', dark ? 'border-white/10' : '')}
-            style={!dark ? { borderColor: 'var(--brand-border)' } : undefined}
+            className="px-5 pb-5 pt-4 border-t"
+            style={{ borderColor: dark ? 'rgba(255,255,255,0.1)' : 'var(--brand-border)' }}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {categoria.productos.map((producto: any) => (
