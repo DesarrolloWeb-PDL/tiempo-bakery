@@ -174,7 +174,7 @@ export function ProductCard({
 
             <div
               className="absolute bottom-2 right-2 z-20 rounded-full px-2 py-1 text-[11px] font-medium md:hidden"
-              style={{ backgroundColor: 'var(--brand-bg-card)', color: 'var(--brand-text-primary)' }}
+              style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', color: 'var(--brand-text-primary)' }}
             >
               {activeImageIndex + 1} / {galleryImages.length}
             </div>

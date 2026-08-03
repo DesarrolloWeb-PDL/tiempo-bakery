@@ -29,8 +29,8 @@ export default function Footer({ siteContent }: FooterProps) {
 
   return (
     <footer 
-      className="border-t relative z-10"
-      style={{ borderColor: theme.primaryColor + '30' }}
+      className="border-t relative z-10 backdrop-blur-xl"
+      style={{ borderColor: theme.primaryColor + '30', backgroundColor: 'rgba(44, 44, 44, 0.85)' }}
     >
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

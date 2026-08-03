@@ -27,7 +27,7 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
           ? 'bg-white/5 border-white/10'
           : 'shadow-sm'
       )}
-      style={!dark ? { backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' } : undefined}
+      style={!dark ? { backgroundColor: 'rgba(44, 44, 44, 0.75)', borderColor: 'var(--brand-border)' } : undefined}
     >
       <button
         type="button"

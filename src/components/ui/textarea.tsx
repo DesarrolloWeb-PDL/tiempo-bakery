@@ -15,7 +15,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         style={{
           borderColor: 'var(--brand-border)',
-          backgroundColor: 'var(--brand-bg-card)',
+          backgroundColor: 'rgba(44, 44, 44, 0.6)',
           color: 'var(--brand-text-primary)',
         }}
         ref={ref}

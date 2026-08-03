@@ -357,7 +357,7 @@ export default function CheckoutPage() {
 
           {/* Resumen - 1/3 */}
           <div className="lg:col-span-1">
-            <div className="rounded-lg shadow-sm p-6 sticky top-8" style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
+            <div className="rounded-lg shadow-sm p-6 sticky top-8 backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-border)' }}>
               <h2 className="font-semibold mb-4" style={{ color: 'var(--brand-text-primary)' }}>
                 Resumen del pedido
               </h2>
@@ -418,8 +418,8 @@ export default function CheckoutPage() {
           style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
         >
           <div
-            className="relative rounded-2xl shadow-2xl p-8 mx-4 text-center max-w-sm w-full"
-            style={{ backgroundColor: 'var(--brand-bg-card)' }}
+            className="relative rounded-2xl shadow-2xl p-8 mx-4 text-center max-w-sm w-full backdrop-blur-xl"
+            style={{ backgroundColor: 'rgba(44, 44, 44, 0.9)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Hourglass */}

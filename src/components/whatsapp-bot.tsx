@@ -70,7 +70,7 @@ export default function WhatsAppBot({ siteContent }: WhatsAppBotProps) {
     <div className="fixed bottom-6 right-6 z-50">
       {/* Panel de preguntas */}
       {isOpen && (
-        <div className="mb-4 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in slide-in-from-bottom-5">
+        <div className="mb-4 w-80 rounded-2xl shadow-2xl border overflow-hidden animate-in slide-in-from-bottom-5 backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.9)', borderColor: 'var(--brand-border)' }}>
           {/* Header */}
           <div className="bg-[#25D366] px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -91,8 +91,8 @@ export default function WhatsAppBot({ siteContent }: WhatsAppBotProps) {
           </div>
 
           {/* Mensaje de bienvenida */}
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-            <p className="text-sm text-gray-600">
+          <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--brand-border)' }}>
+            <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
               ¡Hola! 👋 Elegí una pregunta frecuente o escribinos directo:
             </p>
           </div>
@@ -103,15 +103,16 @@ export default function WhatsAppBot({ siteContent }: WhatsAppBotProps) {
               <button
                 key={index}
                 onClick={() => handleQuestionClick(item)}
-                className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                className="w-full px-4 py-3 text-left hover:opacity-80 transition-colors border-b last:border-0"
+                style={{ borderColor: 'var(--brand-border)' }}
               >
-                <p className="text-sm font-medium text-gray-800">{item.question}</p>
+                <p className="text-sm font-medium" style={{ color: 'var(--brand-text-primary)' }}>{item.question}</p>
               </button>
             ))}
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+          <div className="px-4 py-3 border-t" style={{ borderColor: 'var(--brand-border)' }}>
             <button
               onClick={() => {
                 const message = encodeURIComponent('Hola, vengo de Tiempo Bakery...')

@@ -64,10 +64,10 @@ export function CartSidebar() {
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed top-0 right-0 h-full w-full md:w-96 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col',
+          'fixed top-0 right-0 h-full w-full md:w-96 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col backdrop-blur-xl',
           safeIsOpen ? 'translate-x-0' : 'translate-x-full'
         )}
-        style={{ backgroundColor: 'var(--brand-bg-card)' }}
+        style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--brand-border)' }}>

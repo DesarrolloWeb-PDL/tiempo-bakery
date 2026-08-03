@@ -19,7 +19,7 @@ function TabsTrigger({ className = '', ...props }: TabsPrimitive.TabsTriggerProp
     <TabsPrimitive.Trigger
       className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none ${className}`}
       style={{
-        backgroundColor: 'var(--brand-bg-card)',
+        backgroundColor: 'rgba(44, 44, 44, 0.6)',
         color: 'var(--brand-text-muted)',
         borderColor: 'var(--brand-border)',
         borderWidth: '1px',
