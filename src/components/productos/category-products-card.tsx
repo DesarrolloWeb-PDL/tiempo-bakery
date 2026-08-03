@@ -17,7 +17,7 @@ interface CategoryProductsCardProps {
 }
 
 export default function CategoryProductsCard({ categoria, dark }: CategoryProductsCardProps) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   return (
     <div
