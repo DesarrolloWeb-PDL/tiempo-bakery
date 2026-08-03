@@ -25,8 +25,9 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
         'rounded-2xl border overflow-hidden transition-colors',
         dark
           ? 'bg-white/5 border-white/10'
-          : 'bg-white border-gray-200 shadow-sm'
+          : 'shadow-sm'
       )}
+      style={!dark ? { backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' } : undefined}
     >
       <button
         type="button"
@@ -34,7 +35,7 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
         aria-expanded={open}
         className={cn(
           'w-full flex items-center justify-between gap-3 px-5 py-4 text-left transition-colors',
-          dark ? 'hover:bg-white/10' : 'hover:bg-gray-50'
+          dark ? 'hover:bg-white/10' : 'hover:opacity-80'
         )}
       >
         <span className="min-w-0">
@@ -42,8 +43,8 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
             <span
               className={cn(
                 'text-xl font-bold truncate',
-                dark ? 'text-white' : 'text-gray-900'
               )}
+              style={!dark ? { color: 'var(--brand-text-primary)' } : undefined}
             >
               {categoria.name}
             </span>
@@ -53,8 +54,8 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
             <span
               className={cn(
                 'block text-sm',
-                dark ? 'text-white/70' : 'text-gray-600'
               )}
+              style={!dark ? { color: 'var(--brand-text-muted)' } : undefined}
             >
               {categoria.description}
             </span>
@@ -64,8 +65,9 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
           className={cn(
             'h-5 w-5 shrink-0 transition-transform duration-300',
             open && 'rotate-180',
-            dark ? 'text-white/70' : 'text-gray-500'
+            dark ? 'text-white/70' : ''
           )}
+          style={!dark ? { color: 'var(--brand-text-muted)' } : undefined}
           aria-hidden="true"
         />
       </button>
@@ -77,7 +79,10 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
         )}
       >
         <div className="overflow-hidden">
-          <div className={cn('px-5 pb-5 pt-4 border-t', dark ? 'border-white/10' : 'border-gray-200')}>
+          <div
+            className={cn('px-5 pb-5 pt-4 border-t', dark ? 'border-white/10' : '')}
+            style={!dark ? { borderColor: 'var(--brand-border)' } : undefined}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {categoria.productos.map((producto: any) => (
                 <ProductCard

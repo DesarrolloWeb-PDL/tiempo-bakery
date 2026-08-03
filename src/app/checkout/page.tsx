@@ -9,6 +9,8 @@ import { CustomerInfoStep } from '@/components/checkout/customer-info-step';
 import { DeliveryStep } from '@/components/checkout/delivery-step';
 import { ReviewStep } from '@/components/checkout/review-step';
 import { Badge } from '@/components/ui/badge';
+import { Toaster } from '@/components/toaster';
+import { toast } from '@/components/ui/use-toast';
 import { DeliveryMethod, DEFAULT_SHIPPING_COSTS, PaymentProvider, type PaymentMethodOption, type ShippingCosts } from '@/types/checkout';
 import type { CheckoutFormData } from '@/types/checkout';
 
@@ -195,7 +197,11 @@ export default function CheckoutPage() {
       setTimeout(() => clearCart(), 500);
     } catch (error) {
       console.error('Checkout error:', error);
-      alert(error instanceof Error ? error.message : 'Error al procesar el pedido');
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar el pedido',
+        variant: 'destructive',
+      });
       setIsSubmitting(false);
       clearTimer();
     }
@@ -212,7 +218,7 @@ export default function CheckoutPage() {
   }, [isSubmitting, selectedPaymentProvider]);
 
   if (!mounted) {
-    return <div className="min-h-screen bg-gray-50" />;
+    return <div className="min-h-screen" />;
   }
 
   if (items.length === 0) {
@@ -232,18 +238,19 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-brand-gold-dark mb-4"
+            className="inline-flex items-center text-sm hover:text-brand-gold-dark mb-4"
+            style={{ color: 'var(--brand-text-muted)' }}
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Volver a la tienda
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--brand-text-primary)' }}>Checkout</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -258,8 +265,9 @@ export default function CheckoutPage() {
                       className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                         step.complete || currentStep === step.number
                           ? 'border-brand-gold bg-brand-gold text-white'
-                          : 'border-gray-300 bg-white text-gray-400'
+                          : ''
                       }`}
+                      style={!(step.complete || currentStep === step.number) ? { borderColor: 'var(--brand-border)', backgroundColor: 'var(--brand-bg-card)', color: 'var(--brand-text-muted)' } : undefined}
                     >
                       {step.complete ? (
                         <Check className="h-5 w-5" />
@@ -271,8 +279,9 @@ export default function CheckoutPage() {
                       className={`ml-2 text-sm font-medium ${
                         step.complete || currentStep === step.number
                           ? 'text-brand-gold-dark'
-                          : 'text-gray-500'
+                          : ''
                       }`}
+                      style={!(step.complete || currentStep === step.number) ? { color: 'var(--brand-text-muted)' } : undefined}
                     >
                       {step.title}
                     </span>
@@ -280,8 +289,9 @@ export default function CheckoutPage() {
                   {index < steps.length - 1 && (
                     <div
                       className={`flex-1 h-0.5 mx-4 ${
-                        step.complete ? 'bg-brand-gold' : 'bg-gray-300'
+                        step.complete ? 'bg-brand-gold' : ''
                       }`}
+                      style={!step.complete ? { backgroundColor: 'var(--brand-border)' } : undefined}
                     />
                   )}
                 </React.Fragment>
@@ -347,8 +357,8 @@ export default function CheckoutPage() {
 
           {/* Resumen - 1/3 */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
-              <h2 className="font-semibold text-gray-900 mb-4">
+            <div className="rounded-lg shadow-sm p-6 sticky top-8" style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
+              <h2 className="font-semibold mb-4" style={{ color: 'var(--brand-text-primary)' }}>
                 Resumen del pedido
               </h2>
 
@@ -357,7 +367,7 @@ export default function CheckoutPage() {
                   <div key={item.productId} className="flex justify-between text-sm">
                     <div className="flex-1">
                       <p className="font-medium">{item.name}</p>
-                      <p className="text-gray-500">
+                      <p style={{ color: 'var(--brand-text-muted)' }}>
                         {item.quantity} x {formatCurrency(item.price)}
                         {item.sliced && ' • Rebanado'}
                       </p>
@@ -369,20 +379,20 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              <div className="border-t border-gray-200 pt-4 space-y-2">
+              <div className="border-t pt-4 space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span style={{ color: 'var(--brand-text-muted)' }}>Subtotal</span>
                   <span className="font-medium">{formatCurrency(subtotal)}</span>
                 </div>
                 {currentStep >= 2 && formData.method && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Envío</span>
+                    <span style={{ color: 'var(--brand-text-muted)' }}>Envío</span>
                     <span className="font-medium">
                       {shippingCost === 0 ? 'Gratis' : formatCurrency(shippingCost)}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
+                <div className="flex justify-between text-lg font-bold border-t pt-2" style={{ borderColor: 'var(--brand-border)' }}>
                   <span>Total</span>
                   <span className="text-brand-gold-dark">{formatCurrency(total)}</span>
                 </div>
@@ -408,7 +418,8 @@ export default function CheckoutPage() {
           style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
         >
           <div
-            className="relative bg-white rounded-2xl shadow-2xl p-8 mx-4 text-center max-w-sm w-full"
+            className="relative rounded-2xl shadow-2xl p-8 mx-4 text-center max-w-sm w-full"
+            style={{ backgroundColor: 'var(--brand-bg-card)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Hourglass */}
@@ -451,15 +462,15 @@ export default function CheckoutPage() {
               </svg>
             </div>
 
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--brand-text-primary)' }}>
               Procesando tu pedido
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm mb-4" style={{ color: 'var(--brand-text-muted)' }}>
               {processingMessage}
             </p>
 
             {elapsed > 0 && (
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-400 mb-4">
+              <div className="flex items-center justify-center gap-2 text-sm mb-4" style={{ color: 'var(--brand-text-muted)' }}>
                 <Timer className="w-4 h-4" />
                 <span>{elapsed}s</span>
               </div>
@@ -483,7 +494,8 @@ export default function CheckoutPage() {
             {selectedPaymentProvider !== PaymentProvider.BANK_TRANSFER && (
               <button
                 onClick={handleCloseOverlay}
-                className="mt-6 text-sm text-gray-500 hover:text-gray-700 underline underline-offset-2"
+                className="mt-6 text-sm hover:underline underline-offset-2"
+                style={{ color: 'var(--brand-text-muted)' }}
               >
                 Cerrar y volver al checkout
               </button>
@@ -491,6 +503,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
+      <Toaster />
     </div>
   );
 }

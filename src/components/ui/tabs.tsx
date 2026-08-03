@@ -7,7 +7,8 @@ const Tabs = TabsPrimitive.Root
 function TabsList({ className = '', ...props }: TabsPrimitive.TabsListProps) {
   return (
     <TabsPrimitive.List
-      className={`inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1 text-gray-500 ${className}`}
+      className={`inline-flex h-10 items-center justify-center rounded-lg p-1 ${className}`}
+      style={{ backgroundColor: 'var(--brand-muted-bg)', color: 'var(--brand-text-muted)' }}
       {...props}
     />
   )
@@ -16,7 +17,13 @@ function TabsList({ className = '', ...props }: TabsPrimitive.TabsListProps) {
 function TabsTrigger({ className = '', ...props }: TabsPrimitive.TabsTriggerProps) {
   return (
     <TabsPrimitive.Trigger
-      className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all bg-white text-gray-600 border border-gray-200 shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none hover:bg-gray-50 ${className}`}
+      className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all shadow-sm data-[state=active]:bg-brand-gold data-[state=active]:text-white data-[state=active]:border-brand-gold data-[state=active]:shadow-none ${className}`}
+      style={{
+        backgroundColor: 'var(--brand-bg-card)',
+        color: 'var(--brand-text-muted)',
+        borderColor: 'var(--brand-border)',
+        borderWidth: '1px',
+      }}
       {...props}
     />
   )

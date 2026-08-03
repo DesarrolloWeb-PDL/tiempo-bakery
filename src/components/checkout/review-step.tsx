@@ -91,11 +91,11 @@ export function ReviewStep({
       <CardContent className="space-y-6">
         {/* Productos */}
         <div>
-          <h3 className="font-semibold text-gray-900 mb-3">Productos ({items.length})</h3>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--brand-text-primary)' }}>Productos ({items.length})</h3>
           <div className="space-y-3">
             {items.map((item) => (
-              <div key={item.productId} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                <div className="relative w-16 h-16 shrink-0 rounded-md overflow-hidden bg-white">
+              <div key={item.productId} className="flex gap-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                <div className="relative w-16 h-16 shrink-0 rounded-md overflow-hidden" style={{ backgroundColor: 'var(--brand-secondary)' }}>
                   <Image
                     src={normalizePublicAssetUrl(item.imageUrl) || '/img/espiga.png'}
                     alt={item.name}
@@ -106,7 +106,7 @@ export function ReviewStep({
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">{item.name}</p>
                   {item.weight && (
-                    <p className="text-xs text-gray-500">{item.weight}g</p>
+                    <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>{item.weight}g</p>
                   )}
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="secondary" className="text-xs">
@@ -131,8 +131,8 @@ export function ReviewStep({
 
         {/* Información del cliente */}
         <div>
-          <h3 className="font-semibold text-gray-900 mb-3">Información de contacto</h3>
-          <div className="bg-gray-50 rounded-lg p-4 space-y-1">
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--brand-text-primary)' }}>Información de contacto</h3>
+          <div className="rounded-lg p-4 space-y-1" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
             <p className="text-sm">
               <span className="font-medium">Nombre:</span> {customerData.name}
             </p>
@@ -147,13 +147,13 @@ export function ReviewStep({
 
         {/* Método de entrega */}
         <div>
-          <h3 className="font-semibold text-gray-900 mb-3">Método de entrega</h3>
-          <div className="bg-gray-50 rounded-lg p-4">
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--brand-text-primary)' }}>Método de entrega</h3>
+          <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
             <p className="font-medium text-sm mb-2">
               {deliveryMethodNames[deliveryData.method]}
             </p>
             {deliveryData.method === DeliveryMethod.PICKUP_POINT && selectedPickupPoint && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
                 <p className="font-medium">{selectedPickupPoint.name}</p>
                 <p>
                   {selectedPickupPoint.address}, {selectedPickupPoint.city}
@@ -163,7 +163,7 @@ export function ReviewStep({
             )}
             {(deliveryData.method === DeliveryMethod.LOCAL_DELIVERY ||
               deliveryData.method === DeliveryMethod.NATIONAL_COURIER) && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
                 <p>{deliveryData.address}</p>
                 <p>
                   {deliveryData.city}, {deliveryData.postalCode}
@@ -174,7 +174,7 @@ export function ReviewStep({
         </div>
 
         <div>
-          <h3 className="font-semibold text-gray-900 mb-3">Pago</h3>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--brand-text-primary)' }}>Pago</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             {paymentOptions.map((option) => {
               const selected = option.value === selectedPaymentProvider;
@@ -187,11 +187,12 @@ export function ReviewStep({
                   className={`rounded-lg border p-4 text-left transition-colors ${
                     selected
                       ? 'border-brand-gold bg-brand-gold/5 ring-1 ring-brand-gold/20'
-                      : 'border-gray-200 bg-white hover:border-brand-gold/40'
+                      : 'hover:border-brand-gold/40'
                   }`}
+                  style={!selected ? { borderColor: 'var(--brand-border)' } : undefined}
                 >
-                  <p className="text-sm font-medium text-gray-900">{option.label}</p>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="text-sm font-medium" style={{ color: 'var(--brand-text-primary)' }}>{option.label}</p>
+                  <p className="mt-1 text-xs" style={{ color: 'var(--brand-text-muted)' }}>
                       {option.description ?? (option.value === PaymentProvider.MERCADO_PAGO
                         ? 'Checkout Pro con billetera, tarjetas y medios locales.'
                         : option.value === PaymentProvider.BANK_TRANSFER
@@ -208,7 +209,8 @@ export function ReviewStep({
         <div>
           <label
             htmlFor="notes"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium mb-2"
+            style={{ color: 'var(--brand-text-primary)' }}
           >
             Notas adicionales (opcional)
           </label>
@@ -220,25 +222,25 @@ export function ReviewStep({
             rows={3}
             maxLength={500}
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs mt-1" style={{ color: 'var(--brand-text-muted)' }}>
             {customerNotes.length}/500 caracteres
           </p>
         </div>
 
         {/* Resumen de costos */}
-        <div className="border-t border-gray-200 pt-4">
+        <div className="border-t pt-4" style={{ borderColor: 'var(--brand-border)' }}>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal</span>
+              <span style={{ color: 'var(--brand-text-muted)' }}>Subtotal</span>
               <span className="font-medium">{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Gastos de envío</span>
+              <span style={{ color: 'var(--brand-text-muted)' }}>Gastos de envío</span>
               <span className="font-medium">
                 {shippingCost === 0 ? 'Gratis' : formatCurrency(shippingCost)}
               </span>
             </div>
-            <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
+            <div className="flex justify-between text-lg font-bold border-t pt-2" style={{ borderColor: 'var(--brand-border)' }}>
               <span>Total</span>
               <span className="text-brand-gold-dark">{formatCurrency(total)}</span>
             </div>

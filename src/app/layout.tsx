@@ -6,6 +6,7 @@ import { CartSidebar } from "@/components/cart-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import WhatsAppBot from "@/components/whatsapp-bot";
 import { getSiteContent } from "@/lib/site-content";
+import { Toaster } from "@/components/toaster";
 
 export const metadata: Metadata = {
   title: "Tiempo Bakery - Panadería Artesanal",
@@ -56,6 +57,7 @@ export default async function RootLayout({
             <Footer siteContent={siteContent} />
             <CartSidebar />
             <WhatsAppBot siteContent={siteContent} />
+            <Toaster />
           </div>
         </ThemeProvider>
       </body>

@@ -138,7 +138,8 @@ export function ProductCard({
   return (
     <Card className="group flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <div
-        className="relative h-48 w-full bg-gray-100"
+        className="relative h-48 w-full"
+        style={{ backgroundColor: 'var(--brand-muted-bg)' }}
         onMouseEnter={() => {
           if (galleryImages[1]) {
             showPreviewImage(1);
@@ -171,7 +172,10 @@ export function ProductCard({
               <span>fotos</span>
             </div>
 
-            <div className="absolute bottom-2 right-2 z-20 rounded-full bg-white/90 px-2 py-1 text-[11px] font-medium text-gray-700 md:hidden">
+            <div
+              className="absolute bottom-2 right-2 z-20 rounded-full px-2 py-1 text-[11px] font-medium md:hidden"
+              style={{ backgroundColor: 'var(--brand-bg-card)', color: 'var(--brand-text-primary)' }}
+            >
               {activeImageIndex + 1} / {galleryImages.length}
             </div>
 
@@ -231,7 +235,7 @@ export function ProductCard({
               {category.name}
             </p>
             <Link href={`/productos/${slug}`} className="relative z-10 block">
-              <h3 className="line-clamp-2 text-lg font-semibold text-gray-900 transition-colors group-hover:text-brand-gold-dark">
+              <h3 className="line-clamp-2 text-lg font-semibold transition-colors group-hover:text-brand-gold-dark" style={{ color: 'var(--brand-text-primary)' }}>
                 {name}
               </h3>
             </Link>
@@ -244,11 +248,11 @@ export function ProductCard({
           )}
         </div>
 
-        <p className="text-2xl font-bold text-gray-900">{formatCurrency(price)}</p>
+        <p className="text-2xl font-bold" style={{ color: 'var(--brand-text-primary)' }}>{formatCurrency(price)}</p>
       </CardHeader>
 
       <CardContent className="flex-1 space-y-3 pt-0">
-        <p className="line-clamp-3 text-sm leading-6 text-gray-600">{description}</p>
+        <p className="line-clamp-3 text-sm leading-6" style={{ color: 'var(--brand-text-muted)' }}>{description}</p>
 
         {allergens.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -266,7 +270,7 @@ export function ProductCard({
         )}
 
         {stock.hasStock && stock.available < 999 && (
-          <p className="text-sm text-gray-500">{stock.available} disponibles</p>
+          <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>{stock.available} disponibles</p>
         )}
       </CardContent>
 

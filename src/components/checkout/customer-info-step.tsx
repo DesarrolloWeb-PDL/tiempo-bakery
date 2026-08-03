@@ -68,7 +68,7 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
               Email *
             </label>
             <Input
@@ -85,7 +85,7 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
           </div>
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
               Nombre completo *
             </label>
             <Input
@@ -102,7 +102,7 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="phone" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
               Teléfono *
             </label>
             <Input

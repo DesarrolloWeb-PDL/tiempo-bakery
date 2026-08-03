@@ -142,34 +142,37 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
           </div>
         </div>
 
-        {mobileMenuOpen && (
-          <nav className="md:hidden border-t py-4 flex flex-col gap-3" style={{ borderColor: theme.primaryColor + '30' }}>
-            <Link
-              href="/"
-              className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75"
-              style={{ color: theme.primaryColor }}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {siteContent.navProductsLabel}
-            </Link>
-            <Link
-              href="/sobre-nosotros"
-              className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75"
-              style={{ color: theme.primaryColor }}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {siteContent.navAboutLabel}
-            </Link>
-            <Link
-              href="/contacto"
-              className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75"
-              style={{ color: theme.primaryColor }}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {siteContent.navContactLabel}
-            </Link>
-          </nav>
-        )}
+        <nav 
+          className={`md:hidden border-t overflow-hidden transition-all duration-300 ease-in-out ${
+            mobileMenuOpen ? 'max-h-48 opacity-100 py-4' : 'max-h-0 opacity-0 py-0'
+          }`}
+          style={{ borderColor: theme.primaryColor + '30' }}
+        >
+          <Link
+            href="/"
+            className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75 block"
+            style={{ color: theme.primaryColor }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {siteContent.navProductsLabel}
+          </Link>
+          <Link
+            href="/sobre-nosotros"
+            className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75 block"
+            style={{ color: theme.primaryColor }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {siteContent.navAboutLabel}
+          </Link>
+          <Link
+            href="/contacto"
+            className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75 block"
+            style={{ color: theme.primaryColor }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {siteContent.navContactLabel}
+          </Link>
+        </nav>
       </div>
     </header>
   );

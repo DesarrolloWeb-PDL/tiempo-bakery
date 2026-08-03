@@ -150,25 +150,28 @@ export function DeliveryStep({
                   className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                     isSelected
                       ? 'border-brand-gold bg-brand-gold/5'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'hover:opacity-80'
                   }`}
+                  style={!isSelected ? { borderColor: 'var(--brand-border)' } : undefined}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex gap-3">
                       <Icon
                         className={`h-5 w-5 mt-1 ${
-                          isSelected ? 'text-brand-gold' : 'text-gray-400'
+                          isSelected ? 'text-brand-gold' : ''
                         }`}
+                        style={!isSelected ? { color: 'var(--brand-text-muted)' } : undefined}
                       />
                       <div>
                         <h3
                           className={`font-semibold ${
-                            isSelected ? 'text-brand-gold-dark' : 'text-gray-900'
+                            isSelected ? 'text-brand-gold-dark' : ''
                           }`}
+                          style={!isSelected ? { color: 'var(--brand-text-primary)' } : undefined}
                         >
                           {option.title}
                         </h3>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm mt-1" style={{ color: 'var(--brand-text-muted)' }}>
                           {option.description}
                         </p>
                       </div>
@@ -188,7 +191,7 @@ export function DeliveryStep({
           {/* Formulario según método seleccionado */}
           {selectedMethod === DeliveryMethod.PICKUP_POINT && (
             <div className="space-y-3">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium" style={{ color: 'var(--brand-text-primary)' }}>
                 Selecciona punto de recogida *
               </label>
               {pickupPoints.map((point) => (
@@ -199,16 +202,17 @@ export function DeliveryStep({
                   className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                     pickupLocationId === point.id
                       ? 'border-brand-gold bg-brand-gold/5'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'hover:opacity-80'
                   }`}
+                  style={pickupLocationId !== point.id ? { borderColor: 'var(--brand-border)' } : undefined}
                 >
-                  <h4 className="font-semibold text-gray-900">{point.name}</h4>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <h4 className="font-semibold" style={{ color: 'var(--brand-text-primary)' }}>{point.name}</h4>
+                  <p className="text-sm mt-1" style={{ color: 'var(--brand-text-muted)' }}>
                     {point.address}, {point.city}
                   </p>
                   <p className="text-sm text-brand-gold-dark mt-1">{point.schedule}</p>
                   {point.instructions && (
-                    <p className="text-xs text-gray-500 mt-1">{point.instructions}</p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--brand-text-muted)' }}>{point.instructions}</p>
                   )}
                 </button>
               ))}
@@ -224,7 +228,8 @@ export function DeliveryStep({
               <div>
                 <label
                   htmlFor="address"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--brand-text-primary)' }}
                 >
                   Dirección *
                 </label>
@@ -245,7 +250,8 @@ export function DeliveryStep({
                 <div>
                   <label
                     htmlFor="city"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: 'var(--brand-text-primary)' }}
                   >
                     Ciudad *
                   </label>
@@ -265,7 +271,8 @@ export function DeliveryStep({
                 <div>
                   <label
                     htmlFor="postalCode"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: 'var(--brand-text-primary)' }}
                   >
                     Código Postal *
                   </label>

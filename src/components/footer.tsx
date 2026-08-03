@@ -29,7 +29,7 @@ export default function Footer({ siteContent }: FooterProps) {
 
   return (
     <footer 
-      className="border-t bg-gray-50 relative z-10"
+      className="border-t relative z-10"
       style={{ borderColor: theme.primaryColor + '30' }}
     >
       <div className="container mx-auto px-4 py-8">
@@ -53,7 +53,7 @@ export default function Footer({ siteContent }: FooterProps) {
               )}
               {theme.appTitle}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
               {siteContent.footerDescription}
             </p>
           </div>
@@ -66,10 +66,10 @@ export default function Footer({ siteContent }: FooterProps) {
             >
               {siteContent.footerScheduleTitle}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
               {siteContent.footerScheduleText}
               <br />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>
                 {siteContent.footerDeliveryText}
               </span>
             </p>
@@ -83,7 +83,7 @@ export default function Footer({ siteContent }: FooterProps) {
             >
               {siteContent.footerContactTitle}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
               Email: {siteContent.contactEmail}
               <br />
               Tel: {siteContent.contactPhone}
@@ -100,7 +100,8 @@ export default function Footer({ siteContent }: FooterProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="text-gray-400 hover:text-brand-gold transition-colors"
+              className="hover:text-brand-gold transition-colors"
+              style={{ color: 'var(--brand-text-muted)' }}
             >
               <Instagram className="w-5 h-5" />
             </a>
@@ -111,7 +112,8 @@ export default function Footer({ siteContent }: FooterProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
-              className="text-gray-400 hover:text-[#25D366] transition-colors"
+              className="hover:text-[#25D366] transition-colors"
+              style={{ color: 'var(--brand-text-muted)' }}
             >
               <MessageCircle className="w-5 h-5" />
             </a>
@@ -122,7 +124,7 @@ export default function Footer({ siteContent }: FooterProps) {
           className="mt-6 pt-6 border-t"
           style={{ borderColor: theme.primaryColor + '30' }}
         >
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm" style={{ color: 'var(--brand-text-muted)' }}>
             © {year || '2026'} {theme.appTitle}. {siteContent.footerLegalNote}
           </p>
         </div>

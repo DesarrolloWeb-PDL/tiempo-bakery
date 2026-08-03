@@ -64,13 +64,14 @@ export function CartSidebar() {
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col',
+          'fixed top-0 right-0 h-full w-full md:w-96 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col',
           safeIsOpen ? 'translate-x-0' : 'translate-x-full'
         )}
+        style={{ backgroundColor: 'var(--brand-bg-card)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--brand-border)' }}>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--brand-text-primary)' }}>
             Tu Carrito
           </h2>
           <Button
@@ -86,11 +87,11 @@ export function CartSidebar() {
         {/* Content */}
         {safeItems.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <ShoppingBag className="h-16 w-16 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <ShoppingBag className="h-16 w-16 mb-4" style={{ color: 'var(--brand-text-muted)' }} />
+            <h3 className="text-lg font-medium mb-2" style={{ color: 'var(--brand-text-primary)' }}>
               Tu carrito está vacío
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm mb-6" style={{ color: 'var(--brand-text-muted)' }}>
               ¡Agrega algunos productos para empezar!
             </p>
             <Button onClick={closeCart}>
@@ -104,10 +105,11 @@ export function CartSidebar() {
               {safeItems.map((item) => (
                 <div
                   key={item.productId}
-                  className="flex gap-4 p-3 bg-gray-50 rounded-lg"
+                  className="flex gap-4 p-3 rounded-lg"
+                  style={{ backgroundColor: 'var(--brand-muted-bg)' }}
                 >
                   {/* Image */}
-                  <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden bg-white">
+                  <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden" style={{ backgroundColor: 'var(--brand-secondary)' }}>
                     <Image
                       src={normalizePublicAssetUrl(item.imageUrl) || '/img/espiga.png'}
                       alt={item.name}
@@ -128,7 +130,7 @@ export function CartSidebar() {
                     </Link>
 
                     {item.weight && (
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs mt-1" style={{ color: 'var(--brand-text-muted)' }}>
                         {item.weight}g
                       </p>
                     )}
@@ -142,11 +144,12 @@ export function CartSidebar() {
                         onChange={(e) =>
                           updateSliced(item.productId, e.target.checked)
                         }
-                        className="rounded border-gray-300 text-brand-gold focus:ring-brand-gold"
+                        className="rounded border-[var(--brand-border)] text-brand-gold focus:ring-brand-gold"
                       />
                       <label
                         htmlFor={`sliced-${item.productId}`}
-                        className="text-xs text-gray-600 cursor-pointer"
+                        className="text-xs cursor-pointer"
+                        style={{ color: 'var(--brand-text-muted)' }}
                       >
                         Rebanado
                       </label>
@@ -208,10 +211,10 @@ export function CartSidebar() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-200 p-4 space-y-4">
+            <div className="border-t p-4 space-y-4" style={{ borderColor: 'var(--brand-border)' }}>
               {/* Subtotal */}
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium" style={{ color: 'var(--brand-text-primary)' }}>
                   Subtotal
                 </span>
                 <span className="text-xl font-bold text-brand-gold-dark">
@@ -219,7 +222,7 @@ export function CartSidebar() {
                 </span>
               </div>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>
                 Los gastos de envío se calcularán en el checkout
               </p>
 

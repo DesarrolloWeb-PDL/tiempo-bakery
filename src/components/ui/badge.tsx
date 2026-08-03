@@ -11,10 +11,10 @@ const badgeVariants = cva(
         default:
           "border-transparent bg-brand-gold text-white hover:bg-brand-gold-dark",
         secondary:
-          "border-transparent bg-gray-100 text-gray-900 hover:bg-gray-200",
+          "border-transparent hover:opacity-80",
         destructive:
           "border-transparent bg-red-500 text-white hover:bg-red-600",
-        outline: "text-gray-950 border-gray-300",
+        outline: "",
         success:
           "border-transparent bg-green-100 text-green-800",
         warning:
@@ -34,9 +34,15 @@ export interface BadgeProps
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+  const style: React.CSSProperties = {}
+  if (variant === 'secondary') {
+    style.backgroundColor = 'var(--brand-muted-bg)'
+    style.color = 'var(--brand-text-muted)'
+  } else if (variant === 'outline') {
+    style.color = 'var(--brand-text-primary)'
+    style.borderColor = 'var(--brand-border)'
+  }
+  return <div className={cn(badgeVariants({ variant }), className)} style={style} {...props} />
 }
 
 export { Badge, badgeVariants }
