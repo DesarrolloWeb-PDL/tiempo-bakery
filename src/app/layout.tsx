@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import WhatsAppButton from "@/components/whatsapp-button";
 import { CartSidebar } from "@/components/cart-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
+import WhatsAppBot from "@/components/whatsapp-bot";
 import { getSiteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
@@ -55,7 +55,7 @@ export default async function RootLayout({
             </main>
             <Footer siteContent={siteContent} />
             <CartSidebar />
-            <WhatsAppButton siteContent={siteContent} />
+            <WhatsAppBot siteContent={siteContent} />
           </div>
         </ThemeProvider>
       </body>
