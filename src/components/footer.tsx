@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTheme } from '@/components/theme-provider'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { Instagram, MessageCircle } from 'lucide-react'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import type { SiteContent } from '@/lib/site-content.shared'
 
@@ -92,8 +93,33 @@ export default function Footer({ siteContent }: FooterProps) {
           </div>
         </div>
 
+        <div className="flex justify-center gap-4 mt-6">
+          {siteContent.contactInstagram && (
+            <a
+              href={siteContent.contactInstagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="text-gray-400 hover:text-brand-gold transition-colors"
+            >
+              <Instagram className="w-5 h-5" />
+            </a>
+          )}
+          {siteContent.contactWhatsapp && (
+            <a
+              href={`https://wa.me/${siteContent.contactWhatsapp.replace(/[^0-9]/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              className="text-gray-400 hover:text-[#25D366] transition-colors"
+            >
+              <MessageCircle className="w-5 h-5" />
+            </a>
+          )}
+        </div>
+
         <div 
-          className="mt-8 pt-6 border-t"
+          className="mt-6 pt-6 border-t"
           style={{ borderColor: theme.primaryColor + '30' }}
         >
           <p className="text-center text-sm text-gray-500">

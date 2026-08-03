@@ -11,6 +11,7 @@ export interface SiteContent {
   contactEmail: string
   contactPhone: string
   contactWhatsapp: string
+  contactInstagram: string
   contactAddress: string
   aboutTitle: string
   aboutBody: string
@@ -36,6 +37,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   contactEmail: 'contacto@tiempobakery.com',
   contactPhone: '+34 600 000 000',
   contactWhatsapp: '+34 600 000 000',
+  contactInstagram: 'https://www.instagram.com/tiempo.masamadre',
   contactAddress: 'Obrador: Calle Ejemplo 123, Utrera',
   aboutTitle: 'Sobre Nosotros',
   aboutBody:

@@ -391,6 +391,17 @@ function ContactoConfigAdmin({ siteContent, setSiteContent, loading, saving, mes
             className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Instagram (usuario o URL)</label>
+          <input
+            type="text"
+            value={siteContent.contactInstagram}
+            disabled={loading || saving}
+            onChange={(e) => setSiteContent((prev) => ({ ...prev, contactInstagram: e.target.value }))}
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
+            placeholder="https://www.instagram.com/..."
+          />
+        </div>
         <div className="md:col-span-2">
           <label className="block text-xs text-gray-400 mb-1">Dirección u obrador</label>
           <input

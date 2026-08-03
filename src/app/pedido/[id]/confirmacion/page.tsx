@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams } from 'next/navigation';
-import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -158,6 +158,30 @@ export default function OrderConfirmationPage() {
   const DeliveryIcon = deliveryIcons[order.deliveryMethod as keyof typeof deliveryIcons];
   const isBankTransfer = order.paymentMethod === 'bank_transfer';
 
+  const handleSendWhatsApp = () => {
+    const deliveryLabel = deliveryNames[order.deliveryMethod as keyof typeof deliveryNames] || order.deliveryMethod;
+    const itemsText = order.items
+      .map((item) => `- ${item.productName} x${item.quantity}${item.sliced ? ' (Reb.)' : ''} = ${formatCurrency(item.subtotal)}`)
+      .join('\n');
+    const date = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt));
+    const message = [
+      '🧾 Comprobante Tiempo Bakery',
+      '',
+      `Pedido: #${order.orderNumber}`,
+      `Fecha: ${date}`,
+      `Cliente: ${order.customerName}`,
+      '',
+      'Productos:',
+      itemsText,
+      '',
+      `Total: ${formatCurrency(order.total)}`,
+      '',
+      `📍 Entrega: ${deliveryLabel}`,
+    ].join('\n');
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  };
+
   return (
     <>
       <style>{`
@@ -208,6 +232,10 @@ export default function OrderConfirmationPage() {
           <Button onClick={() => window.print()} className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
             Imprimir comprobante
+          </Button>
+          <Button onClick={handleSendWhatsApp} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
+            <MessageCircle className="h-4 w-4" />
+            Enviar por WhatsApp
           </Button>
         </div>
 

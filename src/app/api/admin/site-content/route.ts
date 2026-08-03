@@ -19,6 +19,7 @@ const siteContentSchema = z.object({
   contactEmail: z.string().email().max(120),
   contactPhone: z.string().min(1).max(60),
   contactWhatsapp: z.string().min(1).max(60),
+  contactInstagram: z.string().max(200).default(''),
   contactAddress: z.string().min(1).max(180),
   aboutTitle: z.string().min(1).max(100),
   aboutBody: z.string().min(1).max(1200),
