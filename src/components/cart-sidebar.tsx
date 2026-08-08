@@ -10,18 +10,128 @@ import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/lib/format';
+import type { CartItem as CartItemType } from '@/types/cart';
 
 function shouldSkipOptimization(url: string) {
   return url.includes('.supabase.co/storage/v1/object/public/');
 }
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount);
+interface CartItemProps {
+  item: CartItemType;
+  closeCart: () => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  updateSliced: (productId: string, sliced: boolean) => void;
+  removeItem: (productId: string) => void;
 }
+
+const CartItem = React.memo(function CartItem({ item, closeCart, updateQuantity, updateSliced, removeItem }: CartItemProps) {
+  return (
+    <div
+      className="flex gap-4 p-3 rounded-lg"
+      style={{ backgroundColor: 'var(--brand-muted-bg)' }}
+    >
+      {/* Image */}
+      <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden" style={{ backgroundColor: 'var(--brand-secondary)' }}>
+        <Image
+          src={normalizePublicAssetUrl(item.imageUrl) || '/img/espiga.png'}
+          alt={item.name}
+          fill
+          className="object-cover"
+          unoptimized={shouldSkipOptimization(normalizePublicAssetUrl(item.imageUrl) || '')}
+        />
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <Link
+          href={`/productos/${item.slug}`}
+          onClick={closeCart}
+          className="font-medium text-sm hover:text-brand-gold-dark transition-colors line-clamp-2"
+        >
+          {item.name}
+        </Link>
+
+        {item.weight && (
+          <p className="text-xs mt-1" style={{ color: 'var(--brand-text-muted)' }}>
+            {item.weight}g
+          </p>
+        )}
+
+        {/* Sliced Toggle */}
+        <div className="flex items-center gap-2 mt-2">
+          <input
+            type="checkbox"
+            id={`sliced-${item.productId}`}
+            checked={item.sliced}
+            onChange={(e) =>
+              updateSliced(item.productId, e.target.checked)
+            }
+            className="rounded border-[var(--brand-border)] text-brand-gold focus:ring-brand-gold"
+          />
+          <label
+            htmlFor={`sliced-${item.productId}`}
+            className="text-xs cursor-pointer"
+            style={{ color: 'var(--brand-text-muted)' }}
+          >
+            Rebanado
+          </label>
+        </div>
+
+        {/* Quantity + Price */}
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() =>
+                updateQuantity(item.productId, item.quantity - 1)
+              }
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+            <span className="text-sm font-medium w-8 text-center">
+              {item.quantity}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() =>
+                updateQuantity(item.productId, item.quantity + 1)
+              }
+              disabled={item.quantity >= item.maxStock}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-brand-gold-dark">
+              {formatCurrency(item.price * item.quantity)}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => removeItem(item.productId)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Stock Warning */}
+        {item.quantity >= item.maxStock && (
+          <Badge variant="warning" className="mt-2 text-xs">
+            Stock máximo alcanzado
+          </Badge>
+        )}
+      </div>
+    </div>
+  );
+});
 
 export function CartSidebar() {
   const pathname = usePathname();
@@ -103,110 +213,14 @@ export function CartSidebar() {
             {/* Items List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {safeItems.map((item) => (
-                <div
+                <CartItem
                   key={item.productId}
-                  className="flex gap-4 p-3 rounded-lg"
-                  style={{ backgroundColor: 'var(--brand-muted-bg)' }}
-                >
-                  {/* Image */}
-                  <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden" style={{ backgroundColor: 'var(--brand-secondary)' }}>
-                    <Image
-                      src={normalizePublicAssetUrl(item.imageUrl) || '/img/espiga.png'}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      unoptimized={shouldSkipOptimization(normalizePublicAssetUrl(item.imageUrl) || '')}
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/productos/${item.slug}`}
-                      onClick={closeCart}
-                      className="font-medium text-sm hover:text-brand-gold-dark transition-colors line-clamp-2"
-                    >
-                      {item.name}
-                    </Link>
-
-                    {item.weight && (
-                      <p className="text-xs mt-1" style={{ color: 'var(--brand-text-muted)' }}>
-                        {item.weight}g
-                      </p>
-                    )}
-
-                    {/* Sliced Toggle */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <input
-                        type="checkbox"
-                        id={`sliced-${item.productId}`}
-                        checked={item.sliced}
-                        onChange={(e) =>
-                          updateSliced(item.productId, e.target.checked)
-                        }
-                        className="rounded border-[var(--brand-border)] text-brand-gold focus:ring-brand-gold"
-                      />
-                      <label
-                        htmlFor={`sliced-${item.productId}`}
-                        className="text-xs cursor-pointer"
-                        style={{ color: 'var(--brand-text-muted)' }}
-                      >
-                        Rebanado
-                      </label>
-                    </div>
-
-                    {/* Quantity + Price */}
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() =>
-                            updateQuantity(item.productId, item.quantity - 1)
-                          }
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="text-sm font-medium w-8 text-center">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() =>
-                            updateQuantity(item.productId, item.quantity + 1)
-                          }
-                          disabled={item.quantity >= item.maxStock}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-brand-gold-dark">
-                          {formatCurrency(item.price * item.quantity)}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => removeItem(item.productId)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Stock Warning */}
-                    {item.quantity >= item.maxStock && (
-                      <Badge variant="warning" className="mt-2 text-xs">
-                        Stock máximo alcanzado
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+                  item={item}
+                  closeCart={closeCart}
+                  updateQuantity={updateQuantity}
+                  updateSliced={updateSliced}
+                  removeItem={removeItem}
+                />
               ))}
             </div>
 

@@ -15,27 +15,27 @@ export enum PaymentProvider {
 
 // Schemas de validación
 export const checkoutCustomerSchema = z.object({
-  email: z.string().email('Email inválido'),
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  phone: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos'),
+  customerEmail: z.string().email('Email inválido'),
+  customerName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  customerPhone: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos'),
 });
 
-export const checkoutDeliverySchema = z.discriminatedUnion('method', [
+export const checkoutDeliverySchema = z.discriminatedUnion('deliveryMethod', [
   z.object({
-    method: z.literal(DeliveryMethod.PICKUP_POINT),
+    deliveryMethod: z.literal(DeliveryMethod.PICKUP_POINT),
     pickupLocationId: z.string().min(1, 'Selecciona un punto de recogida'),
   }),
   z.object({
-    method: z.literal(DeliveryMethod.LOCAL_DELIVERY),
-    address: z.string().min(5, 'La dirección debe tener al menos 5 caracteres'),
-    city: z.string().min(2, 'La ciudad es requerida'),
-    postalCode: z.string().min(5, 'El código postal es requerido'),
+    deliveryMethod: z.literal(DeliveryMethod.LOCAL_DELIVERY),
+    shippingAddress: z.string().min(5, 'La dirección debe tener al menos 5 caracteres'),
+    shippingCity: z.string().min(2, 'La ciudad es requerida'),
+    shippingPostal: z.string().min(5, 'El código postal es requerido'),
   }),
   z.object({
-    method: z.literal(DeliveryMethod.NATIONAL_COURIER),
-    address: z.string().min(5, 'La dirección debe tener al menos 5 caracteres'),
-    city: z.string().min(2, 'La ciudad es requerida'),
-    postalCode: z.string().min(5, 'El código postal es requerido'),
+    deliveryMethod: z.literal(DeliveryMethod.NATIONAL_COURIER),
+    shippingAddress: z.string().min(5, 'La dirección debe tener al menos 5 caracteres'),
+    shippingCity: z.string().min(2, 'La ciudad es requerida'),
+    shippingPostal: z.string().min(5, 'El código postal es requerido'),
   }),
 ]);
 
@@ -45,19 +45,26 @@ export const checkoutNotesSchema = z.object({
 
 // Schema completo del checkout para validación en el servidor
 export const checkoutSchema = z.object({
-  email: z.string().email('Email inválido'),
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  phone: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos'),
-  method: z.nativeEnum(DeliveryMethod),
+  customerEmail: z.string().email('Email inválido'),
+  customerName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  customerPhone: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos'),
+  deliveryMethod: z.nativeEnum(DeliveryMethod),
   paymentProvider: z.nativeEnum(PaymentProvider).optional(),
   pickupLocationId: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  postalCode: z.string().optional(),
+  shippingAddress: z.string().optional(),
+  shippingCity: z.string().optional(),
+  shippingPostal: z.string().optional(),
+  items: z.array(
+    z.object({
+      productId: z.string(),
+      quantity: z.number().min(1),
+      sliced: z.boolean().default(true),
+    })
+  ),
   customerNotes: z.string().max(500, 'Las notas no pueden exceder 500 caracteres').optional(),
 });
 
-// Types derivados de los schemas
+// Tipos derivados de los schemas
 export type CheckoutCustomerData = z.infer<typeof checkoutCustomerSchema>;
 export type CheckoutDeliveryData = z.infer<typeof checkoutDeliverySchema>;
 export type CheckoutNotesData = z.infer<typeof checkoutNotesSchema>;

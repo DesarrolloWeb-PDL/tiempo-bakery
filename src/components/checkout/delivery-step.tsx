@@ -7,14 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Truck, Package } from 'lucide-react';
 import { DeliveryMethod, type ShippingCosts } from '@/types/checkout';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
+import { formatCurrency } from '@/lib/format';
 
 interface PickupPoint {
   id: string;
@@ -33,7 +26,13 @@ interface DeliveryStepProps {
   address?: string;
   city?: string;
   postalCode?: string;
-  onUpdate: (data: any) => void;
+  onUpdate: (data: {
+    deliveryMethod?: DeliveryMethod;
+    pickupLocationId?: string;
+    shippingAddress?: string;
+    shippingCity?: string;
+    shippingPostal?: string;
+  }) => void;
   onNext: () => void;
   onBack: () => void;
 }
@@ -74,7 +73,7 @@ export function DeliveryStep({
   }, [autoAdvance, errors, onNext]);
 
   const handleMethodChange = (method: DeliveryMethod) => {
-    onUpdate({ method, pickupLocationId: undefined, address: '', city: '', postalCode: '' });
+    onUpdate({ deliveryMethod: method, pickupLocationId: undefined, shippingAddress: '', shippingCity: '', shippingPostal: '' });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -198,7 +197,7 @@ export function DeliveryStep({
                 <button
                   key={point.id}
                   type="button"
-                  onClick={() => onUpdate({ pickupLocationId: point.id })}
+                  onClick={() => onUpdate({ deliveryMethod: DeliveryMethod.PICKUP_POINT, pickupLocationId: point.id })}
                   className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                     pickupLocationId === point.id
                       ? 'border-brand-gold bg-brand-gold/5'
@@ -237,7 +236,7 @@ export function DeliveryStep({
                   id="address"
                   type="text"
                   value={address || ''}
-                  onChange={(e) => onUpdate({ address: e.target.value })}
+                  onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
                   placeholder="Calle, número, piso..."
                   required
                 />
@@ -259,7 +258,7 @@ export function DeliveryStep({
                     id="city"
                     type="text"
                     value={city || ''}
-                    onChange={(e) => onUpdate({ city: e.target.value })}
+                    onChange={(e) => onUpdate({ shippingCity: e.target.value })}
                     placeholder="Utrera"
                     required
                   />
@@ -280,7 +279,7 @@ export function DeliveryStep({
                     id="postalCode"
                     type="text"
                     value={postalCode || ''}
-                    onChange={(e) => onUpdate({ postalCode: e.target.value })}
+                    onChange={(e) => onUpdate({ shippingPostal: e.target.value })}
                     placeholder="41710"
                     required
                   />

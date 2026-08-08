@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
+import { formatCurrency } from '@/lib/format'
 
 // ─────────────────────────────────────────────
 // Tipos
@@ -98,10 +99,6 @@ const DELIVERY_LABELS: Record<string, string> = {
   PICKUP_POINT:     'Recogida en punto',
   LOCAL_DELIVERY:   'Envío local',
   NATIONAL_COURIER: 'Mensajería nacional',
-}
-
-function formatCurrency(n: number) {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n)
 }
 
 function formatDate(str: string) {

@@ -17,9 +17,9 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
   const [autoAdvance, setAutoAdvance] = React.useState(false);
 
   const isValid =
-    data.email.includes('@') &&
-    data.name.length >= 2 &&
-    data.phone.length >= 9;
+    data.customerEmail.includes('@') &&
+    data.customerName.length >= 2 &&
+    data.customerPhone.length >= 9;
 
   React.useEffect(() => {
     if (!isValid) {
@@ -28,7 +28,7 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
     }
     const timer = setTimeout(() => setAutoAdvance(true), 1200);
     return () => clearTimeout(timer);
-  }, [data.email, data.name, data.phone, isValid]);
+  }, [data.customerEmail, data.customerName, data.customerPhone, isValid]);
 
   React.useEffect(() => {
     if (autoAdvance && Object.keys(errors).length === 0) {
@@ -40,14 +40,14 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
-    if (!data.email || !data.email.includes('@')) {
-      newErrors.email = 'Email inválido';
+    if (!data.customerEmail || !data.customerEmail.includes('@')) {
+      newErrors.customerEmail = 'Email inválido';
     }
-    if (!data.name || data.name.length < 2) {
-      newErrors.name = 'El nombre debe tener al menos 2 caracteres';
+    if (!data.customerName || data.customerName.length < 2) {
+      newErrors.customerName = 'El nombre debe tener al menos 2 caracteres';
     }
-    if (!data.phone || data.phone.length < 9) {
-      newErrors.phone = 'El teléfono debe tener al menos 9 dígitos';
+    if (!data.customerPhone || data.customerPhone.length < 9) {
+      newErrors.customerPhone = 'El teléfono debe tener al menos 9 dígitos';
     }
 
     setErrors(newErrors);
@@ -68,53 +68,53 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
+            <label htmlFor="customerEmail" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
               Email *
             </label>
             <Input
-              id="email"
+              id="customerEmail"
               type="email"
-              value={data.email}
-              onChange={(e) => onUpdate({ ...data, email: e.target.value })}
+              value={data.customerEmail}
+              onChange={(e) => onUpdate({ ...data, customerEmail: e.target.value })}
               placeholder="tu@email.com"
               required
             />
-            {errors.email && (
-              <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+            {errors.customerEmail && (
+              <p className="text-sm text-red-600 mt-1">{errors.customerEmail}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
+            <label htmlFor="customerName" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
               Nombre completo *
             </label>
             <Input
-              id="name"
+              id="customerName"
               type="text"
-              value={data.name}
-              onChange={(e) => onUpdate({ ...data, name: e.target.value })}
+              value={data.customerName}
+              onChange={(e) => onUpdate({ ...data, customerName: e.target.value })}
               placeholder="Juan Pérez"
               required
             />
-            {errors.name && (
-              <p className="text-sm text-red-600 mt-1">{errors.name}</p>
+            {errors.customerName && (
+              <p className="text-sm text-red-600 mt-1">{errors.customerName}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
+            <label htmlFor="customerPhone" className="block text-sm font-medium mb-1" style={{ color: 'var(--brand-text-primary)' }}>
               Teléfono *
             </label>
             <Input
-              id="phone"
+              id="customerPhone"
               type="tel"
-              value={data.phone}
-              onChange={(e) => onUpdate({ ...data, phone: e.target.value })}
+              value={data.customerPhone}
+              onChange={(e) => onUpdate({ ...data, customerPhone: e.target.value })}
               placeholder="666 777 888"
               required
             />
-            {errors.phone && (
-              <p className="text-sm text-red-600 mt-1">{errors.phone}</p>
+            {errors.customerPhone && (
+              <p className="text-sm text-red-600 mt-1">{errors.customerPhone}</p>
             )}
           </div>
 

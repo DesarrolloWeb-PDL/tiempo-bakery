@@ -14,6 +14,7 @@ import {
   Package,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '@/lib/format'
 
 // ─────────────────────────────────────────────
 // Tipos
@@ -71,10 +72,6 @@ const DELIVERY_LABELS: Record<string, string> = {
   PICKUP_POINT:      '📍 Recogida',
   LOCAL_DELIVERY:    '🚴 Local',
   NATIONAL_COURIER:  '📦 Nacional',
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount)
 }
 
 function formatDate(dateStr: string) {

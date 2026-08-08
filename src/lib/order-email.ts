@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { getSiteContent } from '@/lib/site-content'
+import { formatCurrency } from '@/lib/format'
 
 type OrderEmailItem = {
   productName: string
@@ -38,14 +39,6 @@ const DELIVERY_LABELS: Record<string, string> = {
   PICKUP_POINT: 'Recogida en punto',
   LOCAL_DELIVERY: 'Envío local',
   NATIONAL_COURIER: 'Mensajería nacional',
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount)
 }
 
 function escapeHtml(value: string): string {

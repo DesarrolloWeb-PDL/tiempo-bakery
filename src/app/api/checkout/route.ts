@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 import { stockManager } from '@/lib/stock-manager';
 import { expirePendingOrders } from '@/lib/order-expiry';
@@ -8,6 +8,8 @@ import { createMercadoPagoPreference } from '@/lib/mercadopago';
 import { PaymentProvider, getPaymentSettings, getStripeSecretKey, getMercadoPagoAccessToken, getSiteUrl } from '@/lib/payments';
 import Stripe from 'stripe';
 import { z } from 'zod';
+import { checkoutSchema } from '@/types/checkout';
+import { apiError, apiSuccess } from '@/lib/api-response';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,36 +55,13 @@ function randomOrderSuffix(): string {
   return result
 }
 
-const checkoutSchema = z.object({
-  customerEmail: z.string().email(),
-  customerName: z.string().min(2),
-  customerPhone: z.string().min(9),
-  deliveryMethod: z.enum(['PICKUP_POINT', 'LOCAL_DELIVERY', 'NATIONAL_COURIER']),
-  paymentProvider: z.enum(['STRIPE', 'MERCADO_PAGO', 'BANK_TRANSFER']).optional(),
-  pickupLocationId: z.string().optional(),
-  shippingAddress: z.string().optional(),
-  shippingCity: z.string().optional(),
-  shippingPostal: z.string().optional(),
-  items: z.array(
-    z.object({
-      productId: z.string(),
-      quantity: z.number().min(1),
-      sliced: z.boolean().default(true),
-    })
-  ),
-  customerNotes: z.string().max(500).optional(),
-});
-
 export async function POST(request: NextRequest) {
   try {
     // 1. Verificar time-gating
     const { enabled, service } = await getTimeGatingRuntime();
     const gatingStatus = service.getTimeUntilOpening();
     if (enabled && !gatingStatus.isOpen) {
-      return NextResponse.json(
-        { error: 'El sitio está cerrado para pedidos' },
-        { status: 403 }
-      );
+      return apiError('El sitio está cerrado para pedidos', 403);
     }
 
     // Expiración lazy: liberar stock de pedidos PENDING viejos antes de crear uno nuevo
@@ -99,17 +78,11 @@ export async function POST(request: NextRequest) {
     const selectedProvider = (data.paymentProvider as PaymentProvider | undefined) ?? paymentSettings.defaultProvider;
 
     if (!paymentSettings.enabledProviders.length) {
-      return NextResponse.json(
-        { error: 'No hay medios de pago configurados en el servidor' },
-        { status: 503 }
-      );
+      return apiError('No hay medios de pago configurados en el servidor', 503);
     }
 
     if (!paymentSettings.enabledProviders.includes(selectedProvider)) {
-      return NextResponse.json(
-        { error: 'El medio de pago seleccionado no está disponible' },
-        { status: 400 }
-      );
+      return apiError('El medio de pago seleccionado no está disponible', 400);
     }
 
     // 3. Verificar stock para todos los productos
@@ -125,12 +98,10 @@ export async function POST(request: NextRequest) {
       .filter((item) => !item.available);
 
     if (outOfStockItems.length > 0) {
-      return NextResponse.json(
-        {
-          error: 'Algunos productos no tienen stock suficiente',
-          outOfStockItems,
-        },
-        { status: 400 }
+      return apiError(
+        'Algunos productos no tienen stock suficiente',
+        400,
+        JSON.stringify(outOfStockItems)
       );
     }
 
@@ -341,7 +312,7 @@ export async function POST(request: NextRequest) {
       throw paymentError
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       success: true,
       orderId: order.id,
       orderNumber: order.orderNumber,
@@ -352,27 +323,20 @@ export async function POST(request: NextRequest) {
     console.error('Checkout error:', error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Datos inválidos', details: error.errors },
-        { status: 400 }
-      );
+      return apiError('Datos inválidos', 400, JSON.stringify(error.errors));
     }
 
     if (error instanceof StockReservationError) {
-      return NextResponse.json(
-        {
-          error: 'Algunos productos no tienen stock suficiente',
-          outOfStockItems: [{ productId: error.productId }],
-        },
-        { status: 400 }
+      return apiError(
+        'Algunos productos no tienen stock suficiente',
+        400,
+        JSON.stringify([{ productId: error.productId }])
       )
     }
 
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Error procesando el pedido',
-      },
-      { status: 500 }
+    return apiError(
+      error instanceof Error ? error.message : 'Error procesando el pedido',
+      500
     );
   }
 }

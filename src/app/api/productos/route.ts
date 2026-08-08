@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { timeGating } from '@/lib/time-gating';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const currentWeekId = timeGating.getCurrentWeekId();
 
     // Construir query
-    const whereClause: any = {
+    const whereClause: Prisma.ProductWhereInput = {
       isActive: true,
       published: true, // Solo mostrar productos publicados
     };

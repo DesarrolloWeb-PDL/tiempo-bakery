@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import {
   ADMIN_COOKIE,
   ADMIN_SESSION_MAX_AGE,
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     const { password } = await req.json()
 
-    if (!password || password !== adminPassword) {
+    if (!password || !adminPassword || password.length !== adminPassword.length || !timingSafeEqual(Buffer.from(password), Buffer.from(adminPassword))) {
       return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 })
     }
 

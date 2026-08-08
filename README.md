@@ -398,6 +398,20 @@ timezone: 'Europe/Madrid'  // Ajustar según tu ubicación
 
 ## 🤝 Contribuir
 
+### Language Convention
+
+This project uses a **bilingual convention** by design:
+
+- **File paths & routes**: Spanish — `productos/`, `pedidos/`, `clientes/`. These match the domain language and are already wired into URLs, Prisma models, and imports. **Do not rename.**
+- **Code identifiers**: English — `CartItem`, `StockManager`, `TimeGatingService`, `checkoutSchema`. Matches developer conventions and keeps IDE autocompletion predictable.
+- **UI copy & user-facing text**: Spanish — the app serves Argentine customers, so all labels, error messages, and notifications are in Spanish.
+- **Comments**: Default to English for inline comments. Spanish comments are acceptable when they explain domain-specific business rules (e.g. time-gating, stock semantics).
+- **Commit messages**: Spanish — follow [Conventional Commits](https://www.conventionalcommits.org/) in Spanish (`feat:`, `fix:`, `chore:`, etc.).
+
+**Why not rename everything?** Renaming file paths or routes would break dozens of imports, API URLs, and Prisma model references. The bilingual split is intentional: it keeps the domain model readable for stakeholders while keeping code maintainable for developers.
+
+### Workflow
+
 1. Fork del proyecto
 2. Crear rama de feature (`git checkout -b feature/nueva-funcionalidad`)
 3. Commit de cambios (`git commit -am 'Agregar nueva funcionalidad'`)

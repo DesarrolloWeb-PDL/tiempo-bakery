@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, Filter, RefreshCw, ChevronLeft, ChevronRight, ArrowUpRight, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '@/lib/format'
 
 // ─────────────────────────────────────────────
 // Tipos
@@ -84,10 +85,6 @@ const DELIVERY_LABELS: Record<string, string> = {
   PICKUP_POINT:     '📍 Recogida',
   LOCAL_DELIVERY:   '🚴 Local',
   NATIONAL_COURIER: '📦 Nacional',
-}
-
-function formatCurrency(n: number) {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n)
 }
 
 function formatDate(str: string) {

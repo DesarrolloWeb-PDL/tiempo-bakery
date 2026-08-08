@@ -8,14 +8,7 @@ import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { DEFAULT_SITE_CONTENT, type SiteContent } from '@/lib/site-content.shared'
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount)
-}
+import { formatCurrency } from '@/lib/format'
 
 type SiteContentEditorProps = {
   siteContent: SiteContent

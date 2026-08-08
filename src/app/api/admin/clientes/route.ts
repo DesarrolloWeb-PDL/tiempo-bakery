@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
+import { apiError } from '@/lib/api-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,9 +46,7 @@ export async function GET(req: NextRequest) {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     })
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error al obtener clientes' },
-      { status: 500 }
-    )
+    console.error('Error fetching clients:', error)
+    return apiError('Error al obtener clientes', 500)
   }
 }

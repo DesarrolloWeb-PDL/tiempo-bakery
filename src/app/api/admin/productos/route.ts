@@ -2,41 +2,13 @@ import { NextResponse } from 'next/server'
 import { prisma as db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 import { timeGating } from '@/lib/time-gating'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { syncProductImageGallery } from '@/lib/product-images'
+import { apiError, apiDbError, apiSuccess } from '@/lib/api-response'
 
 export const dynamic = 'force-dynamic'
-
-function mapDbError(error: unknown, fallback: string) {
-  const payload: Record<string, string> = { error: fallback }
-  if (!(error instanceof Error)) return payload
-  const configuredDbUrl = process.env.DATABASE_URL ?? ''
-
-  payload.details = error.message
-
-  if (error.message.includes('Environment variable not found: DATABASE_URL')) {
-    payload.error = 'Configuración incompleta: falta DATABASE_URL'
-  } else if (error.message.includes('Environment variable not found: POSTGRES_URL')) {
-    payload.error = 'Configuración incompleta: falta POSTGRES_URL'
-  } else if (error.message.includes("Can't reach database server")) {
-    payload.error = 'No se puede conectar a la base de datos'
-    try {
-      const host = configuredDbUrl ? new URL(configuredDbUrl).hostname : ''
-      if (host === 'localhost' || host === '127.0.0.1') {
-        payload.error = 'No se puede conectar a la base de datos: DATABASE_URL apunta a localhost en producción'
-      } else if (configuredDbUrl && !configuredDbUrl.includes('sslmode=')) {
-        payload.error = 'No se puede conectar a la base de datos: revisá sslmode=require en DATABASE_URL'
-      }
-    } catch {
-      // noop
-    }
-  } else if (error.message.includes('does not exist')) {
-    payload.error = 'La base de datos no está migrada o faltan tablas'
-  }
-
-  return payload
-}
 
 const createProductSchema = z.object({
   name: z.string().min(2),
@@ -111,11 +83,114 @@ async function syncWeeklyStockForCurrentWeek(product: {
   })
 }
 
+type AdminProduct = Prisma.ProductGetPayload<{
+  include: {
+    category: { select: { id: true; name: true; slug: true } }
+    _count: { select: { orderItems: true; images: true } }
+    images: { select: { id: true; url: true; altText: true; order: true } }
+    weeklyStocks: {
+      where: { weekId: string }
+      select: { weekId: true; maxStock: true; currentStock: true; reservedStock: true }
+    }
+  }
+}>
+
+type AdminCategory = Prisma.CategoryGetPayload<{
+  select: { id: true; name: true; slug: true }
+}>
+
+async function normalizeProductImages(): Promise<{ normalized: number; backfilled: number }> {
+  const currentWeekId = timeGating.getCurrentWeekId()
+
+  let products: AdminProduct[] = []
+
+  try {
+    products = await db.product.findMany({
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+        _count: { select: { orderItems: true, images: true } },
+        images: {
+          select: { id: true, url: true, altText: true, order: true },
+          orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+        },
+        weeklyStocks: {
+          where: { weekId: currentWeekId },
+          select: { weekId: true, maxStock: true, currentStock: true, reservedStock: true },
+        },
+      },
+      orderBy: [{ category: { name: 'asc' } }, { name: 'asc' }],
+    })
+  } catch (compatError) {
+    console.warn('Admin productos fallback activado por incompatibilidad de esquema:', compatError)
+
+    products = (await db.product.findMany({
+      include: {
+        category: { select: { id: true, name: true } },
+        images: {
+          select: { id: true, url: true, altText: true, order: true },
+          orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+        },
+        weeklyStocks: {
+          where: { weekId: currentWeekId },
+          select: { weekId: true, maxStock: true, currentStock: true, reservedStock: true },
+        },
+      },
+      orderBy: [{ name: 'asc' }],
+    }) as AdminProduct[]).map((product) => ({
+      ...product,
+      _count: { orderItems: 0, images: 0 },
+    }))
+  }
+
+  const productsToFix = products.filter((product) => {
+    if (typeof product.imageUrl !== 'string') return false
+    return normalizePublicAssetUrl(product.imageUrl) !== product.imageUrl
+  })
+
+  const productsMissingImageBank = products.filter(
+    (product) => typeof product.imageUrl === 'string' && product.imageUrl.trim() !== '' && product._count?.images === 0
+  )
+
+  let normalized = 0
+  let backfilled = 0
+
+  if (productsToFix.length > 0) {
+    await db.$transaction(
+      productsToFix.map((product) =>
+        db.product.update({
+          where: { id: product.id },
+          data: { imageUrl: normalizePublicAssetUrl(product.imageUrl) },
+        })
+      )
+    )
+    normalized = productsToFix.length
+  }
+
+  if (productsMissingImageBank.length > 0) {
+    await db.$transaction(
+      productsMissingImageBank.map((product) =>
+        db.productImage.create({
+          data: {
+            productId: product.id,
+            url: normalizePublicAssetUrl(product.imageUrl),
+            altText: product.imageAlt,
+            order: 0,
+          },
+        })
+      )
+    )
+    backfilled = productsMissingImageBank.length
+  }
+
+  return { normalized, backfilled }
+}
+
 export async function GET() {
   try {
     const currentWeekId = timeGating.getCurrentWeekId()
-    let products: any[] = []
-    let categories: any[] = []
+
+    let products: AdminProduct[] = []
+    let categories: AdminCategory[] = []
 
     try {
       ;[products, categories] = await Promise.all([
@@ -156,76 +231,16 @@ export async function GET() {
             },
           },
           orderBy: [{ name: 'asc' }],
-        }),
+        }) as Promise<AdminProduct[]>,
         db.category.findMany({
           select: { id: true, name: true },
           orderBy: [{ name: 'asc' }],
-        }),
+        }) as Promise<AdminCategory[]>,
       ])
 
       products = products.map((product) => ({
         ...product,
         _count: { orderItems: 0, images: 0 },
-      }))
-    }
-
-    const productsToFix = products.filter((product) => {
-      if (typeof product.imageUrl !== 'string') return false
-      return normalizePublicAssetUrl(product.imageUrl) !== product.imageUrl
-    })
-
-    const productsMissingImageBank = products.filter(
-      (product) => typeof product.imageUrl === 'string' && product.imageUrl.trim() !== '' && product._count?.images === 0
-    )
-
-    if (productsToFix.length > 0) {
-      await db.$transaction(
-        productsToFix.map((product) =>
-          db.product.update({
-            where: { id: product.id },
-            data: { imageUrl: normalizePublicAssetUrl(product.imageUrl) },
-          })
-        )
-      )
-
-      products = products.map((product) => ({
-        ...product,
-        imageUrl: normalizePublicAssetUrl(product.imageUrl),
-      }))
-    }
-
-    if (productsMissingImageBank.length > 0) {
-      await db.$transaction(
-        productsMissingImageBank.map((product) =>
-          db.productImage.create({
-            data: {
-              productId: product.id,
-              url: normalizePublicAssetUrl(product.imageUrl),
-              altText: product.imageAlt,
-              order: 0,
-            },
-          })
-        )
-      )
-
-      products = products.map((product) => ({
-        ...product,
-        _count: {
-          ...product._count,
-          images:
-            typeof product.imageUrl === 'string' && product.imageUrl.trim() !== '' && product._count?.images === 0
-              ? 1
-              : product._count?.images ?? 0,
-        },
-        images:
-          typeof product.imageUrl === 'string' && product.imageUrl.trim() !== '' && (product.images?.length ?? 0) === 0
-            ? [{
-                id: `${product.id}-primary`,
-                url: normalizePublicAssetUrl(product.imageUrl),
-                altText: product.imageAlt,
-                order: 0,
-              }]
-            : product.images,
       }))
     }
 
@@ -272,20 +287,23 @@ export async function GET() {
     return NextResponse.json({ products: normalizedProducts, categories })
   } catch (error) {
     console.error('Error fetching products for admin:', error)
-    return NextResponse.json(mapDbError(error, 'Error al obtener productos'), { status: 500 })
+    return apiDbError(error, 'Error al obtener productos')
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+
+    if (body.action === 'normalize') {
+      const result = await normalizeProductImages()
+      return NextResponse.json(result)
+    }
+
     const parsed = createProductSchema.safeParse(body)
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Datos inválidos', details: parsed.error.flatten() },
-        { status: 400 }
-      )
+      return apiError('Datos inválidos', 400, JSON.stringify(parsed.error.flatten()))
     }
 
     const product = await db.product.create({
@@ -298,6 +316,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
     console.error('Error creating product:', error)
-    return NextResponse.json(mapDbError(error, 'Error al crear producto'), { status: 500 })
+    return apiDbError(error, 'Error al crear producto')
   }
 }

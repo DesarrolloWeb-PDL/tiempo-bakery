@@ -67,45 +67,53 @@ export class StockManager {
       },
     })
 
+    if (products.length === 0) {
+      return { weekId: currentWeekId, updated: 0, created: 0 }
+    }
+
+    const existingRecords = await prisma.weeklyStock.findMany({
+      where: {
+        weekId: currentWeekId,
+        productId: { in: products.map(p => p.id) },
+      },
+    })
+
+    const existingMap = new Map(existingRecords.map(r => [r.productId, r]))
+
     let updated = 0
     let created = 0
 
-    for (const product of products) {
-      const existing = await prisma.weeklyStock.findUnique({
-        where: {
-          productId_weekId: {
-            productId: product.id,
-            weekId: currentWeekId,
-          },
-        },
-      })
+    await prisma.$transaction(async (tx) => {
+      for (const product of products) {
+        const existing = existingMap.get(product.id)
 
-      if (!existing) {
-        await prisma.weeklyStock.create({
+        if (!existing) {
+          await tx.weeklyStock.create({
+            data: {
+              productId: product.id,
+              weekId: currentWeekId,
+              maxStock: product.weeklyStock,
+              currentStock: product.weeklyStock,
+              reservedStock: 0,
+            },
+          })
+          created += 1
+          continue
+        }
+
+        const sold = existing.maxStock - existing.currentStock - existing.reservedStock
+        const nextCurrentStock = Math.max(0, product.weeklyStock - sold - existing.reservedStock)
+
+        await tx.weeklyStock.update({
+          where: { id: existing.id },
           data: {
-            productId: product.id,
-            weekId: currentWeekId,
             maxStock: product.weeklyStock,
-            currentStock: product.weeklyStock,
-            reservedStock: 0,
+            currentStock: nextCurrentStock,
           },
         })
-        created += 1
-        continue
+        updated += 1
       }
-
-      const sold = existing.maxStock - existing.currentStock - existing.reservedStock
-      const nextCurrentStock = Math.max(0, product.weeklyStock - sold - existing.reservedStock)
-
-      await prisma.weeklyStock.update({
-        where: { id: existing.id },
-        data: {
-          maxStock: product.weeklyStock,
-          currentStock: nextCurrentStock,
-        },
-      })
-      updated += 1
-    }
+    })
 
     return { weekId: currentWeekId, updated, created }
   }

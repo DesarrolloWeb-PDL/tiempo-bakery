@@ -12,15 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/toaster';
 import { toast } from '@/components/ui/use-toast';
 import { DeliveryMethod, DEFAULT_SHIPPING_COSTS, PaymentProvider, type PaymentMethodOption, type ShippingCosts } from '@/types/checkout';
-import type { CheckoutFormData } from '@/types/checkout';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
+import type { CheckoutFormData, CheckoutCustomerData, CheckoutDeliveryData } from '@/types/checkout';
+import { formatCurrency } from '@/lib/format';
 
 interface PickupPoint {
   id: string;
@@ -47,10 +40,10 @@ export default function CheckoutPage() {
 
   // Estado del formulario
   const [formData, setFormData] = React.useState<Partial<CheckoutFormData>>({
-    email: '',
-    name: '',
-    phone: '',
-    method: DeliveryMethod.PICKUP_POINT,
+    customerEmail: '',
+    customerName: '',
+    customerPhone: '',
+    deliveryMethod: DeliveryMethod.PICKUP_POINT,
     customerNotes: '',
   });
 
@@ -99,11 +92,11 @@ export default function CheckoutPage() {
     }
   }, [items, router]);
 
-  const handleCustomerUpdate = (data: any) => {
+  const handleCustomerUpdate = (data: CheckoutCustomerData) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
-  const handleDeliveryUpdate = (data: any) => {
+  const handleDeliveryUpdate = (data: Partial<CheckoutDeliveryData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
@@ -140,15 +133,15 @@ export default function CheckoutPage() {
       await new Promise((r) => setTimeout(r, 600));
 
       const orderData = {
-        customerEmail: formData.email,
-        customerName: formData.name,
-        customerPhone: formData.phone,
-        deliveryMethod: formData.method,
+        customerEmail: formData.customerEmail,
+        customerName: formData.customerName,
+        customerPhone: formData.customerPhone,
+        deliveryMethod: formData.deliveryMethod,
         paymentProvider: selectedPaymentProvider,
         pickupLocationId: formData.pickupLocationId,
-        shippingAddress: formData.address,
-        shippingCity: formData.city,
-        shippingPostal: formData.postalCode,
+        shippingAddress: formData.shippingAddress,
+        shippingCity: formData.shippingCity,
+        shippingPostal: formData.shippingPostal,
         items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -167,6 +160,10 @@ export default function CheckoutPage() {
 
       if (!response.ok) {
         throw new Error(result.error || 'Error al procesar el pedido');
+      }
+
+      if (formData.customerEmail) {
+        localStorage.setItem('tbk_checkout_email', formData.customerEmail);
       }
 
       const redirectUrl = result.checkoutUrl || `/pedido/${result.orderId}/confirmacion`;
@@ -231,8 +228,8 @@ export default function CheckoutPage() {
     { number: 3, title: 'Revisar', complete: false },
   ];
 
-  const shippingCost = currentStep >= 2 && formData.method
-    ? shippingCosts[formData.method]
+  const shippingCost = currentStep >= 2 && formData.deliveryMethod
+    ? shippingCosts[formData.deliveryMethod]
     : 0;
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal + shippingCost;
@@ -302,9 +299,9 @@ export default function CheckoutPage() {
             {currentStep === 1 && (
               <CustomerInfoStep
                 data={{
-                  email: formData.email || '',
-                  name: formData.name || '',
-                  phone: formData.phone || '',
+                  customerEmail: formData.customerEmail || '',
+                  customerName: formData.customerName || '',
+                  customerPhone: formData.customerPhone || '',
                 }}
                 onUpdate={handleCustomerUpdate}
                 onNext={() => setCurrentStep(2)}
@@ -314,12 +311,12 @@ export default function CheckoutPage() {
             {currentStep === 2 && (
               <DeliveryStep
                 pickupPoints={pickupPoints}
-                selectedMethod={formData.method || DeliveryMethod.PICKUP_POINT}
+                selectedMethod={formData.deliveryMethod || DeliveryMethod.PICKUP_POINT}
                 shippingCosts={shippingCosts}
                 pickupLocationId={formData.pickupLocationId}
-                address={formData.address}
-                city={formData.city}
-                postalCode={formData.postalCode}
+                address={formData.shippingAddress}
+                city={formData.shippingCity}
+                postalCode={formData.shippingPostal}
                 onUpdate={handleDeliveryUpdate}
                 onNext={() => setCurrentStep(3)}
                 onBack={() => setCurrentStep(1)}
@@ -331,16 +328,16 @@ export default function CheckoutPage() {
                 items={items}
                 shippingCosts={shippingCosts}
                 customerData={{
-                  email: formData.email || '',
-                  name: formData.name || '',
-                  phone: formData.phone || '',
+                  email: formData.customerEmail || '',
+                  name: formData.customerName || '',
+                  phone: formData.customerPhone || '',
                 }}
                 deliveryData={{
-                  method: formData.method || DeliveryMethod.PICKUP_POINT,
+                  method: formData.deliveryMethod || DeliveryMethod.PICKUP_POINT,
                   pickupLocationId: formData.pickupLocationId,
-                  address: formData.address,
-                  city: formData.city,
-                  postalCode: formData.postalCode,
+                  address: formData.shippingAddress,
+                  city: formData.shippingCity,
+                  postalCode: formData.shippingPostal,
                 }}
                 paymentOptions={paymentOptions}
                 selectedPaymentProvider={selectedPaymentProvider}
@@ -384,7 +381,7 @@ export default function CheckoutPage() {
                   <span style={{ color: 'var(--brand-text-muted)' }}>Subtotal</span>
                   <span className="font-medium">{formatCurrency(subtotal)}</span>
                 </div>
-                {currentStep >= 2 && formData.method && (
+                {currentStep >= 2 && formData.deliveryMethod && (
                   <div className="flex justify-between text-sm">
                     <span style={{ color: 'var(--brand-text-muted)' }}>Envío</span>
                     <span className="font-medium">

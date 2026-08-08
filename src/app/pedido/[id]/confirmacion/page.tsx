@@ -9,14 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
+import { formatCurrency } from '@/lib/format';
 
 interface OrderItem {
   id: string;
@@ -88,8 +81,11 @@ export default function OrderConfirmationPage() {
   React.useEffect(() => {
     if (!orderId) return;
 
+    const email = localStorage.getItem('tbk_checkout_email') || '';
+    const emailParam = email ? `?email=${encodeURIComponent(email)}` : '';
+
     Promise.all([
-      fetch(`/api/pedidos/${orderId}`).then((res) => {
+      fetch(`/api/pedidos/${orderId}${emailParam}`).then((res) => {
         if (!res.ok) throw new Error('No se pudo cargar el pedido');
         return res.json();
       }),

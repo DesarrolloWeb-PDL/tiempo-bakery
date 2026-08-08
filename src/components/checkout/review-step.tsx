@@ -10,14 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { DeliveryMethod, PaymentProvider, type PaymentMethodOption, type ShippingCosts } from '@/types/checkout';
 import type { CartItem } from '@/types/cart';
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
+import { formatCurrency } from '@/lib/format';
 
 interface ReviewStepProps {
   items: CartItem[];

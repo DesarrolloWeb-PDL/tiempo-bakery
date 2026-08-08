@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = params;
+    const email = request.nextUrl.searchParams.get('email');
 
     const order = await prisma.order.findUnique({
       where: { id },
@@ -37,41 +38,54 @@ export async function GET(
       return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 });
     }
 
-    // Formatear respuesta
-    const response = {
+    if (email) {
+      if (email.toLowerCase() !== order.customerEmail.toLowerCase()) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+      }
+
+      const response = {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        createdAt: order.createdAt,
+        paidAt: order.paidAt,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        deliveryMethod: order.deliveryMethod,
+        pickupLocation: order.pickupLocation,
+        pickupAddress: order.pickupAddress,
+        pickupSchedule: order.pickupSchedule,
+        shippingAddress: order.shippingAddress,
+        shippingCity: order.shippingCity,
+        shippingPostal: order.shippingPostal,
+        subtotal: Number(order.subtotal),
+        shippingCost: Number(order.shippingCost),
+        total: Number(order.total),
+        customerNotes: order.customerNotes,
+        paymentMethod: order.paymentMethod,
+        items: order.items.map((item) => ({
+          id: item.id,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+          subtotal: Number(item.subtotal),
+          sliced: item.sliced,
+          product: item.product,
+        })),
+      };
+
+      return NextResponse.json(response);
+    }
+
+    return NextResponse.json({
       id: order.id,
       orderNumber: order.orderNumber,
       status: order.status,
       paymentStatus: order.paymentStatus,
       createdAt: order.createdAt,
-      paidAt: order.paidAt,
-      customerName: order.customerName,
-      customerEmail: order.customerEmail,
-      customerPhone: order.customerPhone,
-      deliveryMethod: order.deliveryMethod,
-      pickupLocation: order.pickupLocation,
-      pickupAddress: order.pickupAddress,
-      pickupSchedule: order.pickupSchedule,
-      shippingAddress: order.shippingAddress,
-      shippingCity: order.shippingCity,
-      shippingPostal: order.shippingPostal,
-      subtotal: Number(order.subtotal),
-      shippingCost: Number(order.shippingCost),
-      total: Number(order.total),
-      customerNotes: order.customerNotes,
-      paymentMethod: order.paymentMethod,
-      items: order.items.map((item) => ({
-        id: item.id,
-        productName: item.productName,
-        quantity: item.quantity,
-        unitPrice: Number(item.unitPrice),
-        subtotal: Number(item.subtotal),
-        sliced: item.sliced,
-        product: item.product,
-      })),
-    };
-
-    return NextResponse.json(response);
+    });
   } catch (error) {
     console.error('Error fetching order:', error);
     return NextResponse.json(

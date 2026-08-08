@@ -8,14 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { AddToCartButton } from './add-to-cart-button';
 import { cn } from '@/lib/utils';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
+import { formatCurrency } from '@/lib/format';
 
 const SUPABASE_STORAGE_PATTERN = '.supabase.co/storage/v1/object/public/'
 
