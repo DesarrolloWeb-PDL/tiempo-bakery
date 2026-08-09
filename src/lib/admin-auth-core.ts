@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'crypto'
+
 
 export const ADMIN_COOKIE = 'tbk_admin_auth'
 
@@ -112,9 +112,7 @@ export function verifyTokenSignature(
 ): Promise<boolean> {
   const expectedSignature = signValue(payloadSegment, sessionSecret)
   return expectedSignature.then(
-    (sig) =>
-      signatureSegment.length === sig.length &&
-      timingSafeEqual(Buffer.from(signatureSegment), Buffer.from(sig))
+    (sig) => signatureSegment === sig
   )
 }
 
