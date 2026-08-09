@@ -32,7 +32,7 @@ export type ThemeSettings = {
 }
 
 export const DEFAULT_THEME: ThemeSettings = {
-  appTitle: 'Tiempo Bakery',
+  appTitle: 'Tiempo Masa Madre',
   appSubtitle: 'Micropanadería artesanal por encargo semanal',
   logoUrl: '/img/espiga.png',
   primaryColor: '#D4A95A',

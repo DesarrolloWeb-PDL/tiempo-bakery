@@ -20,7 +20,7 @@ export interface AppTheme {
 }
 
 const DEFAULT_THEME: AppTheme = {
-  appTitle: 'Tiempo Bakery',
+  appTitle: 'Tiempo Masa Madre',
   appSubtitle: 'Micropanadería artesanal por encargo semanal',
   logoUrl: '/img/espiga.png',
   heroImageUrl: '/img/hero-bg.png',

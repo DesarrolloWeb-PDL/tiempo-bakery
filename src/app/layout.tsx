@@ -9,7 +9,7 @@ import { getSiteContent } from "@/lib/site-content";
 import { Toaster } from "@/components/toaster";
 
 export const metadata: Metadata = {
-  title: "Tiempo Bakery - Panadería Artesanal",
+  title: "Tiempo Masa Madre - Panadería Artesanal",
   description: "Micropanadería artesanal por encargo semanal. Panes y dulces elaborados en tandas pequeñas con fermentaciones lentas y producto real.",
   manifest: "/manifest",
   themeColor: "#d89a44",

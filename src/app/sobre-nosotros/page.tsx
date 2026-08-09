@@ -1,7 +1,7 @@
 import { getSiteContent } from '@/lib/site-content'
 
 export const metadata = {
-  title: 'Sobre Nosotros | Tiempo Bakery',
+  title: 'Sobre Nosotros | Tiempo Masa Madre',
 }
 
 export default async function SobreNosotrosPage() {

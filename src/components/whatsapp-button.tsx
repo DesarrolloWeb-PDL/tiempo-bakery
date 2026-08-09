@@ -24,7 +24,7 @@ export default function WhatsAppButton({ siteContent }: WhatsAppButtonProps) {
   if (!mounted || pathname.startsWith('/admin')) return null
 
   const phone = cleanPhone(siteContent.contactWhatsapp)
-  const message = encodeURIComponent('Hola, vengo de Tiempo Bakery...')
+  const message = encodeURIComponent('Hola, vengo de Tiempo Masa Madre...')
   const url = `https://wa.me/${phone}?text=${message}`
 
   return (

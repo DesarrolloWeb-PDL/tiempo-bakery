@@ -78,7 +78,7 @@ const themeSchema = z.object({
 type ThemeConfig = z.infer<typeof themeSchema>
 
 const DEFAULT_THEME: ThemeConfig = {
-  appTitle: 'Tiempo Bakery',
+  appTitle: 'Tiempo Masa Madre',
   appSubtitle: 'Micropanadería artesanal por encargo semanal',
   logoUrl: '/img/espiga.png',
   heroImageUrl: '/img/hero-bg.png',

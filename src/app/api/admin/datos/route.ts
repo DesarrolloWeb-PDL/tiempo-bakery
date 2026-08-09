@@ -91,7 +91,7 @@ export async function GET() {
       siteConfigRows.map((row: { key: string; value: string }) => [row.key, row.value])
     )
     const theme = {
-      appTitle: themeMap.theme_appTitle ?? 'Tiempo Bakery',
+      appTitle: themeMap.theme_appTitle ?? 'Tiempo Masa Madre',
       appSubtitle: themeMap.theme_appSubtitle ?? 'Panaderia artesanal con preventa semanal',
       logoUrl: themeMap.theme_logoUrl ?? '/img/espiga.png',
       primaryColor: themeMap.theme_primaryColor ?? '#d89a44',

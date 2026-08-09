@@ -120,14 +120,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {logoSrc && (
               <Image
                 src={logoSrc}
-                alt="Tiempo Bakery Admin"
+                alt="Tiempo Masa Madre Admin"
                 width={36}
                 height={36}
                 className="h-9 w-9 shrink-0 object-contain"
               />
             )}
             <div>
-              <p className="font-bold text-sm leading-none" style={{ color: 'var(--brand-text-primary)' }}>Tiempo Bakery</p>
+              <p className="font-bold text-sm leading-none" style={{ color: 'var(--brand-text-primary)' }}>Tiempo Masa Madre</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--brand-text-muted)' }}>Panel de Admin</p>
             </div>
           </Link>

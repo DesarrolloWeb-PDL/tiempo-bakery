@@ -61,7 +61,7 @@ function getResendClient() {
 }
 
 function getFromAddress() {
-  return process.env.ORDER_EMAIL_FROM?.trim() || 'Tiempo Bakery <onboarding@resend.dev>'
+  return process.env.ORDER_EMAIL_FROM?.trim() || 'Tiempo Masa Madre <onboarding@resend.dev>'
 }
 
 function getNotificationRecipients(contactEmail: string) {
@@ -115,7 +115,7 @@ function renderDeliveryDetails(order: OrderEmailPayload) {
 function renderCustomerEmailHtml(order: OrderEmailPayload, contactEmail: string) {
   return `
     <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;">
-      <h1 style="margin:0 0 16px;font-size:28px;color:#92400e;">Tiempo Bakery</h1>
+      <h1 style="margin:0 0 16px;font-size:28px;color:#92400e;">Tiempo Masa Madre</h1>
       <p style="margin:0 0 16px;">Hola ${escapeHtml(order.customerName)}, recibimos tu pedido <strong>${escapeHtml(order.orderNumber)}</strong> y el pago quedó confirmado.</p>
       <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin:0 0 20px;">
         ${renderDeliveryDetails(order)}
@@ -184,7 +184,7 @@ export async function sendOrderPaidEmails(order: OrderEmailPayload): Promise<Sen
   const customerResponse = await resend.emails.send({
     from,
     to: [order.customerEmail],
-    subject: `Pedido confirmado ${order.orderNumber} | Tiempo Bakery`,
+    subject: `Pedido confirmado ${order.orderNumber} | Tiempo Masa Madre`,
     html: renderCustomerEmailHtml(order, siteContent.contactEmail),
   })
 

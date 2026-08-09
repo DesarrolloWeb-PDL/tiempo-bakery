@@ -2,13 +2,13 @@ import { getSiteContent } from '@/lib/site-content'
 import { WhatsAppIcon } from '@/components/icons/whatsapp-icon'
 
 export const metadata = {
-  title: 'Contacto | Tiempo Bakery',
+  title: 'Contacto | Tiempo Masa Madre',
 }
 
 export default async function ContactoPage() {
   const siteContent = await getSiteContent()
   const whatsappPhone = siteContent.contactWhatsapp.replace(/[^0-9]/g, '')
-  const whatsappMessage = encodeURIComponent('Hola, vengo de Tiempo Bakery...')
+  const whatsappMessage = encodeURIComponent('Hola, vengo de Tiempo Masa Madre...')
   const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${whatsappMessage}`
 
   return (

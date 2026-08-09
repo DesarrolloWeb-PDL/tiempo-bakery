@@ -49,13 +49,13 @@ function LoginForm() {
           <div className="w-16 h-16 bg-brand-gold rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Image
                 src="/favicon.png"
-                alt="Tiempo Bakery"
+                alt="Tiempo Masa Madre"
                 width={36}
                 height={36}
                 className="object-contain brightness-0 invert"
               />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Tiempo Bakery</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Tiempo Masa Madre</h1>
           <p className="text-gray-500 text-sm mt-1">Panel de administración</p>
         </div>
 

@@ -791,7 +791,7 @@ export default function AdminConfigPage() {
   const [uploadingHeroImage, setUploadingHeroImage] = useState(false)
   const [themeMsg, setThemeMsg] = useState<string | null>(null)
   const [theme, setTheme] = useState({
-    appTitle: 'Tiempo Bakery',
+    appTitle: 'Tiempo Masa Madre',
     appSubtitle: 'Micropanadería artesanal por encargo semanal',
     logoUrl: '/img/espiga.png',
     primaryColor: '#D4A95A',
@@ -1331,7 +1331,7 @@ export default function AdminConfigPage() {
               disabled={loadingTheme || savingTheme}
               onChange={(e) => setTheme({ ...theme, appTitle: e.target.value })}
               className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
-              placeholder="Ej: Tiempo Bakery"
+              placeholder="Ej: Tiempo Masa Madre"
             />
           </div>
 
@@ -1543,7 +1543,7 @@ export default function AdminConfigPage() {
               <span>Vista previa:</span>
               <div style={{ textAlign: theme.titleAlign as any }}>
                 <span style={{ fontFamily: theme.fontHeading, fontSize: theme.fontSizeTitle }} className="font-bold text-white truncate block">
-                  {theme.appTitle || 'Tiempo Bakery'}
+                  {theme.appTitle || 'Tiempo Masa Madre'}
                 </span>
                 {theme.appSubtitle && (
                   <span style={{ fontFamily: theme.fontBody }} className="text-[10px] text-gray-400 truncate block">

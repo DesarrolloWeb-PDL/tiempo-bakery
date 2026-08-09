@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const primaryColor = theme.primaryColor || '#d4a95a';
     const secondaryColor = theme.secondaryColor || '#383333';
-    const appTitle = theme.appTitle || 'Tiempo Bakery';
+    const appTitle = theme.appTitle || 'Tiempo Masa Madre';
 
     const response = new ImageResponse(
       (

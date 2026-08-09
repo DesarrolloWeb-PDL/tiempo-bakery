@@ -378,7 +378,7 @@ export default function AdminPagosPage() {
                         }))
                       }
                       className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-800 text-white"
-                      placeholder="alias.tiempo.bakery"
+                       placeholder="alias.tiempo.masa.madre"
                     />
                   </div>
                   <div>

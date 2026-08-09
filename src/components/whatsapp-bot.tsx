@@ -78,7 +78,7 @@ export default function WhatsAppBot({ siteContent }: WhatsAppBotProps) {
                 <MessageCircle className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-white text-sm">Tiempo Bakery</h3>
+                <h3 className="font-semibold text-white text-sm">Tiempo Masa Madre</h3>
                 <p className="text-xs text-white/80">Respondemos al instante</p>
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function WhatsAppBot({ siteContent }: WhatsAppBotProps) {
           <div className="px-4 py-3 border-t" style={{ borderColor: 'var(--brand-border)' }}>
             <button
               onClick={() => {
-                const message = encodeURIComponent('Hola, vengo de Tiempo Bakery...')
+                const message = encodeURIComponent('Hola, vengo de Tiempo Masa Madre...')
                 const url = `https://wa.me/${phone}?text=${message}`
                 window.open(url, '_blank')
                 setIsOpen(false)
