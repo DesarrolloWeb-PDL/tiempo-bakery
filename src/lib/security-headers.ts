@@ -6,7 +6,7 @@ const CONTENT_SECURITY_POLICY = [
   "frame-ancestors 'none'",
   "form-action 'self'",
   "object-src 'none'",
-  "script-src 'self' https://vercel.live",
+  "script-src 'self' 'unsafe-inline' https://vercel.live",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https:",
