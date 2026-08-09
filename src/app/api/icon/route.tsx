@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
             width: '100%',
             height: '100%',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '20px',
@@ -42,38 +43,49 @@ export async function GET(request: NextRequest) {
             <img
               src={logoUrl}
               alt="Logo"
-              width={size * 0.8}
-              height={size * 0.8}
+              width={size * 0.55}
+              height={size * 0.55}
               style={{
                 objectFit: 'contain',
               }}
             />
           ) : (
+            <div style={{ fontSize: size * 0.4, fontWeight: 'bold' }}>🥖</div>
+          )}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              marginTop: size * 0.04,
+            }}
+          >
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                color: 'white',
+                fontSize: size * 0.1,
+                fontWeight: 'bold',
+                color: primaryColor,
                 textAlign: 'center',
+                lineHeight: 1.1,
+                maxWidth: '90%',
               }}
             >
-              <div style={{ fontSize: size * 0.4, fontWeight: 'bold' }}>🥖</div>
-              <div
-                style={{
-                  fontSize: size * 0.12,
-                  marginTop: 10,
-                  fontWeight: 'bold',
-                  maxWidth: '90%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {appTitle}
-              </div>
+              Tiempo
             </div>
-          )}
+            <div
+              style={{
+                fontSize: size * 0.07,
+                fontWeight: 'bold',
+                color: primaryColor,
+                textAlign: 'center',
+                lineHeight: 1.1,
+                maxWidth: '90%',
+                opacity: 0.85,
+              }}
+            >
+              Masa Madre
+            </div>
+          </div>
         </div>
       ),
       {
