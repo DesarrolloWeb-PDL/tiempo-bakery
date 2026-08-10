@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '20px',
@@ -43,8 +42,8 @@ export async function GET(request: NextRequest) {
             <img
               src={logoUrl}
               alt="Logo"
-              width={size * 0.4}
-              height={size * 0.4}
+              width={size * 0.7}
+              height={size * 0.7}
               style={{
                 objectFit: 'contain',
               }}
@@ -52,37 +51,6 @@ export async function GET(request: NextRequest) {
           ) : (
             <div style={{ fontSize: size * 0.4, fontWeight: 'bold' }}>🥖</div>
           )}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              marginTop: size * 0.05,
-            }}
-          >
-            <div
-              style={{
-                fontSize: size * 0.16,
-                fontWeight: 'bold',
-                color: primaryColor,
-                textAlign: 'center',
-                lineHeight: 1.1,
-              }}
-            >
-              Tiempo
-            </div>
-            <div
-              style={{
-                fontSize: size * 0.12,
-                fontWeight: 'bold',
-                color: primaryColor,
-                textAlign: 'center',
-                lineHeight: 1.1,
-              }}
-            >
-              Masa Madre
-            </div>
-          </div>
         </div>
       ),
       {
