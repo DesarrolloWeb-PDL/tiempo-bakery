@@ -11,7 +11,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
 
   return {
     name: theme.appTitle || 'Tiempo Masa Madre',
-    short_name: '',
+    short_name: ' ',
     description: 'Micropanadería artesanal por encargo semanal. Panes y dulces elaborados en tandas pequeñas con fermentaciones lentas y producto real.',
     start_url: `/?v=${timestamp}`,
     display: 'standalone',
