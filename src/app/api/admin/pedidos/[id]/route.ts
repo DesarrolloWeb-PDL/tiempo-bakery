@@ -3,17 +3,31 @@ import { prisma as db } from '@/lib/db'
 import { z } from 'zod'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { timeGating } from '@/lib/time-gating'
+import { ORDER_STATUSES, canTransition, type OrderStatus } from '@/lib/order-status'
 
 export const dynamic = 'force-dynamic'
 
-const VALID_STATUSES = ['PENDING', 'PAID', 'BAKING', 'READY', 'DELIVERED', 'CANCELLED'] as const
 const VALID_PAYMENT_STATUSES = ['PENDING', 'PAID', 'FAILED'] as const
 
-const updateSchema = z.object({
-  status: z.enum(VALID_STATUSES).optional(),
-  paymentStatus: z.enum(VALID_PAYMENT_STATUSES).optional(),
-  adminNotes: z.string().max(1000).optional(),
-})
+const updateSchema = z
+  .object({
+    status: z.enum(ORDER_STATUSES).optional(),
+    paymentStatus: z.enum(VALID_PAYMENT_STATUSES).optional(),
+    adminNotes: z.string().max(1000).optional(),
+    failedReason: z.string().max(500).optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.status === 'DELIVERY_FAILED') {
+        return typeof data.failedReason === 'string' && data.failedReason.trim().length > 0
+      }
+      return true
+    },
+    {
+      message: 'El motivo de fallo es obligatorio para DELIVERY_FAILED',
+      path: ['failedReason'],
+    }
+  )
 
 export async function GET(
   _req: NextRequest,
@@ -31,6 +45,13 @@ export async function GET(
           },
         },
         user: { select: { id: true, email: true, name: true } },
+        assignment: {
+          include: {
+            deliveryPerson: {
+              select: { id: true, name: true, phone: true },
+            },
+          },
+        },
       },
     })
 
@@ -69,30 +90,144 @@ export async function PATCH(
       )
     }
 
-    const { status, paymentStatus, adminNotes } = parsed.data
+    const { status, paymentStatus, adminNotes, failedReason } = parsed.data
 
-    const existing = await db.order.findUnique({ where: { id: params.id } })
+    const existing = await db.order.findUnique({
+      where: { id: params.id },
+      select: {
+        id: true,
+        status: true,
+        deliveryMethod: true,
+        paymentStatus: true,
+        deliveredAt: true,
+      },
+    })
+
     if (!existing) {
       return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
     }
 
-    const updatedOrder = await db.order.update({
-      where: { id: params.id },
-      data: {
-        ...(status !== undefined && { status }),
-        ...(paymentStatus !== undefined && { paymentStatus }),
-        ...(status === 'DELIVERED' && !existing.deliveredAt && { deliveredAt: new Date() }),
-        ...(paymentStatus === 'PAID' && existing.paymentStatus !== 'PAID' && { paidAt: new Date() }),
-      },
-      select: {
-        id: true,
-        orderNumber: true,
-        status: true,
-        paymentStatus: true,
-        adminNotes: true,
-        updatedAt: true,
-      },
-    })
+    if (status !== undefined && status !== existing.status) {
+      if (
+        !canTransition(
+          existing.status as OrderStatus,
+          status,
+          existing.deliveryMethod as 'PICKUP_POINT' | 'LOCAL_DELIVERY' | 'NATIONAL_COURIER'
+        )
+      ) {
+        return NextResponse.json(
+          { error: `Transición no válida de ${existing.status} a ${status}` },
+          { status: 400 }
+        )
+      }
+    }
+
+    if (status === 'OUT_FOR_DELIVERY') {
+      const assignment = await db.deliveryAssignment.findUnique({
+        where: { orderId: params.id },
+      })
+      if (!assignment) {
+        return NextResponse.json(
+          { error: 'Se requiere una asignación de repartidor para cambiar a EN CAMINO' },
+          { status: 400 }
+        )
+      }
+    }
+
+    let updatedOrder
+
+    if (status === 'DELIVERED') {
+      const now = new Date()
+      const assignment = await db.deliveryAssignment.findUnique({
+        where: { orderId: params.id },
+        select: { id: true },
+      })
+
+      const [orderResult] = await db.$transaction([
+        db.order.update({
+          where: { id: params.id },
+          data: {
+            status,
+            ...(paymentStatus !== undefined && { paymentStatus }),
+            ...(adminNotes !== undefined && { adminNotes }),
+            ...(!existing.deliveredAt && { deliveredAt: now }),
+          },
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            paymentStatus: true,
+            adminNotes: true,
+            deliveredAt: true,
+            updatedAt: true,
+          },
+        }),
+        ...(assignment
+          ? [
+              db.deliveryAssignment.update({
+                where: { id: assignment.id },
+                data: { deliveredAt: now },
+              }),
+            ]
+          : []),
+      ])
+
+      updatedOrder = orderResult
+    } else if (status === 'DELIVERY_FAILED') {
+      const assignment = await db.deliveryAssignment.findUnique({
+        where: { orderId: params.id },
+        select: { id: true },
+      })
+
+      const [orderResult] = await db.$transaction([
+        db.order.update({
+          where: { id: params.id },
+          data: {
+            status,
+            ...(paymentStatus !== undefined && { paymentStatus }),
+            ...(adminNotes !== undefined && { adminNotes }),
+          },
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            paymentStatus: true,
+            adminNotes: true,
+            deliveredAt: true,
+            updatedAt: true,
+          },
+        }),
+        ...(assignment
+          ? [
+              db.deliveryAssignment.update({
+                where: { id: assignment.id },
+                data: { failedReason },
+              }),
+            ]
+          : []),
+      ])
+
+      updatedOrder = orderResult
+    } else {
+      updatedOrder = await db.order.update({
+        where: { id: params.id },
+        data: {
+          ...(status !== undefined && { status }),
+          ...(paymentStatus !== undefined && { paymentStatus }),
+          ...(adminNotes !== undefined && { adminNotes }),
+          ...(paymentStatus === 'PAID' && existing.paymentStatus !== 'PAID' && { paidAt: new Date() }),
+        },
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          paymentStatus: true,
+          adminNotes: true,
+          deliveredAt: true,
+          updatedAt: true,
+        },
+      })
+    }
 
     return NextResponse.json(updatedOrder)
   } catch (error) {

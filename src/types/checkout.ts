@@ -30,6 +30,9 @@ export const checkoutDeliverySchema = z.discriminatedUnion('deliveryMethod', [
     shippingAddress: z.string().min(5, 'La dirección debe tener al menos 5 caracteres'),
     shippingCity: z.string().min(2, 'La ciudad es requerida'),
     shippingPostal: z.string().min(5, 'El código postal es requerido'),
+    zoneId: z.string().optional(),
+    scheduleId: z.string().optional(),
+    deliveryDate: z.coerce.date().optional(),
   }),
   z.object({
     deliveryMethod: z.literal(DeliveryMethod.NATIONAL_COURIER),
@@ -54,6 +57,9 @@ export const checkoutSchema = z.object({
   shippingAddress: z.string().optional(),
   shippingCity: z.string().optional(),
   shippingPostal: z.string().optional(),
+  zoneId: z.string().optional(),
+  scheduleId: z.string().optional(),
+  deliveryDate: z.coerce.date().optional(),
   items: z.array(
     z.object({
       productId: z.string(),

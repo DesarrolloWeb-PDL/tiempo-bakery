@@ -6,9 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Truck, Package } from 'lucide-react';
-import { DeliveryMethod, type ShippingCosts } from '@/types/checkout';
+import { DeliveryMethod, type ShippingCosts, type CheckoutFormData } from '@/types/checkout';
 import { formatCurrency } from '@/lib/format';
 import { useLanguage } from '@/components/language-provider';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { DeliveryZone, AvailableSlot } from '@/types/delivery';
+
 
 interface PickupPoint {
   id: string;
@@ -19,33 +28,51 @@ interface PickupPoint {
   instructions?: string;
 }
 
+interface DeliveryDayOption {
+  date: Date;
+  slot: AvailableSlot;
+}
+
 interface DeliveryStepProps {
   pickupPoints: PickupPoint[];
   selectedMethod: DeliveryMethod;
   shippingCosts: ShippingCosts;
+  zones?: DeliveryZone[];
+  availableDays?: DeliveryDayOption[];
   pickupLocationId?: string;
   address?: string;
   city?: string;
   postalCode?: string;
-  onUpdate: (data: {
-    deliveryMethod?: DeliveryMethod;
-    pickupLocationId?: string;
-    shippingAddress?: string;
-    shippingCity?: string;
-    shippingPostal?: string;
-  }) => void;
+  zoneId?: string;
+  scheduleId?: string;
+  deliveryDate?: Date | string;
+  onUpdate: (data: Partial<CheckoutFormData>) => void;
   onNext: () => void;
   onBack: () => void;
+}
+
+function formatDayLabel(date: Date, startTime: string, endTime: string) {
+  const formatter = new Intl.DateTimeFormat('es', {
+    weekday: 'long',
+    day: 'numeric',
+  });
+  const day = formatter.format(date);
+  return `${day.charAt(0).toUpperCase()}${day.slice(1)} · ${startTime} - ${endTime}`;
 }
 
 export function DeliveryStep({
   pickupPoints,
   selectedMethod,
   shippingCosts,
+  zones = [],
+  availableDays = [],
   pickupLocationId,
   address,
   city,
   postalCode,
+  zoneId,
+  scheduleId,
+  deliveryDate,
   onUpdate,
   onNext,
   onBack,
@@ -54,10 +81,18 @@ export function DeliveryStep({
   const [autoAdvance, setAutoAdvance] = React.useState(false);
   const { t } = useLanguage();
 
+  const selectedZone = zones.find((z) => z.id === zoneId);
+  const localDeliveryCost =
+    selectedMethod === DeliveryMethod.LOCAL_DELIVERY && selectedZone
+      ? selectedZone.shippingCost
+      : shippingCosts.LOCAL_DELIVERY;
+
   const isDeliveryValid =
     selectedMethod === DeliveryMethod.PICKUP_POINT
       ? !!pickupLocationId
-      : !!(address && city && postalCode);
+      : selectedMethod === DeliveryMethod.LOCAL_DELIVERY
+        ? !!(address && city && postalCode)
+        : !!(address && city && postalCode);
 
   React.useEffect(() => {
     if (!isDeliveryValid) {
@@ -75,7 +110,29 @@ export function DeliveryStep({
   }, [autoAdvance, errors, onNext]);
 
   const handleMethodChange = (method: DeliveryMethod) => {
-    onUpdate({ deliveryMethod: method, pickupLocationId: undefined, shippingAddress: '', shippingCity: '', shippingPostal: '' });
+    onUpdate({
+      deliveryMethod: method,
+      pickupLocationId: undefined,
+      shippingAddress: '',
+      shippingCity: '',
+      shippingPostal: '',
+      zoneId: undefined,
+      scheduleId: undefined,
+      deliveryDate: undefined,
+    });
+  };
+
+  const handleZoneChange = (value: string) => {
+    onUpdate({
+      zoneId: value === '__none__' ? undefined : value,
+      scheduleId: undefined,
+      deliveryDate: undefined,
+    });
+  };
+
+  const handleDayChange = (value: string) => {
+    const [scheduleId, date] = value.split(':');
+    onUpdate({ scheduleId, deliveryDate: new Date(date) });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -116,7 +173,7 @@ export function DeliveryStep({
       icon: Truck,
       title: t.deliveryLocal,
       description: t.deliveryLocalDesc,
-      cost: shippingCosts.LOCAL_DELIVERY,
+      cost: localDeliveryCost,
     },
     {
       method: DeliveryMethod.NATIONAL_COURIER,
@@ -126,6 +183,15 @@ export function DeliveryStep({
       cost: shippingCosts.NATIONAL_COURIER,
     },
   ];
+
+  const deliveryDateString = deliveryDate
+    ? typeof deliveryDate === 'string'
+      ? deliveryDate
+      : deliveryDate.toISOString()
+    : undefined;
+  const selectedDayValue = scheduleId && deliveryDateString
+    ? `${scheduleId}:${deliveryDateString.split('T')[0]}`
+    : undefined;
 
   return (
     <Card>
@@ -223,8 +289,124 @@ export function DeliveryStep({
             </div>
           )}
 
-          {(selectedMethod === DeliveryMethod.LOCAL_DELIVERY ||
-            selectedMethod === DeliveryMethod.NATIONAL_COURIER) && (
+          {selectedMethod === DeliveryMethod.LOCAL_DELIVERY && (
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="address"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--brand-text-primary)' }}
+                >
+                  {t.deliveryAddress}
+                </label>
+                <Input
+                  id="address"
+                  type="text"
+                  value={address || ''}
+                  onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
+                  placeholder="Calle, número, piso..."
+                  required
+                />
+                {errors.address && (
+                  <p className="text-sm text-red-600 mt-1">{errors.address}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: 'var(--brand-text-primary)' }}
+                  >
+                    {t.deliveryCity}
+                  </label>
+                  <Input
+                    id="city"
+                    type="text"
+                    value={city || ''}
+                    onChange={(e) => onUpdate({ shippingCity: e.target.value })}
+                    placeholder="Utrera"
+                    required
+                  />
+                  {errors.city && (
+                    <p className="text-sm text-red-600 mt-1">{errors.city}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="postalCode"
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: 'var(--brand-text-primary)' }}
+                  >
+                    {t.deliveryPostal}
+                  </label>
+                  <Input
+                    id="postalCode"
+                    type="text"
+                    value={postalCode || ''}
+                    onChange={(e) => onUpdate({ shippingPostal: e.target.value })}
+                    placeholder="41710"
+                    required
+                  />
+                  {errors.postalCode && (
+                    <p className="text-sm text-red-600 mt-1">{errors.postalCode}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--brand-text-primary)' }}
+                >
+                  {t.deliveryZoneLabel}
+                </label>
+                <Select value={zoneId} onValueChange={handleZoneChange}>
+                  <SelectTrigger aria-label={t.deliveryZoneLabel}>
+                    <SelectValue placeholder={t.deliveryZonePlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t.deliveryZonePlaceholder}</SelectItem>
+                    {zones.map((zone) => (
+                      <SelectItem key={zone.id} value={zone.id}>
+                        {zone.name} — {formatCurrency(zone.shippingCost)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedZone && availableDays.length > 0 && (
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: 'var(--brand-text-primary)' }}
+                  >
+                    {t.deliveryDayLabel}
+                  </label>
+                  <Select value={selectedDayValue} onValueChange={handleDayChange}>
+                    <SelectTrigger aria-label={t.deliveryDayLabel}>
+                      <SelectValue placeholder={t.deliveryDayPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableDays.map((day) => {
+                        const value = `${day.slot.id}:${day.date.toISOString().split('T')[0]}`;
+                        return (
+                          <SelectItem key={value} value={value}>
+                            {formatDayLabel(day.date, day.slot.startTime, day.slot.endTime)}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
+
+          {selectedMethod === DeliveryMethod.NATIONAL_COURIER && (
             <div className="space-y-4">
               <div>
                 <label

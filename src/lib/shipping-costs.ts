@@ -48,3 +48,26 @@ export function getShippingCostByMethod(method: string, costs: ShippingCosts): n
   if (method === 'NATIONAL_COURIER') return costs.nationalCourier
   return 0
 }
+
+export async function getLocalDeliveryShippingCost(
+  zoneId: string | null | undefined,
+  subtotal: number
+): Promise<number> {
+  if (zoneId) {
+    try {
+      const zone = await prisma.deliveryZone.findUnique({ where: { id: zoneId } })
+
+      if (zone && zone.isActive) {
+        if (zone.minOrderFree != null && subtotal >= zone.minOrderFree) {
+          return 0
+        }
+        return zone.shippingCost
+      }
+    } catch (error) {
+      console.error('Error loading delivery zone, using fallback:', error)
+    }
+  }
+
+  const costs = await getShippingCostsRuntime()
+  return costs.localDelivery
+}

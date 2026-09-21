@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   ShoppingBag,
@@ -15,6 +15,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatCurrency } from '@/lib/format'
+import { getStatusLabel, isValidStatus } from '@/lib/order-status'
+import type { OrderStatus } from '@/lib/order-status'
 
 // ─────────────────────────────────────────────
 // Tipos
@@ -59,13 +61,15 @@ interface MetricsData {
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
-const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  PENDING:   { label: 'Pendiente',  className: 'bg-yellow-100 text-yellow-700' },
-  PAID:      { label: 'Pagado',     className: 'bg-blue-100 text-blue-700' },
-  BAKING:    { label: 'En horno',   className: 'bg-orange-100 text-orange-700' },
-  READY:     { label: 'Listo',      className: 'bg-green-100 text-green-700' },
-  DELIVERED: { label: 'Entregado',  className: 'bg-gray-700 text-gray-300' },
-  CANCELLED: { label: 'Cancelado',  className: 'bg-red-100 text-red-700' },
+const STATUS_STYLES: Record<OrderStatus, string> = {
+  PENDING: 'bg-yellow-100 text-yellow-700',
+  PAID: 'bg-blue-100 text-blue-700',
+  BAKING: 'bg-orange-100 text-orange-700',
+  READY: 'bg-green-100 text-green-700',
+  OUT_FOR_DELIVERY: 'bg-brand-gold/20 text-brand-gold-dark',
+  DELIVERED: 'bg-gray-700 text-gray-300',
+  DELIVERY_FAILED: 'bg-red-100 text-red-700',
+  CANCELLED: 'bg-red-100 text-red-700',
 }
 
 const DELIVERY_LABELS: Record<string, string> = {
@@ -326,10 +330,9 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   data.recentOrders.map((order) => {
-                    const status = STATUS_LABELS[order.status] ?? {
-                      label: order.status,
-                      className: 'bg-gray-700 text-gray-300',
-                    }
+                    const statusKey = isValidStatus(order.status) ? order.status : null
+                    const statusClass = statusKey ? STATUS_STYLES[statusKey] : 'bg-gray-700 text-gray-300'
+                    const statusLabel = statusKey ? getStatusLabel(statusKey) : order.status
                     const totalItems = order.items.reduce((s, i) => s + i.quantity, 0)
                     return (
                       <Link
@@ -345,10 +348,10 @@ export default function AdminDashboard() {
                             <span
                               className={cn(
                                 'text-xs px-1.5 py-0.5 rounded-full font-medium',
-                                status.className
+                                statusClass
                               )}
                             >
-                              {status.label}
+                              {statusLabel}
                             </span>
                           </div>
                           <p className="text-xs text-gray-400 mt-0.5 truncate">

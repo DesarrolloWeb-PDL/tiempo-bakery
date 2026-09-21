@@ -3,12 +3,23 @@ export const dynamic = "force-dynamic"
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Clock3, Key, Layout, Loader2, LogOut, Mail, MapPin, Info, Palette, Plus, RefreshCw, RotateCcw, Save, Settings, Trash2, Truck } from 'lucide-react'
+import { Key, Layout, Loader2, LogOut, Mail, Info, Palette, Settings, Truck } from 'lucide-react'
 import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { DEFAULT_SITE_CONTENT, type SiteContent } from '@/lib/site-content.shared'
-import { formatCurrency } from '@/lib/format'
+import { DeliveryConfigAdmin } from '@/components/admin/delivery/delivery-config-tab'
+import { DEFAULT_PREVENTA_CONFIG, type PreventaConfig } from '@/components/admin/delivery/preventa-config'
+import { EMPTY_PICKUP_POINT, type PickupPoint, type PickupPointDraft } from '@/components/admin/delivery/pickup-points-config'
+import {
+  EMPTY_ZONE_DRAFT,
+  type ZoneDraft,
+} from '@/components/admin/delivery/delivery-zones-config'
+import {
+  EMPTY_SCHEDULE_DRAFT,
+  type ScheduleDraft,
+} from '@/components/admin/delivery/delivery-schedule-config'
+import type { DeliveryScheduleWithAvailability, DeliveryZone } from '@/types/delivery'
 
 type SiteContentEditorProps = {
   siteContent: SiteContent
@@ -20,98 +31,6 @@ type SiteContentEditorProps = {
   onReset: () => void
 }
 
-type PreventaConfig = {
-  enabled: boolean
-  openingDay: number
-  openingHour: number
-  openingMinute: number
-  closingDay: number
-  closingHour: number
-  closingMinute: number
-}
-
-type PickupPoint = {
-  id: string
-  name: string
-  address: string
-  city: string
-  postalCode: string
-  schedule: string
-  instructions: string
-  isActive: boolean
-  order: number
-}
-
-type PickupPointDraft = Omit<PickupPoint, 'id'>
-
-type DeliveryConfigAdminProps = {
-  preventa: PreventaConfig
-  setPreventa: React.Dispatch<React.SetStateAction<PreventaConfig>>
-  loadingPreventa: boolean
-  savingPreventa: boolean
-  preventaMsg: string | null
-  onRefreshPreventa: () => void
-  onSavePreventa: () => void
-  onResetPreventa: () => void
-  shippingCosts: {
-    pickupPoint: number
-    localDelivery: number
-    nationalCourier: number
-  }
-  setShippingCosts: React.Dispatch<React.SetStateAction<{
-    pickupPoint: number
-    localDelivery: number
-    nationalCourier: number
-  }>>
-  loadingShipping: boolean
-  savingShipping: boolean
-  shippingMsg: string | null
-  onSaveShipping: () => void
-  onResetShipping: () => void
-  pickupPoints: PickupPoint[]
-  pickupDraft: PickupPointDraft
-  setPickupDraft: React.Dispatch<React.SetStateAction<PickupPointDraft>>
-  editingPickupId: string | null
-  loadingPickupPoints: boolean
-  savingPickupPoint: boolean
-  pickupPointsMsg: string | null
-  onRefreshPickupPoints: () => void
-  onEditPickupPoint: (point: PickupPoint) => void
-  onCancelEditPickupPoint: () => void
-  onSavePickupPoint: () => void
-  onDeletePickupPoint: (id: string) => void
-}
-
-const DAY_OPTIONS = [
-  { value: 0, label: 'Domingo' },
-  { value: 1, label: 'Lunes' },
-  { value: 2, label: 'Martes' },
-  { value: 3, label: 'Miércoles' },
-  { value: 4, label: 'Jueves' },
-  { value: 5, label: 'Viernes' },
-  { value: 6, label: 'Sábado' },
-]
-
-const DEFAULT_PREVENTA_CONFIG: PreventaConfig = {
-  enabled: true,
-  openingDay: 3,
-  openingHour: 18,
-  openingMinute: 0,
-  closingDay: 0,
-  closingHour: 20,
-  closingMinute: 0,
-}
-
-const EMPTY_PICKUP_POINT: PickupPointDraft = {
-  name: '',
-  address: '',
-  city: '',
-  postalCode: '',
-  schedule: '',
-  instructions: '',
-  isActive: true,
-  order: 0,
-}
 
 function SiteContentActions({ loading, saving, message, onSave, onReset }: Omit<SiteContentEditorProps, 'siteContent' | 'setSiteContent'>) {
   return (
@@ -445,333 +364,6 @@ function ContactoConfigAdmin({ siteContent, setSiteContent, loading, saving, mes
   )
 }
 
-function DeliveryConfigAdmin({
-  preventa,
-  setPreventa,
-  loadingPreventa,
-  savingPreventa,
-  preventaMsg,
-  onRefreshPreventa,
-  onSavePreventa,
-  onResetPreventa,
-  shippingCosts,
-  setShippingCosts,
-  loadingShipping,
-  savingShipping,
-  shippingMsg,
-  onSaveShipping,
-  onResetShipping,
-  pickupPoints,
-  pickupDraft,
-  setPickupDraft,
-  editingPickupId,
-  loadingPickupPoints,
-  savingPickupPoint,
-  pickupPointsMsg,
-  onRefreshPickupPoints,
-  onEditPickupPoint,
-  onCancelEditPickupPoint,
-  onSavePickupPoint,
-  onDeletePickupPoint,
-}: DeliveryConfigAdminProps) {
-  const timeOptions = Array.from({ length: 24 }, (_, hour) => hour)
-  const minuteOptions = [0, 15, 30, 45]
-
-  const updatePreventa = <K extends keyof PreventaConfig>(key: K, value: PreventaConfig[K]) => {
-    setPreventa((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const updatePickupDraft = <K extends keyof PickupPointDraft>(key: K, value: PickupPointDraft[K]) => {
-    setPickupDraft((prev) => ({ ...prev, [key]: value }))
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-gray-700">
-          <div>
-            <h2 className="font-semibold text-white text-sm">Ventana semanal de preventa</h2>
-            <p className="text-xs text-gray-400 mt-1">Configura cuándo abre y cierra el período de pedidos.</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={onRefreshPreventa}
-              disabled={loadingPreventa || savingPreventa}
-              className="px-3 py-2 bg-white text-gray-300 text-sm rounded-lg border border-gray-700 hover:bg-gray-100 disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${loadingPreventa ? 'animate-spin' : ''}`} />
-            </button>
-            <button
-              onClick={onResetPreventa}
-              disabled={loadingPreventa || savingPreventa}
-              className="flex items-center gap-2 px-3 py-2 bg-red-900/30 text-red-400 text-sm rounded-lg border border-red-800 hover:bg-red-900/50 disabled:opacity-50"
-            >
-              <RotateCcw className="w-4 h-4" /> Restablecer
-            </button>
-            <button
-              onClick={onSavePreventa}
-              disabled={loadingPreventa || savingPreventa}
-              className="flex items-center gap-2 px-4 py-2 bg-brand-gold text-white text-sm rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
-            >
-              <Save className="w-4 h-4" /> {savingPreventa ? 'Guardando...' : 'Guardar'}
-            </button>
-          </div>
-        </div>
-        <div className="px-5 py-4 space-y-4">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-            <input
-              type="checkbox"
-              checked={preventa.enabled}
-              onChange={(e) => updatePreventa('enabled', e.target.checked)}
-              disabled={loadingPreventa || savingPreventa}
-            />
-            Activar restricción de preventa
-          </label>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Apertura</p>
-              <div className="grid grid-cols-3 gap-2">
-                <select
-                  value={preventa.openingDay}
-                  onChange={(e) => updatePreventa('openingDay', Number(e.target.value))}
-                  disabled={loadingPreventa || savingPreventa}
-                  className="col-span-2 px-3 py-2 rounded-lg border border-gray-700 text-sm"
-                >
-                  {DAY_OPTIONS.map((day) => (
-                    <option key={day.value} value={day.value}>{day.label}</option>
-                  ))}
-                </select>
-                <div className="flex gap-2">
-                  <select
-                    value={preventa.openingHour}
-                    onChange={(e) => updatePreventa('openingHour', Number(e.target.value))}
-                    disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
-                  >
-                    {timeOptions.map((hour) => (
-                      <option key={hour} value={hour}>{String(hour).padStart(2, '0')}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={preventa.openingMinute}
-                    onChange={(e) => updatePreventa('openingMinute', Number(e.target.value))}
-                    disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
-                  >
-                    {minuteOptions.map((minute) => (
-                      <option key={minute} value={minute}>{String(minute).padStart(2, '0')}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Cierre</p>
-              <div className="grid grid-cols-3 gap-2">
-                <select
-                  value={preventa.closingDay}
-                  onChange={(e) => updatePreventa('closingDay', Number(e.target.value))}
-                  disabled={loadingPreventa || savingPreventa}
-                  className="col-span-2 px-3 py-2 rounded-lg border border-gray-700 text-sm"
-                >
-                  {DAY_OPTIONS.map((day) => (
-                    <option key={day.value} value={day.value}>{day.label}</option>
-                  ))}
-                </select>
-                <div className="flex gap-2">
-                  <select
-                    value={preventa.closingHour}
-                    onChange={(e) => updatePreventa('closingHour', Number(e.target.value))}
-                    disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
-                  >
-                    {timeOptions.map((hour) => (
-                      <option key={hour} value={hour}>{String(hour).padStart(2, '0')}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={preventa.closingMinute}
-                    onChange={(e) => updatePreventa('closingMinute', Number(e.target.value))}
-                    disabled={loadingPreventa || savingPreventa}
-                    className="w-full px-2 py-2 rounded-lg border border-gray-700 text-sm"
-                  >
-                    {minuteOptions.map((minute) => (
-                      <option key={minute} value={minute}>{String(minute).padStart(2, '0')}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-xs text-gray-400 bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 flex items-center gap-2">
-            <Clock3 className="w-4 h-4 text-gray-400" />
-            Apertura {DAY_OPTIONS.find((d) => d.value === preventa.openingDay)?.label} {String(preventa.openingHour).padStart(2, '0')}:{String(preventa.openingMinute).padStart(2, '0')} · cierre {DAY_OPTIONS.find((d) => d.value === preventa.closingDay)?.label} {String(preventa.closingHour).padStart(2, '0')}:{String(preventa.closingMinute).padStart(2, '0')}
-          </div>
-
-          {preventaMsg && <p className={`text-sm ${preventaMsg.includes('guardada') || preventaMsg.includes('restablecida') ? 'text-green-600' : 'text-red-600'}`}>{preventaMsg}</p>}
-        </div>
-      </div>
-
-      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-700">
-          <Truck className="w-4 h-4 text-brand-gold" />
-          <h3 className="font-semibold text-white text-sm">Costos de envío</h3>
-        </div>
-        <div className="px-5 py-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Envío local (AR$)</label>
-              <input
-                type="number"
-                min={0}
-                step="1"
-                value={shippingCosts.localDelivery}
-                disabled={loadingShipping || savingShipping}
-                onChange={(e) => setShippingCosts((prev) => ({ ...prev, localDelivery: Number(e.target.value) }))}
-                className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
-              />
-              <p className="text-xs text-gray-400 mt-1">{formatCurrency(shippingCosts.localDelivery)}</p>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Mensajería nacional (AR$)</label>
-              <input
-                type="number"
-                min={0}
-                step="1"
-                value={shippingCosts.nationalCourier}
-                disabled={loadingShipping || savingShipping}
-                onChange={(e) => setShippingCosts((prev) => ({ ...prev, nationalCourier: Number(e.target.value) }))}
-                className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
-              />
-              <p className="text-xs text-gray-400 mt-1">{formatCurrency(shippingCosts.nationalCourier)}</p>
-            </div>
-          </div>
-
-          <p className="text-xs text-gray-400">Recogida en punto siempre se mantiene en <strong>gratis</strong>.</p>
-          {shippingMsg && <p className="text-sm text-gray-300">{shippingMsg}</p>}
-
-          <div className="flex gap-2">
-            <button
-              onClick={onSaveShipping}
-              disabled={loadingShipping || savingShipping}
-              className="px-4 py-2 bg-brand-gold text-white text-sm font-medium rounded-lg hover:bg-brand-gold-dark disabled:opacity-50"
-            >
-              {savingShipping ? 'Guardando...' : 'Guardar costos'}
-            </button>
-            <button
-              onClick={onResetShipping}
-              disabled={loadingShipping || savingShipping}
-              className="px-4 py-2 bg-gray-700 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-600 disabled:opacity-50"
-            >
-              Restablecer
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-gray-700">
-          <div>
-            <h3 className="font-semibold text-white text-sm">Puntos de recogida</h3>
-            <p className="text-xs text-gray-400 mt-1">Administrá los puntos visibles en checkout y su orden.</p>
-          </div>
-          <button
-            onClick={onRefreshPickupPoints}
-            disabled={loadingPickupPoints || savingPickupPoint}
-            className="px-3 py-2 bg-white text-gray-300 text-sm rounded-lg border border-gray-700 hover:bg-gray-100 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${loadingPickupPoints ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-        <div className="px-5 py-4 space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Nombre</label>
-              <input type="text" value={pickupDraft.name} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('name', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Horario</label>
-              <input type="text" value={pickupDraft.schedule} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('schedule', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" placeholder="Ej: Viernes 10:00 a 14:00" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Dirección</label>
-              <input type="text" value={pickupDraft.address} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('address', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Ciudad</label>
-              <input type="text" value={pickupDraft.city} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('city', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Código postal</label>
-              <input type="text" value={pickupDraft.postalCode} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('postalCode', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Orden</label>
-              <input type="number" min={0} step="1" value={pickupDraft.order} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('order', Number(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm" />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs text-gray-400 mb-1">Instrucciones</label>
-              <textarea value={pickupDraft.instructions} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('instructions', e.target.value)} className="w-full min-h-24 px-3 py-2 rounded-lg border border-gray-700 text-sm" />
-            </div>
-          </div>
-
-          <label className="flex items-center gap-2 text-sm text-gray-300">
-            <input type="checkbox" checked={pickupDraft.isActive} disabled={savingPickupPoint} onChange={(e) => updatePickupDraft('isActive', e.target.checked)} />
-            Punto activo en checkout
-          </label>
-
-          {pickupPointsMsg && <p className={`text-sm ${pickupPointsMsg.includes('guardado') || pickupPointsMsg.includes('agregado') || pickupPointsMsg.includes('eliminado') ? 'text-green-600' : 'text-red-600'}`}>{pickupPointsMsg}</p>}
-
-          <div className="flex gap-2">
-            <button onClick={onSavePickupPoint} disabled={savingPickupPoint} className="flex items-center gap-2 px-4 py-2 bg-brand-gold text-white text-sm rounded-lg hover:bg-brand-gold-dark disabled:opacity-50">
-              {editingPickupId ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {savingPickupPoint ? 'Guardando...' : editingPickupId ? 'Actualizar punto' : 'Agregar punto'}
-            </button>
-            {editingPickupId && (
-              <button onClick={onCancelEditPickupPoint} disabled={savingPickupPoint} className="px-4 py-2 bg-gray-700 text-gray-300 text-sm rounded-lg hover:bg-gray-600 disabled:opacity-50">
-                Cancelar edición
-              </button>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            {pickupPoints.map((point) => (
-              <div key={point.id} className="rounded-lg border border-gray-700 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-white flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-brand-gold" /> {point.name}
-                    </p>
-                    <p className="text-sm text-gray-300">{point.address}, {point.city} {point.postalCode}</p>
-                    <p className="text-xs text-gray-400">{point.schedule}</p>
-                    {point.instructions && <p className="text-xs text-gray-400">{point.instructions}</p>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${point.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-700 text-gray-400'}`}>
-                      {point.isActive ? 'Activo' : 'Oculto'}
-                    </span>
-                    <button onClick={() => onEditPickupPoint(point)} disabled={savingPickupPoint} className="px-3 py-2 bg-gray-700 text-gray-300 text-xs rounded-lg hover:bg-gray-600 disabled:opacity-50">Editar</button>
-                    <button onClick={() => onDeletePickupPoint(point.id)} disabled={savingPickupPoint} className="px-3 py-2 bg-red-900/30 text-red-400 text-xs rounded-lg hover:bg-red-900/50 disabled:opacity-50">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {!pickupPoints.length && !loadingPickupPoints && (
-              <div className="rounded-lg border border-dashed border-gray-600 p-4 text-sm text-gray-400">
-                Todavía no hay puntos de recogida cargados.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function AdminConfigPage() {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -869,6 +461,20 @@ export default function AdminConfigPage() {
   const [pickupDraft, setPickupDraft] = useState<PickupPointDraft>(EMPTY_PICKUP_POINT)
   const [editingPickupId, setEditingPickupId] = useState<string | null>(null)
 
+  const [loadingZones, setLoadingZones] = useState(true)
+  const [savingZone, setSavingZone] = useState(false)
+  const [zonesMsg, setZonesMsg] = useState<string | null>(null)
+  const [zones, setZones] = useState<DeliveryZone[]>([])
+  const [zoneDraft, setZoneDraft] = useState<ZoneDraft>(EMPTY_ZONE_DRAFT)
+  const [editingZoneId, setEditingZoneId] = useState<string | null>(null)
+
+  const [loadingSchedules, setLoadingSchedules] = useState(true)
+  const [savingSchedule, setSavingSchedule] = useState(false)
+  const [schedulesMsg, setSchedulesMsg] = useState<string | null>(null)
+  const [schedules, setSchedules] = useState<DeliveryScheduleWithAvailability[]>([])
+  const [scheduleDraft, setScheduleDraft] = useState<ScheduleDraft>(EMPTY_SCHEDULE_DRAFT)
+  const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null)
+
   const fetchShippingCosts = async () => {
     setLoadingShipping(true)
     setShippingMsg(null)
@@ -963,6 +569,36 @@ export default function AdminConfigPage() {
     }
   }
 
+  const fetchZones = async () => {
+    setLoadingZones(true)
+    setZonesMsg(null)
+    try {
+      const res = await fetch('/api/admin/delivery-zones')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setZones(data.zones ?? [])
+    } catch {
+      setZonesMsg('No se pudieron cargar las zonas de entrega')
+    } finally {
+      setLoadingZones(false)
+    }
+  }
+
+  const fetchSchedules = async () => {
+    setLoadingSchedules(true)
+    setSchedulesMsg(null)
+    try {
+      const res = await fetch('/api/admin/delivery-schedule')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setSchedules(data.schedules ?? [])
+    } catch {
+      setSchedulesMsg('No se pudieron cargar los horarios de entrega')
+    } finally {
+      setLoadingSchedules(false)
+    }
+  }
+
   useEffect(() => {
     void fetchShippingCosts()
     void fetchThemeConfig()
@@ -970,6 +606,8 @@ export default function AdminConfigPage() {
     void fetchSiteContent()
     void fetchPreventa()
     void fetchPickupPoints()
+    void fetchZones()
+    void fetchSchedules()
   }, [])
 
   const handleLogout = async () => {
@@ -1191,6 +829,176 @@ export default function AdminConfigPage() {
     }
   }
 
+  const handleEditZone = (zone: DeliveryZone) => {
+    setEditingZoneId(zone.id)
+    setZoneDraft({
+      name: zone.name,
+      neighborhoods: zone.neighborhoods.join(', '),
+      shippingCost: zone.shippingCost,
+      isActive: zone.isActive,
+      order: zone.order,
+    })
+    setZonesMsg(null)
+  }
+
+  const handleCancelEditZone = () => {
+    setEditingZoneId(null)
+    setZoneDraft(EMPTY_ZONE_DRAFT)
+    setZonesMsg(null)
+  }
+
+  const handleSaveZone = async () => {
+    const neighborhoods = zoneDraft.neighborhoods
+      .split(',')
+      .map((n) => n.trim())
+      .filter((n) => n.length > 0)
+
+    if (!zoneDraft.name.trim() || neighborhoods.length === 0) {
+      setZonesMsg('Completá al menos el nombre y un barrio')
+      return
+    }
+
+    setSavingZone(true)
+    setZonesMsg(null)
+    try {
+      const payload = editingZoneId
+        ? { id: editingZoneId, ...zoneDraft, neighborhoods }
+        : { ...zoneDraft, neighborhoods }
+      const res = await fetch('/api/admin/delivery-zones', {
+        method: editingZoneId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'No se pudo guardar la zona')
+      await fetchZones()
+      setEditingZoneId(null)
+      setZoneDraft(EMPTY_ZONE_DRAFT)
+      setZonesMsg(editingZoneId ? 'Zona guardada' : 'Zona agregada')
+    } catch (error) {
+      setZonesMsg(error instanceof Error ? error.message : 'No se pudo guardar la zona')
+    } finally {
+      setSavingZone(false)
+    }
+  }
+
+  const handleDeleteZone = async (id: string) => {
+    setSavingZone(true)
+    setZonesMsg(null)
+    try {
+      const res = await fetch('/api/admin/delivery-zones', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar la zona')
+      await fetchZones()
+      if (editingZoneId === id) {
+        setEditingZoneId(null)
+        setZoneDraft(EMPTY_ZONE_DRAFT)
+      }
+      setZonesMsg('Zona eliminada')
+    } catch (error) {
+      setZonesMsg(error instanceof Error ? error.message : 'No se pudo eliminar la zona')
+    } finally {
+      setSavingZone(false)
+    }
+  }
+
+  const handleEditSchedule = (schedule: DeliveryScheduleWithAvailability) => {
+    setEditingScheduleId(schedule.id)
+    setScheduleDraft({
+      dayOfWeek: schedule.dayOfWeek,
+      startTime: schedule.startTime,
+      endTime: schedule.endTime,
+      maxOrders: schedule.maxOrders ?? '',
+      cutoffDay: schedule.cutoffDay,
+      cutoffTime: schedule.cutoffTime ?? '',
+      isActive: schedule.isActive,
+    })
+    setSchedulesMsg(null)
+  }
+
+  const handleCancelEditSchedule = () => {
+    setEditingScheduleId(null)
+    setScheduleDraft(EMPTY_SCHEDULE_DRAFT)
+    setSchedulesMsg(null)
+  }
+
+  const handleSaveSchedule = async () => {
+    if (!scheduleDraft.startTime || !scheduleDraft.endTime) {
+      setSchedulesMsg('Completá el horario de inicio y fin')
+      return
+    }
+
+    if (scheduleDraft.startTime >= scheduleDraft.endTime) {
+      setSchedulesMsg('El horario de fin debe ser posterior al de inicio')
+      return
+    }
+
+    const hasCutoffDay = scheduleDraft.cutoffDay !== null && scheduleDraft.cutoffDay !== undefined
+    const hasCutoffTime = scheduleDraft.cutoffTime.trim() !== ''
+    if (hasCutoffDay !== hasCutoffTime) {
+      setSchedulesMsg('Día y hora de corte deben estar ambos presentes o ambos ausentes')
+      return
+    }
+
+    setSavingSchedule(true)
+    setSchedulesMsg(null)
+    try {
+      const payload = {
+        dayOfWeek: scheduleDraft.dayOfWeek,
+        startTime: scheduleDraft.startTime,
+        endTime: scheduleDraft.endTime,
+        maxOrders: scheduleDraft.maxOrders === '' ? undefined : Number(scheduleDraft.maxOrders),
+        cutoffDay: hasCutoffDay ? scheduleDraft.cutoffDay : undefined,
+        cutoffTime: hasCutoffTime ? scheduleDraft.cutoffTime : undefined,
+        isActive: scheduleDraft.isActive,
+      }
+      const body = editingScheduleId ? { id: editingScheduleId, ...payload } : payload
+      const res = await fetch('/api/admin/delivery-schedule', {
+        method: editingScheduleId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'No se pudo guardar el horario')
+      await fetchSchedules()
+      setEditingScheduleId(null)
+      setScheduleDraft(EMPTY_SCHEDULE_DRAFT)
+      setSchedulesMsg(editingScheduleId ? 'Horario guardado' : 'Horario agregado')
+    } catch (error) {
+      setSchedulesMsg(error instanceof Error ? error.message : 'No se pudo guardar el horario')
+    } finally {
+      setSavingSchedule(false)
+    }
+  }
+
+  const handleDeleteSchedule = async (id: string) => {
+    setSavingSchedule(true)
+    setSchedulesMsg(null)
+    try {
+      const res = await fetch('/api/admin/delivery-schedule', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar el horario')
+      await fetchSchedules()
+      if (editingScheduleId === id) {
+        setEditingScheduleId(null)
+        setScheduleDraft(EMPTY_SCHEDULE_DRAFT)
+      }
+      setSchedulesMsg('Horario eliminado')
+    } catch (error) {
+      setSchedulesMsg(error instanceof Error ? error.message : 'No se pudo eliminar el horario')
+    } finally {
+      setSavingSchedule(false)
+    }
+  }
+
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0]
     if (!file) return
@@ -1318,6 +1126,30 @@ export default function AdminConfigPage() {
             onCancelEditPickupPoint={handleCancelEditPickupPoint}
             onSavePickupPoint={handleSavePickupPoint}
             onDeletePickupPoint={handleDeletePickupPoint}
+            zones={zones}
+            zoneDraft={zoneDraft}
+            setZoneDraft={setZoneDraft}
+            editingZoneId={editingZoneId}
+            loadingZones={loadingZones}
+            savingZone={savingZone}
+            zonesMsg={zonesMsg}
+            onRefreshZones={fetchZones}
+            onEditZone={handleEditZone}
+            onCancelEditZone={handleCancelEditZone}
+            onSaveZone={handleSaveZone}
+            onDeleteZone={handleDeleteZone}
+            schedules={schedules}
+            scheduleDraft={scheduleDraft}
+            setScheduleDraft={setScheduleDraft}
+            editingScheduleId={editingScheduleId}
+            loadingSchedules={loadingSchedules}
+            savingSchedule={savingSchedule}
+            schedulesMsg={schedulesMsg}
+            onRefreshSchedules={fetchSchedules}
+            onEditSchedule={handleEditSchedule}
+            onCancelEditSchedule={handleCancelEditSchedule}
+            onSaveSchedule={handleSaveSchedule}
+            onDeleteSchedule={handleDeleteSchedule}
           />
         </Tabs.Content>
 

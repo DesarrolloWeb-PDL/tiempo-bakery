@@ -17,10 +17,17 @@ import {
   ChefHat,
   Truck,
   Trash2,
+  RotateCcw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { formatCurrency } from '@/lib/format'
+import {
+  FLOW_BY_METHOD,
+  getNextStatuses,
+  getStatusLabel,
+  type DeliveryMethod,
+} from '@/lib/order-status'
 
 // ─────────────────────────────────────────────
 // Tipos
@@ -63,26 +70,32 @@ interface OrderDetail {
     product: { slug: string; imageUrl: string; imageAlt: string }
   }>
   user: { id: string; email: string; name: string } | null
+  assignment?: {
+    id: string
+    deliveryPerson: { id: string; name: string; phone: string } | null
+    deliveredAt: string | null
+    failedReason: string | null
+  } | null
 }
 
 // ─────────────────────────────────────────────
 // UI helpers
 // ─────────────────────────────────────────────
-const STATUS_FLOW = ['PENDING', 'PAID', 'BAKING', 'READY', 'DELIVERED']
-
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  PENDING:   { label: 'Pendiente',  icon: Clock,         color: 'text-yellow-600', bg: 'bg-yellow-100' },
-  PAID:      { label: 'Pagado',     icon: CreditCard,    color: 'text-blue-600',   bg: 'bg-blue-100' },
-  BAKING:    { label: 'En horno',   icon: ChefHat,       color: 'text-orange-600', bg: 'bg-orange-100' },
-  READY:     { label: 'Listo',      icon: CheckCircle2,  color: 'text-green-600',  bg: 'bg-green-100' },
-  DELIVERED: { label: 'Entregado',  icon: Truck,         color: 'text-gray-300',   bg: 'bg-gray-700' },
-  CANCELLED: { label: 'Cancelado',  icon: XCircle,       color: 'text-red-600',    bg: 'bg-red-100' },
+  PENDING:            { label: 'Pendiente',        icon: Clock,         color: 'text-yellow-600', bg: 'bg-yellow-100' },
+  PAID:               { label: 'Pagado',           icon: CreditCard,    color: 'text-blue-600',   bg: 'bg-blue-100' },
+  BAKING:             { label: 'En horno',         icon: ChefHat,       color: 'text-orange-600', bg: 'bg-orange-100' },
+  READY:              { label: 'Listo',            icon: CheckCircle2,  color: 'text-green-600',  bg: 'bg-green-100' },
+  OUT_FOR_DELIVERY:   { label: 'En camino',        icon: Truck,         color: 'text-purple-600', bg: 'bg-purple-100' },
+  DELIVERED:          { label: 'Entregado',        icon: CheckCircle2,  color: 'text-gray-300',   bg: 'bg-gray-700' },
+  DELIVERY_FAILED:    { label: 'Entrega fallida',  icon: AlertCircle,   color: 'text-red-600',    bg: 'bg-red-100' },
+  CANCELLED:          { label: 'Cancelado',        icon: XCircle,       color: 'text-red-600',    bg: 'bg-red-100' },
 }
 
 const PAYMENT_CONFIG: Record<string, { label: string; color: string }> = {
   PENDING: { label: 'Sin pagar',     color: 'text-yellow-600' },
-  PAID:    { label: 'Cobrado',        color: 'text-emerald-600' },
-  FAILED:  { label: 'Pago fallido',   color: 'text-red-600' },
+  PAID:    { label: 'Cobrado',       color: 'text-emerald-600' },
+  FAILED:  { label: 'Pago fallido',  color: 'text-red-600' },
 }
 
 function formatOrderPaymentMethod(value: string) {
@@ -165,17 +178,34 @@ export default function AdminOrderDetailPage() {
 
   const updateStatus = async (newStatus: string) => {
     if (!order) return
+
+    let failedReason: string | undefined
+    if (newStatus === 'DELIVERY_FAILED') {
+      const reason = window.prompt('¿Motivo del fallo de entrega?')
+      if (!reason || reason.trim().length === 0) return
+      failedReason = reason.trim()
+    }
+
     setSaving(true)
     setSaveMessage(null)
     try {
       const res = await fetch(`/api/admin/pedidos/${order.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, ...(failedReason && { failedReason }) }),
       })
       if (!res.ok) throw new Error()
       const updated = await res.json()
-      setOrder((prev) => prev ? { ...prev, status: updated.status, updatedAt: updated.updatedAt } : prev)
+      setOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: updated.status,
+              deliveredAt: updated.deliveredAt ?? prev.deliveredAt,
+              updatedAt: updated.updatedAt,
+            }
+          : prev
+      )
       setSaveMessage('Estado actualizado correctamente')
     } catch {
       setSaveMessage('Error al actualizar el estado')
@@ -262,9 +292,12 @@ export default function AdminOrderDetailPage() {
     )
   }
 
-  const currentStatusIdx = STATUS_FLOW.indexOf(order.status)
+  const deliveryMethod = order.deliveryMethod as DeliveryMethod
+  const statusFlow = FLOW_BY_METHOD[deliveryMethod] ?? FLOW_BY_METHOD.NATIONAL_COURIER
+  const currentStatusIdx = statusFlow.indexOf(order.status as never)
   const statusConfig = STATUS_CONFIG[order.status]
   const StatusIcon = statusConfig?.icon ?? Clock
+  const nextStatuses = getNextStatuses(order.status as never, deliveryMethod)
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -290,6 +323,7 @@ export default function AdminOrderDetailPage() {
           <p className="text-sm text-gray-400 mt-1">
             Creado el {formatDate(order.createdAt)}
             {order.paidAt && ` · Pagado el ${formatDate(order.paidAt)}`}
+            {order.deliveredAt && ` · Entregado el ${formatDate(order.deliveredAt)}`}
           </p>
         </div>
         <div className="text-right shrink-0">
@@ -320,13 +354,12 @@ export default function AdminOrderDetailPage() {
         {/* Columna principal */}
         <div className="lg:col-span-2 space-y-5">
           {/* Cambio de estado */}
-          {order.status !== 'CANCELLED' && (
+          {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
             <Section title="Cambiar estado" icon={Clock}>
               <div className="space-y-3">
-                {/* Progress bar */}
+                {/* Progress bar branched */}
                 <div className="flex items-center gap-1">
-                  {STATUS_FLOW.map((st, idx) => {
-                    const conf = STATUS_CONFIG[st]
+                  {statusFlow.map((st, idx) => {
                     const isPast = idx < currentStatusIdx
                     const isCurrent = idx === currentStatusIdx
                     return (
@@ -335,7 +368,7 @@ export default function AdminOrderDetailPage() {
                           'flex-1 h-1.5 rounded-full transition-colors',
                           isPast || isCurrent ? 'bg-brand-gold' : 'bg-gray-700'
                         )} />
-                        {idx === STATUS_FLOW.length - 1 && (
+                        {idx === statusFlow.length - 1 && (
                           <div className={cn(
                             'w-3 h-3 rounded-full border-2 transition-colors',
                             isCurrent ? 'border-brand-gold bg-brand-gold' : isPast ? 'border-brand-gold bg-brand-gold' : 'border-gray-300 bg-white'
@@ -347,20 +380,23 @@ export default function AdminOrderDetailPage() {
                 </div>
                 {/* Botones de estado */}
                 <div className="flex flex-wrap gap-2">
-                  {STATUS_FLOW.map((st) => {
+                  {statusFlow.map((st) => {
                     const conf = STATUS_CONFIG[st]
                     const Icon = conf.icon
                     const isCurrent = order.status === st
+                    const isNext = nextStatuses.includes(st as never)
                     return (
                       <button
                         key={st}
-                        onClick={() => !isCurrent && updateStatus(st)}
-                        disabled={isCurrent || saving}
+                        onClick={() => isNext && updateStatus(st)}
+                        disabled={!isNext || saving}
                         className={cn(
                           'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors border',
                           isCurrent
                             ? `${conf.bg} ${conf.color} border-transparent cursor-default`
-                            : 'bg-white text-gray-300 border-gray-700 hover:border-brand-gold/40 hover:text-brand-gold-dark hover:bg-brand-gold/10',
+                            : isNext
+                              ? 'bg-white text-gray-300 border-gray-700 hover:border-brand-gold/40 hover:text-brand-gold-dark hover:bg-brand-gold/10'
+                              : 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed',
                           saving && 'opacity-50'
                         )}
                       >
@@ -369,6 +405,16 @@ export default function AdminOrderDetailPage() {
                       </button>
                     )
                   })}
+                  {order.status === 'DELIVERY_FAILED' && nextStatuses.includes('OUT_FOR_DELIVERY' as never) && (
+                    <button
+                      onClick={() => updateStatus('OUT_FOR_DELIVERY')}
+                      disabled={saving}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-brand-gold text-brand-gold hover:bg-brand-gold/10 disabled:opacity-50"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Reintentar entrega
+                    </button>
+                  )}
                   <button
                     onClick={() => updateStatus('CANCELLED')}
                     disabled={saving}
@@ -380,6 +426,12 @@ export default function AdminOrderDetailPage() {
                 </div>
               </div>
             </Section>
+          )}
+
+          {order.assignment?.failedReason && (
+            <div className="bg-red-900/30 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
+              <strong>Motivo de fallo:</strong> {order.assignment.failedReason}
+            </div>
           )}
 
           {/* Productos */}
@@ -490,6 +542,13 @@ export default function AdminOrderDetailPage() {
                   <Field label="Ciudad" value={order.shippingCity} />
                   <Field label="Código postal" value={order.shippingPostal} />
                 </>
+              )}
+              {order.assignment?.deliveryPerson && (
+                <div className="pt-2 border-t border-gray-700">
+                  <p className="text-xs text-gray-400 mb-0.5">Repartidor asignado</p>
+                  <p className="text-sm text-white">{order.assignment.deliveryPerson.name}</p>
+                  <p className="text-xs text-gray-400">{order.assignment.deliveryPerson.phone}</p>
+                </div>
               )}
             </div>
           </Section>

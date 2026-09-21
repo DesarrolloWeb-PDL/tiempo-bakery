@@ -13,6 +13,7 @@ import {
   Clock3,
   Users,
   Settings,
+  Truck,
   Menu,
   X,
   ArrowLeft,
@@ -61,6 +62,11 @@ const navItems = [
     label: 'Pagos',
     href: '/admin/pagos',
     icon: CreditCard,
+  },
+  {
+    label: 'Reparto',
+    href: '/admin/reparto',
+    icon: Truck,
   },
   {
     label: 'Configuración',

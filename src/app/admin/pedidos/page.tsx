@@ -46,7 +46,9 @@ const STATUS_OPTIONS = [
   { value: 'PAID', label: 'Pagado' },
   { value: 'BAKING', label: 'En horno' },
   { value: 'READY', label: 'Listo' },
+  { value: 'OUT_FOR_DELIVERY', label: 'En camino' },
   { value: 'DELIVERED', label: 'Entregado' },
+  { value: 'DELIVERY_FAILED', label: 'Entrega fallida' },
   { value: 'CANCELLED', label: 'Cancelado' },
 ]
 
@@ -58,17 +60,20 @@ const PAYMENT_OPTIONS = [
 ]
 
 const STATUS_STYLES: Record<string, string> = {
-  PENDING:   'bg-yellow-100 text-yellow-700',
-  PAID:      'bg-blue-100 text-blue-700',
-  BAKING:    'bg-orange-100 text-orange-700',
-  READY:     'bg-green-100 text-green-700',
-  DELIVERED: 'bg-gray-700 text-gray-300',
-  CANCELLED: 'bg-red-100 text-red-700',
+  PENDING:            'bg-yellow-100 text-yellow-700',
+  PAID:               'bg-blue-100 text-blue-700',
+  BAKING:             'bg-orange-100 text-orange-700',
+  READY:              'bg-green-100 text-green-700',
+  OUT_FOR_DELIVERY:   'bg-purple-100 text-purple-700',
+  DELIVERED:          'bg-gray-700 text-gray-300',
+  DELIVERY_FAILED:    'bg-red-100 text-red-700',
+  CANCELLED:          'bg-red-100 text-red-700',
 }
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'Pendiente', PAID: 'Pagado', BAKING: 'En horno',
-  READY: 'Listo', DELIVERED: 'Entregado', CANCELLED: 'Cancelado',
+  READY: 'Listo', OUT_FOR_DELIVERY: 'En camino', DELIVERED: 'Entregado',
+  DELIVERY_FAILED: 'Entrega fallida', CANCELLED: 'Cancelado',
 }
 
 const PAYMENT_STYLES: Record<string, string> = {

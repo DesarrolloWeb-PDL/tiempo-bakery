@@ -105,16 +105,24 @@ model Order {
   adminNotes      String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
-  paidAt          DateTime?
-  deliveredAt     DateTime?
-  deletedAt       DateTime?
-  user            User?       @relation(fields: [userId], references: [id])
-  items           OrderItem[]
+  paidAt             DateTime?
+  deliveredAt        DateTime?
+  deletedAt          DateTime?
+  deliveryZoneId String?
+  deliveryScheduleId String?
+  deliveryDate DateTime?
+  user              User?             @relation(fields: [userId], references: [id])
+  items             OrderItem[]
+  deliveryZone      DeliveryZone?     @relation(fields: [deliveryZoneId], references: [id], onDelete: SetNull)
+  deliverySchedule  DeliverySchedule? @relation(fields: [deliveryScheduleId], references: [id], onDelete: SetNull)
+  assignment        DeliveryAssignment?
 
   @@index([userId])
   @@index([weekId])
   @@index([status])
   @@index([orderNumber])
+  @@index([deliveryZoneId])
+  @@index([deliveryScheduleId, deliveryDate])
 }
 
 model OrderItem {
@@ -178,4 +186,75 @@ model AdminSession {
 
   @@index([jti])
   @@index([expiresAt])
+}
+
+model DeliveryZone {
+  id            String   @id @default(cuid())
+  name          String
+  neighborhoods String[]
+  radiusKm      Float?
+  shippingCost  Float
+  minOrderFree  Float?
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  orders        Order[]
+}
+
+model DeliverySchedule {
+  id          String   @id @default(cuid())
+  dayOfWeek   Int
+  startTime   String
+  endTime     String
+  maxOrders   Int?
+  cutoffDay   Int?
+  cutoffTime  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+}
+
+model DeliveryPerson {
+  id          String             @id @default(cuid())
+  name        String
+  phone       String
+  email       String?
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  assignments DeliveryAssignment[]
+  attempts    DeliveryAttempt[]
+}
+
+model DeliveryAssignment {
+  id               String            @id @default(cuid())
+  orderId          String            @unique
+  deliveryPersonId String
+  status           String            @default("ASSIGNED")
+  assignedAt       DateTime          @default(now())
+  deliveredAt      DateTime?
+  failedReason     String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  order            Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryPerson   DeliveryPerson    @relation(fields: [deliveryPersonId], references: [id], onDelete: Restrict)
+  attempts         DeliveryAttempt[]
+}
+
+model DeliveryAttempt {
+  id               String             @id @default(cuid())
+  assignmentId     String
+  deliveryPersonId String?
+  status           String?
+  attemptedAt      DateTime           @default(now())
+  success          Boolean
+  reason           String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  assignment       DeliveryAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  deliveryPerson   DeliveryPerson?    @relation(fields: [deliveryPersonId], references: [id], onDelete: SetNull)
+
+  @@index([assignmentId])
 }

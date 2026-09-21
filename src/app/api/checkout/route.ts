@@ -3,7 +3,8 @@ import { prisma } from '@/lib/db';
 import { stockManager } from '@/lib/stock-manager';
 import { expirePendingOrders } from '@/lib/order-expiry';
 import { getTimeGatingRuntime } from '@/lib/time-gating';
-import { getShippingCostByMethod, getShippingCostsRuntime } from '@/lib/shipping-costs';
+import { getShippingCostByMethod, getShippingCostsRuntime, getLocalDeliveryShippingCost } from '@/lib/shipping-costs';
+import { isSlotAvailable } from '@/lib/delivery-availability';
 import { createMercadoPagoPreference } from '@/lib/mercadopago';
 import { PaymentProvider, getPaymentSettings, getStripeSecretKey, getMercadoPagoAccessToken, getSiteUrl } from '@/lib/payments';
 import Stripe from 'stripe';
@@ -127,8 +128,27 @@ export async function POST(request: NextRequest) {
     });
 
     // 5. Calcular costos de envío
-    const shippingCosts = await getShippingCostsRuntime();
-    const shippingCost = getShippingCostByMethod(data.deliveryMethod, shippingCosts);
+    let shippingCost = 0
+    if (data.deliveryMethod === 'LOCAL_DELIVERY') {
+      if (data.zoneId) {
+        const zone = await prisma.deliveryZone.findUnique({ where: { id: data.zoneId } })
+        if (!zone || !zone.isActive) {
+          return apiError('La zona de entrega seleccionada no es válida', 400)
+        }
+      }
+
+      if (data.scheduleId && data.deliveryDate) {
+        const available = await isSlotAvailable(data.scheduleId, data.deliveryDate)
+        if (!available) {
+          return apiError('El día u horario de entrega seleccionado ya no está disponible', 409)
+        }
+      }
+
+      shippingCost = await getLocalDeliveryShippingCost(data.zoneId, subtotal)
+    } else {
+      const shippingCosts = await getShippingCostsRuntime();
+      shippingCost = getShippingCostByMethod(data.deliveryMethod, shippingCosts);
+    }
 
     const total = subtotal + shippingCost;
 
@@ -186,6 +206,9 @@ export async function POST(request: NextRequest) {
           shippingAddress: data.shippingAddress,
           shippingCity: data.shippingCity,
           shippingPostal: data.shippingPostal,
+          deliveryZoneId: data.zoneId ?? null,
+          deliveryScheduleId: data.scheduleId ?? null,
+          deliveryDate: data.deliveryDate ?? null,
           customerNotes: data.customerNotes,
           items: {
             create: orderItems,

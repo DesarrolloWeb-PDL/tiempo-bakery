@@ -87,6 +87,10 @@ export interface Translations {
   deliveryErrorAddress: string;
   deliveryErrorCity: string;
   deliveryErrorPostal: string;
+  deliveryZoneLabel: string;
+  deliveryZonePlaceholder: string;
+  deliveryDayLabel: string;
+  deliveryDayPlaceholder: string;
   reviewTitle: string;
   reviewDesc: string;
   reviewProducts: string;
@@ -183,7 +187,7 @@ const ES: Translations = {
   homeNoProducts: "No hay productos disponibles",
   homeComingSoon: "Pronto agregaremos productos para esta semana.",
   homeClosed: "Vuelve cuando abramos para ver los productos disponibles.",
-  timeOpen: "Estamos abiertos!",
+  timeOpen: "¡Estamos abiertos!",
   timeOpenBetween: "Realiza tu pedido entre",
   timeBadgeOpen: "Abierto",
   timeClosed: "Temporalmente cerrado",
@@ -248,6 +252,10 @@ const ES: Translations = {
   deliveryErrorAddress: "La direccion es requerida",
   deliveryErrorCity: "La ciudad es requerida",
   deliveryErrorPostal: "El codigo postal es requerido",
+  deliveryZoneLabel: "Zona de entrega",
+  deliveryZonePlaceholder: "Selecciona una zona",
+  deliveryDayLabel: "Dia y horario de entrega",
+  deliveryDayPlaceholder: "Selecciona un dia y horario",
   reviewTitle: "Revisa tu pedido",
   reviewDesc: "Verifica que todo es correcto antes de proceder al pago",
   reviewProducts: "Productos",
@@ -409,6 +417,10 @@ const PT: Translations = {
   deliveryErrorAddress: "O endereco e obrigatorio",
   deliveryErrorCity: "A cidade e obrigatoria",
   deliveryErrorPostal: "O codigo postal e obrigatorio",
+  deliveryZoneLabel: "Zona de entrega",
+  deliveryZonePlaceholder: "Selecione uma zona",
+  deliveryDayLabel: "Dia e horario de entrega",
+  deliveryDayPlaceholder: "Selecione um dia e horario",
   reviewTitle: "Revise seu pedido",
   reviewDesc: "Verifique que tudo esta correto antes de prosseguir ao pagamento",
   reviewProducts: "Produtos",
@@ -570,6 +582,10 @@ const EN: Translations = {
   deliveryErrorAddress: "Address is required",
   deliveryErrorCity: "City is required",
   deliveryErrorPostal: "Postal code is required",
+  deliveryZoneLabel: "Delivery zone",
+  deliveryZonePlaceholder: "Select a zone",
+  deliveryDayLabel: "Delivery day and time",
+  deliveryDayPlaceholder: "Select a day and time",
   reviewTitle: "Review your order",
   reviewDesc: "Make sure everything is correct before proceeding to payment",
   reviewProducts: "Products",

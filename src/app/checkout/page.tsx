@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/toaster';
 import { toast } from '@/components/ui/use-toast';
 import { DeliveryMethod, DEFAULT_SHIPPING_COSTS, PaymentProvider, type PaymentMethodOption, type ShippingCosts } from '@/types/checkout';
-import type { CheckoutFormData, CheckoutCustomerData, CheckoutDeliveryData } from '@/types/checkout';
+import type { CheckoutFormData, CheckoutCustomerData } from '@/types/checkout';
+import type { DeliveryZone, AvailableSlot } from '@/types/delivery';
 import { formatCurrency } from '@/lib/format';
 import { useLanguage } from '@/components/language-provider';
 
@@ -37,6 +38,8 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [pickupPoints, setPickupPoints] = React.useState<PickupPoint[]>([]);
   const [shippingCosts, setShippingCosts] = React.useState<ShippingCosts>(DEFAULT_SHIPPING_COSTS);
+  const [zones, setZones] = React.useState<DeliveryZone[]>([]);
+  const [availableDays, setAvailableDays] = React.useState<Array<{ date: Date; slot: AvailableSlot }>>([]);
   const [paymentOptions, setPaymentOptions] = React.useState<PaymentMethodOption[]>([]);
   const [selectedPaymentProvider, setSelectedPaymentProvider] = React.useState<PaymentProvider>(PaymentProvider.STRIPE);
 
@@ -85,6 +88,20 @@ export default function CheckoutPage() {
         setSelectedPaymentProvider(data.defaultProvider || PaymentProvider.STRIPE)
       })
       .catch((err) => console.error('Error loading payment methods:', err));
+
+    fetch('/api/delivery-options?horizon=14')
+      .then((res) => {
+        if (!res.ok) throw new Error(t.checkoutErrorShipping)
+        return res.json()
+      })
+      .then((data) => {
+        setZones(data.zones || [])
+        setAvailableDays((data.days || []).map((d: { date: string; slot: AvailableSlot }) => ({
+          date: new Date(d.date),
+          slot: d.slot,
+        })))
+      })
+      .catch((err) => console.error('Error loading delivery options:', err));
   }, []);
 
   // Redirigir si el carrito está vacío
@@ -98,8 +115,14 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
-  const handleDeliveryUpdate = (data: Partial<CheckoutDeliveryData>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+  const handleDeliveryUpdate = (data: Partial<CheckoutFormData>) => {
+    setFormData((prev) => {
+      const next: Partial<CheckoutFormData> = { ...prev, ...data };
+      if (data.deliveryDate !== undefined) {
+        next.deliveryDate = new Date(data.deliveryDate);
+      }
+      return next;
+    });
   };
 
   const handleNotesChange = (notes: string) => {
@@ -144,6 +167,9 @@ export default function CheckoutPage() {
         shippingAddress: formData.shippingAddress,
         shippingCity: formData.shippingCity,
         shippingPostal: formData.shippingPostal,
+        zoneId: formData.zoneId,
+        scheduleId: formData.scheduleId,
+        deliveryDate: formData.deliveryDate,
         items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -315,10 +341,15 @@ export default function CheckoutPage() {
                 pickupPoints={pickupPoints}
                 selectedMethod={formData.deliveryMethod || DeliveryMethod.PICKUP_POINT}
                 shippingCosts={shippingCosts}
+                zones={zones}
+                availableDays={availableDays}
                 pickupLocationId={formData.pickupLocationId}
                 address={formData.shippingAddress}
                 city={formData.shippingCity}
                 postalCode={formData.shippingPostal}
+                zoneId={formData.zoneId}
+                scheduleId={formData.scheduleId}
+                deliveryDate={formData.deliveryDate}
                 onUpdate={handleDeliveryUpdate}
                 onNext={() => setCurrentStep(3)}
                 onBack={() => setCurrentStep(1)}
