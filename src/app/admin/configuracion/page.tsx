@@ -385,6 +385,7 @@ export default function AdminConfigPage() {
     pickupPoint: 0,
     localDelivery: 3500,
     nationalCourier: 5950,
+    nationalCourierEnabled: false,
   })
 
   // Theme customization
@@ -497,6 +498,7 @@ export default function AdminConfigPage() {
         pickupPoint: Number(data.pickupPoint ?? 0),
         localDelivery: Number(data.localDelivery ?? 3500),
         nationalCourier: Number(data.nationalCourier ?? 5950),
+        nationalCourierEnabled: data.nationalCourierEnabled ?? false,
       })
     } catch {
       setShippingMsg('No se pudieron cargar los costos de envío')
@@ -638,6 +640,7 @@ export default function AdminConfigPage() {
         body: JSON.stringify({
           localDelivery: Math.max(0, shippingCosts.localDelivery),
           nationalCourier: Math.max(0, shippingCosts.nationalCourier),
+          nationalCourierEnabled: shippingCosts.nationalCourierEnabled,
         }),
       })
       if (!res.ok) throw new Error()

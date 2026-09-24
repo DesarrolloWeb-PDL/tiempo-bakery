@@ -6,9 +6,10 @@ import type { SiteContent } from '@/lib/site-content.shared'
 
 interface TranslatedContactProps {
   siteContent: SiteContent
+  nationalCourierEnabled?: boolean
 }
 
-export function TranslatedContact({ siteContent }: TranslatedContactProps) {
+export function TranslatedContact({ siteContent, nationalCourierEnabled = false }: TranslatedContactProps) {
   const { t } = useLanguage()
   const whatsappPhone = siteContent.contactWhatsapp.replace(/[^0-9]/g, '')
   const whatsappMessage = encodeURIComponent(t.whatsappDefaultMessage)
@@ -45,10 +46,12 @@ export function TranslatedContact({ siteContent }: TranslatedContactProps) {
           <h2 className="text-lg font-semibold text-brand-gold">{t.deliveryLocal} ({siteContent.cityName})</h2>
           <p className="mt-1 text-sm text-brand-gold/85">{t.deliveryLocalText}</p>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-brand-gold">{t.deliveryCourier}</h2>
-          <p className="mt-1 text-sm text-brand-gold/85">{t.deliveryCourierText}</p>
-        </div>
+        {nationalCourierEnabled && (
+          <div>
+            <h2 className="text-lg font-semibold text-brand-gold">{t.deliveryCourier}</h2>
+            <p className="mt-1 text-sm text-brand-gold/85">{t.deliveryCourierText}</p>
+          </div>
+        )}
       </div>
     </>
   )

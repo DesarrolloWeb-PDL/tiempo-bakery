@@ -80,6 +80,7 @@ export interface ShippingCosts {
   PICKUP_POINT: number;
   LOCAL_DELIVERY: number;
   NATIONAL_COURIER: number;
+  nationalCourierEnabled: boolean;
 }
 
 // Costos de envío por defecto (fallback frontend)
@@ -87,6 +88,7 @@ export const DEFAULT_SHIPPING_COSTS: ShippingCosts = {
   PICKUP_POINT: 0,
   LOCAL_DELIVERY: 3500,
   NATIONAL_COURIER: 5950,
+  nationalCourierEnabled: false,
 } as const;
 
 // Interfaz para el resumen del pedido

@@ -175,13 +175,17 @@ export function DeliveryStep({
       description: t.deliveryLocalDesc,
       cost: localDeliveryCost,
     },
-    {
-      method: DeliveryMethod.NATIONAL_COURIER,
-      icon: Package,
-      title: t.deliveryCourier,
-      description: t.deliveryCourierDesc,
-      cost: shippingCosts.NATIONAL_COURIER,
-    },
+    ...(shippingCosts.nationalCourierEnabled
+      ? [
+          {
+            method: DeliveryMethod.NATIONAL_COURIER,
+            icon: Package,
+            title: t.deliveryCourier,
+            description: t.deliveryCourierDesc,
+            cost: shippingCosts.NATIONAL_COURIER,
+          },
+        ]
+      : []),
   ];
 
   const deliveryDateString = deliveryDate

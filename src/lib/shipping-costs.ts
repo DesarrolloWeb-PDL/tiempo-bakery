@@ -4,12 +4,14 @@ export interface ShippingCosts {
   pickupPoint: number
   localDelivery: number
   nationalCourier: number
+  nationalCourierEnabled: boolean
 }
 
 export const DEFAULT_SHIPPING_COSTS: ShippingCosts = {
   pickupPoint: 0,
   localDelivery: 3500,
   nationalCourier: 5950,
+  nationalCourierEnabled: false,
 }
 
 function parseAmount(value: string | undefined, fallback: number) {
@@ -35,6 +37,7 @@ export async function getShippingCostsRuntime(): Promise<ShippingCosts> {
       pickupPoint: 0,
       localDelivery: parseAmount(map.get('shipping_cost_local'), DEFAULT_SHIPPING_COSTS.localDelivery),
       nationalCourier: parseAmount(map.get('shipping_cost_national'), DEFAULT_SHIPPING_COSTS.nationalCourier),
+      nationalCourierEnabled: map.get('shipping_national_enabled') === 'true',
     }
   } catch (error) {
     console.error('Error loading shipping costs, using defaults:', error)

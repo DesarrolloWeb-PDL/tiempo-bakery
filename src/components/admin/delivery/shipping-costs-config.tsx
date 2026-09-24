@@ -9,6 +9,7 @@ export type ShippingCosts = {
   pickupPoint: number
   localDelivery: number
   nationalCourier: number
+  nationalCourierEnabled: boolean
 }
 
 type ShippingCostsConfigProps = {
@@ -58,12 +59,26 @@ export function ShippingCostsConfig({
               min={0}
               step="1"
               value={shippingCosts.nationalCourier}
-              disabled={loadingShipping || savingShipping}
+              disabled={loadingShipping || savingShipping || !shippingCosts.nationalCourierEnabled}
               onChange={(e) => setShippingCosts((prev) => ({ ...prev, nationalCourier: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm disabled:opacity-40"
             />
             <p className="text-xs text-gray-400 mt-1">{formatCurrency(shippingCosts.nationalCourier)}</p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={shippingCosts.nationalCourierEnabled}
+              disabled={loadingShipping || savingShipping}
+              onChange={(e) => setShippingCosts((prev) => ({ ...prev, nationalCourierEnabled: e.target.checked }))}
+              className="sr-only peer"
+            />
+            <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-gold"></div>
+          </label>
+          <span className="text-xs text-gray-300">Habilitar mensajería nacional</span>
         </div>
 
         <p className="text-xs text-gray-400">Recogida en punto siempre se mantiene en <strong>gratis</strong>.</p>

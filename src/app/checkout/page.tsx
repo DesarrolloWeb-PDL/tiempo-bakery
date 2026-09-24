@@ -74,6 +74,7 @@ export default function CheckoutPage() {
           PICKUP_POINT: Number(data.pickupPoint ?? 0),
           LOCAL_DELIVERY: Number(data.localDelivery ?? DEFAULT_SHIPPING_COSTS.LOCAL_DELIVERY),
           NATIONAL_COURIER: Number(data.nationalCourier ?? DEFAULT_SHIPPING_COSTS.NATIONAL_COURIER),
+          nationalCourierEnabled: data.nationalCourierEnabled ?? false,
         })
       })
       .catch((err) => console.error('Error loading shipping costs:', err));

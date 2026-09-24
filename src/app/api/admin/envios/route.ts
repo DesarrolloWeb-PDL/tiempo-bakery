@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 const schema = z.object({
   localDelivery: z.number().min(0),
   nationalCourier: z.number().min(0),
+  nationalCourierEnabled: z.boolean().optional(),
 })
 
 export async function GET() {
@@ -43,6 +44,11 @@ export async function PUT(req: NextRequest) {
         create: { key: 'shipping_cost_national', value: String(parsed.data.nationalCourier) },
         update: { value: String(parsed.data.nationalCourier) },
       }),
+      db.siteConfig.upsert({
+        where: { key: 'shipping_national_enabled' },
+        create: { key: 'shipping_national_enabled', value: String(parsed.data.nationalCourierEnabled ?? false) },
+        update: { value: String(parsed.data.nationalCourierEnabled ?? false) },
+      }),
     ])
 
     return NextResponse.json({ success: true })
@@ -64,6 +70,11 @@ export async function DELETE() {
         where: { key: 'shipping_cost_national' },
         create: { key: 'shipping_cost_national', value: String(DEFAULT_SHIPPING_COSTS.nationalCourier) },
         update: { value: String(DEFAULT_SHIPPING_COSTS.nationalCourier) },
+      }),
+      db.siteConfig.upsert({
+        where: { key: 'shipping_national_enabled' },
+        create: { key: 'shipping_national_enabled', value: String(DEFAULT_SHIPPING_COSTS.nationalCourierEnabled) },
+        update: { value: String(DEFAULT_SHIPPING_COSTS.nationalCourierEnabled) },
       }),
     ])
 
