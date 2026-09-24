@@ -78,7 +78,6 @@ export function DeliveryStep({
   onBack,
 }: DeliveryStepProps) {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const [autoAdvance, setAutoAdvance] = React.useState(false);
   const { t } = useLanguage();
 
   const selectedZone = zones.find((z) => z.id === zoneId);
@@ -93,21 +92,6 @@ export function DeliveryStep({
       : selectedMethod === DeliveryMethod.LOCAL_DELIVERY
         ? !!(address && city && postalCode)
         : !!(address && city && postalCode);
-
-  React.useEffect(() => {
-    if (!isDeliveryValid) {
-      setAutoAdvance(false);
-      return;
-    }
-    const timer = setTimeout(() => setAutoAdvance(true), 1000);
-    return () => clearTimeout(timer);
-  }, [selectedMethod, pickupLocationId, address, city, postalCode, isDeliveryValid]);
-
-  React.useEffect(() => {
-    if (autoAdvance && Object.keys(errors).length === 0) {
-      onNext();
-    }
-  }, [autoAdvance, errors, onNext]);
 
   const handleMethodChange = (method: DeliveryMethod) => {
     onUpdate({
