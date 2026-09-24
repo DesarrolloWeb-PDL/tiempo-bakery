@@ -129,7 +129,7 @@ export default function ProductForm({
         </div>
 
         <div>
-          <div className="relative">
+          <div className="flex items-center rounded-lg border border-gray-600 bg-gray-900 focus-within:border-brand-gold focus-within:ring-1 focus-within:ring-brand-gold/30">
             <input
               value={form.price}
               onChange={(e) => onFieldChange('price', e.target.value)}
@@ -137,43 +137,43 @@ export default function ProductForm({
               step="0.01"
               min="0"
               placeholder="Precio"
-              className={`${inputClass('price')} pr-10`}
+              className="flex-1 min-w-0 px-3 py-2 text-sm bg-transparent text-white placeholder:text-gray-400 border-0 focus:outline-none"
               required
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">AR$</span>
+            <span className="pr-3 text-xs text-gray-400 select-none">AR$</span>
           </div>
           {fieldErrors.price && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.price}</p>
           )}
         </div>
         <div>
-          <div className="relative">
+          <div className="flex items-center rounded-lg border border-gray-600 bg-gray-900 focus-within:border-brand-gold focus-within:ring-1 focus-within:ring-brand-gold/30">
             <input
               value={form.weight}
               onChange={(e) => onFieldChange('weight', e.target.value)}
               type="number"
               min="0"
               placeholder="Peso"
-              className={`${inputClass('weight')} pr-6`}
+              className="flex-1 min-w-0 px-3 py-2 text-sm bg-transparent text-white placeholder:text-gray-400 border-0 focus:outline-none"
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">g</span>
+            <span className="pr-3 text-xs text-gray-400 select-none">g</span>
           </div>
           {fieldErrors.weight && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.weight}</p>
           )}
         </div>
         <div>
-          <div className="relative">
+          <div className="flex items-center rounded-lg border border-gray-600 bg-gray-900 focus-within:border-brand-gold focus-within:ring-1 focus-within:ring-brand-gold/30">
             <input
               value={form.weeklyStock}
               onChange={(e) => onFieldChange('weeklyStock', e.target.value)}
               type="number"
               min="0"
               placeholder="Stock semanal"
-              className={`${inputClass('weeklyStock')} pr-6`}
+              className="flex-1 min-w-0 px-3 py-2 text-sm bg-transparent text-white placeholder:text-gray-400 border-0 focus:outline-none"
               required
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">ud</span>
+            <span className="pr-3 text-xs text-gray-400 select-none">ud</span>
           </div>
           {fieldErrors.weeklyStock && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.weeklyStock}</p>
