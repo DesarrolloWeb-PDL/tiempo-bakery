@@ -137,10 +137,10 @@ export default function ProductForm({
               step="0.01"
               min="0"
               placeholder="Precio"
-              className={`${inputClass('price')} pr-12`}
+              className={`${inputClass('price')} pr-10`}
               required
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">AR$</span>
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">AR$</span>
           </div>
           {fieldErrors.price && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.price}</p>
@@ -154,9 +154,9 @@ export default function ProductForm({
               type="number"
               min="0"
               placeholder="Peso"
-              className={`${inputClass('weight')} pr-8`}
+              className={`${inputClass('weight')} pr-6`}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">g</span>
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">g</span>
           </div>
           {fieldErrors.weight && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.weight}</p>
@@ -170,10 +170,10 @@ export default function ProductForm({
               type="number"
               min="0"
               placeholder="Stock semanal"
-              className={`${inputClass('weeklyStock')} pr-8`}
+              className={`${inputClass('weeklyStock')} pr-6`}
               required
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">ud</span>
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">ud</span>
           </div>
           {fieldErrors.weeklyStock && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.weeklyStock}</p>
