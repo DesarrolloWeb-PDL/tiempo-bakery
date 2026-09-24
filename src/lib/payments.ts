@@ -200,7 +200,7 @@ export async function getPaymentSettings(): Promise<PaymentSettings> {
   const enabledProviders = await getEnabledPaymentProviders()
   const bankTransfer = await getBankTransferSettings()
 
-  if (bankTransfer.enabled && (isFilled(bankTransfer.alias) || isFilled(bankTransfer.cbu) || isFilled(bankTransfer.bankName))) {
+  if (bankTransfer.enabled && (isFilled(bankTransfer.alias) || isFilled(bankTransfer.cbu) || isFilled(bankTransfer.bankName) || isFilled(bankTransfer.accountHolder))) {
     enabledProviders.push('BANK_TRANSFER')
   }
 
