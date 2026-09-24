@@ -43,6 +43,8 @@ interface ProductCardProps {
   description: string;
   price: number;
   weight?: number;
+  ingredients?: string;
+  riskNote?: string | null;
   imageUrl: string;
   imageAlt: string;
   images?: Array<{
@@ -68,6 +70,8 @@ export function ProductCard({
   description,
   price,
   weight,
+  ingredients,
+  riskNote,
   imageUrl,
   imageAlt,
   images = [],
@@ -248,6 +252,17 @@ export function ProductCard({
 
       <CardContent className="flex-1 space-y-3 pt-0">
         <p className="line-clamp-3 text-sm leading-6" style={{ color: 'var(--brand-text-muted)' }}>{description}</p>
+
+        {ingredients && (
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide mb-1" style={{ color: 'var(--brand-text-muted)' }}>{t.productIngredients}</p>
+            <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>{ingredients}</p>
+          </div>
+        )}
+
+        {riskNote && (
+          <p className="text-xs italic" style={{ color: 'var(--brand-text-muted)' }}>{riskNote}</p>
+        )}
 
         {allergens.length > 0 && (
           <div className="flex flex-wrap gap-2">

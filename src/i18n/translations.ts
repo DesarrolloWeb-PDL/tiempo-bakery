@@ -125,6 +125,8 @@ export interface Translations {
   productAvailable: string;
   productWeight: string;
   productAllergens: string;
+  productIngredients: string;
+  productRiskNote: string;
   productPlaceholderLabel: string;
   productPlaceholderUpdating: string;
   productGalleryViewImage: string;
@@ -290,6 +292,8 @@ const ES: Translations = {
   productAvailable: "disponibles",
   productWeight: "Peso",
   productAllergens: "Alérgenos",
+  productIngredients: "Ingredientes",
+  productRiskNote: "Nota",
   productPlaceholderLabel: "Producto artesanal",
   productPlaceholderUpdating: "Imagen en actualización",
   productGalleryViewImage: "Ver imagen",
@@ -455,6 +459,8 @@ const PT: Translations = {
   productAvailable: "disponíveis",
   productWeight: "Peso",
   productAllergens: "Alérgenos",
+  productIngredients: "Ingredientes",
+  productRiskNote: "Nota",
   productPlaceholderLabel: "Produto artesanal",
   productPlaceholderUpdating: "Imagem em atualização",
   productGalleryViewImage: "Ver imagem",
@@ -620,6 +626,8 @@ const EN: Translations = {
   productAvailable: "available",
   productWeight: "Weight",
   productAllergens: "Allergens",
+  productIngredients: "Ingredients",
+  productRiskNote: "Note",
   productPlaceholderLabel: "Artisanal product",
   productPlaceholderUpdating: "Image being updated",
   productGalleryViewImage: "View image",

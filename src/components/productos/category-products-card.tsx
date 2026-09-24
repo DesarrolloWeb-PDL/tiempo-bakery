@@ -95,6 +95,8 @@ export default function CategoryProductsCard({ categoria, dark }: CategoryProduc
                   description={producto.description}
                   price={producto.price}
                   weight={producto.weight}
+                  ingredients={producto.ingredients}
+                  riskNote={producto.riskNote}
                   imageUrl={producto.imageUrl}
                   imageAlt={producto.imageAlt}
                   images={producto.images}

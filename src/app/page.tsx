@@ -60,6 +60,8 @@ async function getProducts() {
             description: p.description,
             price: p.price,
             weight: p.weight,
+            ingredients: p.ingredients,
+            riskNote: p.riskNote,
             imageUrl: p.imageUrl,
             imageAlt: p.imageAlt,
             images: p.images,
