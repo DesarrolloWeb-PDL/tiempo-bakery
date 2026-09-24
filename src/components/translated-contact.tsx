@@ -37,7 +37,7 @@ export function TranslatedContact({ siteContent, nationalCourierEnabled = false 
           {t.contactWhatsappBtn}
         </a>
       </div>
-      <div className="mt-8 space-y-4 rounded-xl border border-brand-gold/20 bg-brand-bg-card p-6">
+      <div className="mt-8 space-y-4 rounded-xl border border-brand-gold/20 bg-black/30 backdrop-blur-sm p-6">
         <div>
           <h2 className="text-lg font-semibold text-brand-gold">{t.deliveryPickup}</h2>
           <p className="mt-1 text-sm text-brand-gold/85">{t.deliveryPickupText}</p>
