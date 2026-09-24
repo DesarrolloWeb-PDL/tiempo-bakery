@@ -565,10 +565,10 @@ export function useProductAdmin() {
   const inputClass = useCallback(
     (field: ProductFormField) =>
       cn(
-        'px-3 py-2 rounded-lg border text-sm bg-gray-900 text-white',
+        'px-3 py-2 rounded-lg border text-sm bg-gray-900 text-white placeholder:text-gray-400',
         fieldErrors[field]
           ? 'border-red-800 bg-red-900/30 text-red-300 placeholder:text-red-400'
-          : 'border-gray-700',
+          : 'border-gray-600 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30',
       ),
     [fieldErrors],
   )

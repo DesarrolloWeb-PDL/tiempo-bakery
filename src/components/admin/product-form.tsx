@@ -129,43 +129,52 @@ export default function ProductForm({
         </div>
 
         <div>
-          <input
-            value={form.price}
-            onChange={(e) => onFieldChange('price', e.target.value)}
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="Precio (AR$)"
-            className={inputClass('price')}
-            required
-          />
+          <div className="relative">
+            <input
+              value={form.price}
+              onChange={(e) => onFieldChange('price', e.target.value)}
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="Precio"
+              className={`${inputClass('price')} pr-12`}
+              required
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">AR$</span>
+          </div>
           {fieldErrors.price && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.price}</p>
           )}
         </div>
         <div>
-          <input
-            value={form.weight}
-            onChange={(e) => onFieldChange('weight', e.target.value)}
-            type="number"
-            min="0"
-            placeholder="Peso (g)"
-            className={inputClass('weight')}
-          />
+          <div className="relative">
+            <input
+              value={form.weight}
+              onChange={(e) => onFieldChange('weight', e.target.value)}
+              type="number"
+              min="0"
+              placeholder="Peso"
+              className={`${inputClass('weight')} pr-8`}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">g</span>
+          </div>
           {fieldErrors.weight && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.weight}</p>
           )}
         </div>
         <div>
-          <input
-            value={form.weeklyStock}
-            onChange={(e) => onFieldChange('weeklyStock', e.target.value)}
-            type="number"
-            min="0"
-            placeholder="Stock semanal"
-            className={inputClass('weeklyStock')}
-            required
-          />
+          <div className="relative">
+            <input
+              value={form.weeklyStock}
+              onChange={(e) => onFieldChange('weeklyStock', e.target.value)}
+              type="number"
+              min="0"
+              placeholder="Stock semanal"
+              className={`${inputClass('weeklyStock')} pr-8`}
+              required
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">ud</span>
+          </div>
           {fieldErrors.weeklyStock && (
             <p className="mt-1 text-xs text-red-400">{fieldErrors.weeklyStock}</p>
           )}
@@ -299,13 +308,13 @@ export default function ProductForm({
                       value={image.url}
                       onChange={(e) => onExtraImageChange(index, 'url', e.target.value)}
                       placeholder="URL imagen extra"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-600 text-sm bg-gray-900 text-white placeholder:text-gray-400 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
                     />
                     <input
                       value={image.altText}
                       onChange={(e) => onExtraImageChange(index, 'altText', e.target.value)}
                       placeholder="Alt imagen extra"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-600 text-sm bg-gray-900 text-white placeholder:text-gray-400 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
                     />
                   </div>
                   <div className="flex items-start justify-end gap-1">
@@ -371,13 +380,13 @@ export default function ProductForm({
         value={form.allergens}
         onChange={(e) => onFieldChange('allergens', e.target.value)}
         placeholder="Alérgenos (separados por coma)"
-        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+        className="w-full px-3 py-2 rounded-lg border border-gray-600 text-sm bg-gray-900 text-white placeholder:text-gray-400 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
       />
       <input
         value={form.riskNote}
         onChange={(e) => onFieldChange('riskNote', e.target.value)}
         placeholder="Nota de riesgo (opcional)"
-        className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+        className="w-full px-3 py-2 rounded-lg border border-gray-600 text-sm bg-gray-900 text-white placeholder:text-gray-400 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -389,39 +398,42 @@ export default function ProductForm({
               stockType: e.target.value as 'WEEKLY' | 'UNLIMITED',
             }))
           }
-          className="px-3 py-2 rounded-lg border border-gray-700 text-sm"
+          className="px-3 py-2 rounded-lg border border-gray-600 text-sm bg-gray-900 text-white focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
         >
           <option value="WEEKLY">Stock semanal</option>
           <option value="UNLIMITED">Stock ilimitado</option>
         </select>
-        <div className="flex items-center gap-4 text-sm text-gray-700">
-          <label className="flex items-center gap-2">
+        <div className="flex items-center gap-4 text-sm text-gray-200">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={form.allowSlicing}
               onChange={(e) =>
                 onFormChange((f) => ({ ...f, allowSlicing: e.target.checked }))
               }
+              className="w-4 h-4 rounded border-gray-500 bg-gray-800 text-brand-gold focus:ring-brand-gold/30"
             />
             Permitir rebanado
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={form.isActive}
               onChange={(e) =>
                 onFormChange((f) => ({ ...f, isActive: e.target.checked }))
               }
+              className="w-4 h-4 rounded border-gray-500 bg-gray-800 text-brand-gold focus:ring-brand-gold/30"
             />
             Activo
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={form.published}
               onChange={(e) =>
                 onFormChange((f) => ({ ...f, published: e.target.checked }))
               }
+              className="w-4 h-4 rounded border-gray-500 bg-gray-800 text-brand-gold focus:ring-brand-gold/30"
             />
             Publicado
           </label>
@@ -433,7 +445,7 @@ export default function ProductForm({
           value={newCategoryName}
           onChange={(e) => onNewCategoryNameChange(e.target.value)}
           placeholder="Nueva categoría rápida"
-          className="flex-1 px-3 py-2 rounded-lg border border-gray-700 text-sm bg-gray-900 text-white"
+          className="flex-1 px-3 py-2 rounded-lg border border-gray-600 text-sm bg-gray-900 text-white placeholder:text-gray-400 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
         />
         <button
           type="button"
