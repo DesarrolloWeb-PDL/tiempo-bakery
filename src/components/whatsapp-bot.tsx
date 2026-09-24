@@ -16,7 +16,7 @@ interface FAQItem {
   answer: string
 }
 
-function getFaqItems(t: ReturnType<typeof import('@/components/language-provider')['useLanguage']>['t']): FAQItem[] {
+function getFaqItems(t: ReturnType<typeof import('@/components/language-provider')['useLanguage']>['t'], cityName: string): FAQItem[] {
   return [
     {
       question: `🍞 ${t.whatsappFaqSourdough}`,
@@ -28,7 +28,7 @@ function getFaqItems(t: ReturnType<typeof import('@/components/language-provider
     },
     {
       question: `🚚 ${t.whatsappFaqLocalDelivery}`,
-      answer: t.whatsappFaqLocalDeliveryAnswer,
+      answer: t.whatsappFaqLocalDeliveryAnswer.replace(/en tu zona/g, `en ${cityName}`),
     },
     {
       question: `🌾 ${t.whatsappFaqGluten}`,
@@ -40,7 +40,7 @@ function getFaqItems(t: ReturnType<typeof import('@/components/language-provider
     },
     {
       question: `📍 ${t.whatsappFaqPickup}`,
-      answer: t.whatsappFaqPickupAnswer,
+      answer: t.whatsappFaqPickupAnswer.replace(/en distintas zonas/g, `en distintas zonas de ${cityName}`),
     },
   ]
 }
@@ -62,7 +62,7 @@ export default function WhatsAppBot({ siteContent }: WhatsAppBotProps) {
   if (!mounted || pathname.startsWith('/admin')) return null
 
   const phone = cleanPhone(siteContent.contactWhatsapp)
-  const FAQ_ITEMS = getFaqItems(t)
+  const FAQ_ITEMS = getFaqItems(t, siteContent.cityName)
 
   const handleQuestionClick = (item: FAQItem) => {
     const message = encodeURIComponent(item.answer)

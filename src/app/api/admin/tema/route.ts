@@ -110,7 +110,7 @@ const DEFAULT_THEME: ThemeConfig = {
   infoTitle2: 'Masa Madre Natural',
   infoSubtitle2: 'Sin levadura industrial. Fermentación lenta y natural.',
   infoTitle3: 'Retirada Local',
-  infoSubtitle3: 'Puntos de retirada en Utrera o envío a domicilio.',
+  infoSubtitle3: 'Puntos de retirada o envío a domicilio.',
 }
 
 const THEME_KEYS = Object.keys(DEFAULT_THEME) as (keyof ThemeConfig)[]

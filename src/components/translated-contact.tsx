@@ -42,7 +42,7 @@ export function TranslatedContact({ siteContent }: TranslatedContactProps) {
           <p className="mt-1 text-sm text-brand-gold/85">{t.deliveryPickupText}</p>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-brand-gold">{t.deliveryLocal}</h2>
+          <h2 className="text-lg font-semibold text-brand-gold">{t.deliveryLocal} ({siteContent.cityName})</h2>
           <p className="mt-1 text-sm text-brand-gold/85">{t.deliveryLocalText}</p>
         </div>
         <div>

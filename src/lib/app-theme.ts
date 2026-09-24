@@ -34,7 +34,7 @@ const DEFAULT_THEME: AppTheme = {
   infoTitle2: 'Masa Madre Natural',
   infoSubtitle2: 'Sin levadura industrial. Fermentación lenta y natural.',
   infoTitle3: 'Retirada Local',
-  infoSubtitle3: 'Puntos de retirada en Utrera o envío a domicilio.',
+  infoSubtitle3: 'Puntos de retirada o envío a domicilio.',
 }
 
 export async function getThemeConfig(): Promise<AppTheme> {

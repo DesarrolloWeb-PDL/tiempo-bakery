@@ -21,6 +21,7 @@ export interface SiteContent {
   deliveryPickupText: string
   deliveryLocalText: string
   deliveryCourierText: string
+  cityName: string
 }
 
 export const DEFAULT_SITE_CONTENT: SiteContent = {
@@ -53,6 +54,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     'El reparto local se ofrece únicamente dentro del casco urbano y se coordina el mismo día del horneado.',
   deliveryCourierText:
     'También podés optar por mensajería urgente. El pedido sale el mismo día del horneado programado.',
+  cityName: 'Utrera',
 }
 
 export const SITE_CONTENT_KEYS = Object.keys(DEFAULT_SITE_CONTENT) as Array<keyof SiteContent>

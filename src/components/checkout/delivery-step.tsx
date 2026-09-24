@@ -326,7 +326,7 @@ export function DeliveryStep({
                     type="text"
                     value={city || ''}
                     onChange={(e) => onUpdate({ shippingCity: e.target.value })}
-                    placeholder="Utrera"
+                    placeholder="Ciudad"
                     required
                   />
                   {errors.city && (
@@ -443,7 +443,7 @@ export function DeliveryStep({
                     type="text"
                     value={city || ''}
                     onChange={(e) => onUpdate({ shippingCity: e.target.value })}
-                    placeholder="Utrera"
+                    placeholder="Ciudad"
                     required
                   />
                   {errors.city && (

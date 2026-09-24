@@ -324,6 +324,17 @@ function ContactoConfigAdmin({ siteContent, setSiteContent, loading, saving, mes
             className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
           />
         </div>
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Ciudad (aparece en envío local y FAQs)</label>
+          <input
+            type="text"
+            value={siteContent.cityName}
+            disabled={loading || saving}
+            onChange={(e) => setSiteContent((prev) => ({ ...prev, cityName: e.target.value }))}
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 text-sm"
+            placeholder="Ej: Utrera"
+          />
+        </div>
         <div className="md:col-span-2">
           <label className="block text-xs text-gray-400 mb-1">Texto de recogida</label>
           <textarea
@@ -416,7 +427,7 @@ export default function AdminConfigPage() {
     infoTitle2: 'Masa Madre Natural',
     infoSubtitle2: 'Sin levadura industrial. Fermentación lenta y natural.',
     infoTitle3: 'Retirada Local',
-    infoSubtitle3: 'Puntos de retirada en Utrera o envío a domicilio.',
+    infoSubtitle3: 'Puntos de retirada o envío a domicilio.',
   })
   const [loadingPayments, setLoadingPayments] = useState(true)
   const [paymentSettings, setPaymentSettings] = useState<{

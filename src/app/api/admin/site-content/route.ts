@@ -29,6 +29,7 @@ const siteContentSchema = z.object({
   deliveryPickupText: z.string().min(1).max(400),
   deliveryLocalText: z.string().min(1).max(400),
   deliveryCourierText: z.string().min(1).max(400),
+  cityName: z.string().min(1).max(80),
 })
 
 function mapDbError(error: unknown, fallback: string) {
