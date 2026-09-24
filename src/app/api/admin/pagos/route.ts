@@ -78,26 +78,39 @@ export async function PUT(request: NextRequest) {
     }
 
     // Guardar o eliminar credenciales según el estado enabled
+    // Si el campo está vacío pero ya existe una clave/token en DB, conservar el existente
     if (stripeEnabled) {
-      if (!stripeSecretKey.trim()) {
-        return NextResponse.json(
-          { error: 'Stripe está habilitado pero no ingresaste la Secret Key' },
-          { status: 400 }
-        );
+      const trimmedKey = stripeSecretKey.trim();
+      if (trimmedKey) {
+        await setStripeSecretKey(trimmedKey);
+      } else {
+        const existing = await getStripeSecretKey();
+        if (!existing) {
+          return NextResponse.json(
+            { error: 'Stripe está habilitado pero no ingresaste la Secret Key' },
+            { status: 400 }
+          );
+        }
+        // Kept existing key — no update needed
       }
-      await setStripeSecretKey(stripeSecretKey.trim());
     } else {
       await deleteStripeSecretKey();
     }
 
     if (mercadopagoEnabled) {
-      if (!mercadopagoAccessToken.trim()) {
-        return NextResponse.json(
-          { error: 'Mercado Pago está habilitado pero no ingresaste el Access Token' },
-          { status: 400 }
-        );
+      const trimmedToken = mercadopagoAccessToken.trim();
+      if (trimmedToken) {
+        await setMercadoPagoAccessToken(trimmedToken);
+      } else {
+        const existing = await getMercadoPagoAccessToken();
+        if (!existing) {
+          return NextResponse.json(
+            { error: 'Mercado Pago está habilitado pero no ingresaste el Access Token' },
+            { status: 400 }
+          );
+        }
+        // Kept existing token — no update needed
       }
-      await setMercadoPagoAccessToken(mercadopagoAccessToken.trim());
     } else {
       await deleteMercadoPagoAccessToken();
     }
