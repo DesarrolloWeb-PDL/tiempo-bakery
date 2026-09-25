@@ -385,7 +385,7 @@ export default function OrderConfirmationPage() {
             <div className="print-ticket bg-white border-2 border-gray-300 rounded-lg p-6 w-full max-w-sm">
               <div className="text-center border-b-2 border-dashed pb-3 mb-3">
                 <div className="flex items-center justify-center gap-2">
-                  <img src="/img/espiga.png" alt="" className="h-6 w-6 object-contain" />
+                  <Image src="/img/espiga.png" alt="" width={24} height={24} className="object-contain" unoptimized />
                   <p className="text-lg font-bold text-gray-900">Tiempo Masa Madre</p>
                 </div>
                 <p className="text-xs text-gray-600">Micropanadería artesanal</p>
