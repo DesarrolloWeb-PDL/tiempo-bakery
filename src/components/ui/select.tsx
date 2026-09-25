@@ -21,7 +21,8 @@ const SelectTrigger = React.forwardRef<
     )}
     style={{
       borderColor: 'var(--brand-border)',
-      color: 'var(--brand-text-primary)',
+      backgroundColor: '#ffffff',
+      color: '#1a1a1a',
     }}
     {...props}
   >
@@ -74,7 +75,7 @@ const SelectContent = React.forwardRef<
           'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
         className
       )}
-      style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-border)', backdropFilter: 'blur(12px)' }}
+      style={{ backgroundColor: '#ffffff', borderColor: 'var(--brand-border)', color: '#1a1a1a' }}
       position={position}
       {...props}
     >
