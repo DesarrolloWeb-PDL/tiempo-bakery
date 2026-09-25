@@ -49,6 +49,10 @@ interface Order {
   shippingCost: number;
   total: number;
   customerNotes?: string;
+  deliveryZoneName?: string | null;
+  deliveryStartTime?: string | null;
+  deliveryEndTime?: string | null;
+  deliveryDate?: string | null;
   items: OrderItem[];
 }
 
@@ -415,11 +419,30 @@ export default function OrderConfirmationPage() {
                   <>
                     <p className="font-semibold text-sm text-gray-900">{order.pickupLocation}</p>
                     <p className="text-xs text-gray-600">{order.pickupAddress}</p>
-                    <p className="text-xs text-gray-600">{order.pickupSchedule}</p>
+                    {order.deliveryDate && (
+                      <p className="text-xs text-gray-900 mt-1">
+                        📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+                      </p>
+                    )}
+                    {order.pickupSchedule && (
+                      <p className="text-xs text-gray-600">🕐 {order.pickupSchedule}</p>
+                    )}
                   </>
                 )}
                 {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && (
-                  <p className="text-xs text-gray-900">Envío a: {order.shippingAddress}, {order.shippingCity}</p>
+                  <>
+                    <p className="text-xs text-gray-900">
+                      📍 {order.shippingAddress}, {order.shippingCity}
+                    </p>
+                    {order.deliveryDate && (
+                      <p className="text-xs text-gray-900 mt-1">
+                        📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+                      </p>
+                    )}
+                    {order.deliveryStartTime && order.deliveryEndTime && (
+                      <p className="text-xs text-gray-600">🕐 {order.deliveryStartTime} - {order.deliveryEndTime}</p>
+                    )}
+                  </>
                 )}
               </div>
               <div className="border-t-2 border-dashed mt-3 pt-2 text-center">
@@ -473,15 +496,30 @@ export default function OrderConfirmationPage() {
                   <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
                     <p className="font-medium text-sm" style={{ color: 'var(--brand-text-primary)' }}>{order.pickupLocation}</p>
                     <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>{order.pickupAddress}</p>
-                    <p className="text-xs text-brand-gold-dark mt-1">{order.pickupSchedule}</p>
+                    {order.deliveryDate && (
+                      <p className="text-xs mt-1 font-medium" style={{ color: 'var(--brand-text-primary)' }}>
+                        📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+                      </p>
+                    )}
+                    {order.pickupSchedule && (
+                      <p className="text-xs text-brand-gold-dark mt-0.5">🕐 {order.pickupSchedule}</p>
+                    )}
                   </div>
                 )}
 
                 {/* Shipping address details */}
                 {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && order.shippingAddress && (
                   <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
-                    <p className="text-sm" style={{ color: 'var(--brand-text-primary)' }}>{order.shippingAddress}</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--brand-text-primary)' }}>{order.shippingAddress}</p>
                     <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>{order.shippingCity}, {order.shippingPostal}</p>
+                    {order.deliveryDate && (
+                      <p className="text-xs mt-1 font-medium" style={{ color: 'var(--brand-text-primary)' }}>
+                        📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+                      </p>
+                    )}
+                    {order.deliveryStartTime && order.deliveryEndTime && (
+                      <p className="text-xs text-brand-gold-dark mt-0.5">🕐 {order.deliveryStartTime} - {order.deliveryEndTime}</p>
+                    )}
                   </div>
                 )}
 
@@ -492,7 +530,9 @@ export default function OrderConfirmationPage() {
                     <span style={{ color: 'var(--brand-text-primary)' }}>{formatCurrency(order.subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span style={{ color: 'var(--brand-text-muted)' }}>Envío</span>
+                    <span style={{ color: 'var(--brand-text-muted)' }}>
+                      {order.deliveryZoneName ? `Delivery · ${order.deliveryZoneName}` : 'Delivery'}
+                    </span>
                     <span style={{ color: 'var(--brand-text-primary)' }}>
                       {order.shippingCost === 0 ? 'Gratis' : formatCurrency(order.shippingCost)}
                     </span>

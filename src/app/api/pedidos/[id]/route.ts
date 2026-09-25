@@ -31,6 +31,12 @@ export async function GET(
             email: true,
           },
         },
+        deliveryZone: {
+          select: { name: true },
+        },
+        deliverySchedule: {
+          select: { startTime: true, endTime: true },
+        },
       },
     });
 
@@ -65,6 +71,10 @@ export async function GET(
         total: Number(order.total),
         customerNotes: order.customerNotes,
         paymentMethod: order.paymentMethod,
+        deliveryZoneName: order.deliveryZone?.name ?? null,
+        deliveryStartTime: order.deliverySchedule?.startTime ?? null,
+        deliveryEndTime: order.deliverySchedule?.endTime ?? null,
+        deliveryDate: order.deliveryDate?.toISOString() ?? null,
         items: order.items.map((item) => ({
           id: item.id,
           productName: item.productName,
