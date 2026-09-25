@@ -47,14 +47,7 @@ async function rollbackPendingOrder(orderId: string) {
   })
 }
 
-function randomOrderSuffix(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let result = ''
-  for (let i = 0; i < 6; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)]
-  }
-  return result
-}
+import { DateTime } from 'luxon';
 
 export async function POST(request: NextRequest) {
   try {
@@ -166,7 +159,19 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      const orderNumber = `TBK-${new Date().getFullYear()}-${randomOrderSuffix()}`;
+      // Generar orderNumber: YYMMDD-HHMM-orden
+      const now = DateTime.now().setZone('America/Argentina/Buenos_Aires');
+      const datePart = now.toFormat('yyMMdd');
+      const timePart = now.toFormat('HHmm');
+      const startOfDay = now.startOf('day');
+      const endOfDay = now.endOf('day');
+      const todayCount = await prisma.order.count({
+        where: {
+          createdAt: { gte: startOfDay.toJSDate(), lte: endOfDay.toJSDate() },
+        },
+      });
+      const sequence = String(todayCount + 1).padStart(2, '0');
+      const orderNumber = `${datePart}-${timePart}-${sequence}`;
 
       let pickupDetails = null;
       if (data.deliveryMethod === 'PICKUP_POINT' && data.pickupLocationId) {

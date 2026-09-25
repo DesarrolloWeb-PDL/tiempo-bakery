@@ -17,6 +17,8 @@ const pickupPointFindUniqueMock = vi.fn()
 const orderCreateMock = vi.fn()
 const orderFindUniqueMock = vi.fn()
 
+const orderCountMock = vi.fn().mockResolvedValue(0)
+
 const txMock = {
   user: { upsert: userUpsertMock },
   pickupPoint: { findUnique: pickupPointFindUniqueMock },
@@ -30,7 +32,7 @@ const txMock = {
 vi.mock('@/lib/db', () => ({
   prisma: {
     product: { findMany: productFindManyMock },
-    order: { update: orderUpdateMock },
+    order: { update: orderUpdateMock, count: orderCountMock },
     $transaction: vi.fn(async (callback: (tx: typeof txMock) => Promise<unknown>) => callback(txMock)),
   },
 }))
