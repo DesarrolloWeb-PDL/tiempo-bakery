@@ -89,9 +89,7 @@ export function DeliveryStep({
   const isDeliveryValid =
     selectedMethod === DeliveryMethod.PICKUP_POINT
       ? !!pickupLocationId
-      : selectedMethod === DeliveryMethod.LOCAL_DELIVERY
-        ? !!(address && city && postalCode)
-        : !!(address && city && postalCode);
+      : !!(address);
 
   const handleMethodChange = (method: DeliveryMethod) => {
     onUpdate({
@@ -130,11 +128,9 @@ export function DeliveryStep({
     if (
       (selectedMethod === DeliveryMethod.LOCAL_DELIVERY ||
         selectedMethod === DeliveryMethod.NATIONAL_COURIER) &&
-      (!address || !city || !postalCode)
+      !address
     ) {
-      if (!address) newErrors.address = t.deliveryErrorAddress;
-      if (!city) newErrors.city = t.deliveryErrorCity;
-      if (!postalCode) newErrors.postalCode = t.deliveryErrorPostal;
+      newErrors.address = t.deliveryErrorAddress;
     }
 
     setErrors(newErrors);
