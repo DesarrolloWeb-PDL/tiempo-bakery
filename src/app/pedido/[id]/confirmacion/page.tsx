@@ -515,7 +515,7 @@ export default function OrderConfirmationPage() {
                 {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && order.shippingAddress && (
                   <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
                     <p className="text-sm font-medium" style={{ color: 'var(--brand-text-primary)' }}>{order.shippingAddress}</p>
-                    <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>{order.shippingCity}, {order.shippingPostal}</p>
+                    <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>{order.shippingPostal}</p>
                     {order.deliveryDate && (
                       <p className="text-xs mt-1 font-medium" style={{ color: 'var(--brand-text-primary)' }}>
                         📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
