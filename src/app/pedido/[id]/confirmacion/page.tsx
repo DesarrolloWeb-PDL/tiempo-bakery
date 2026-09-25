@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams } from 'next/navigation';
 import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer, MessageCircle, Clock, Copy, Check } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -92,6 +93,23 @@ function CopyField({ label, value, copiedField, onCopy, gold, mono }: CopyFieldP
           )}
         </button>
       </div>
+    </div>
+  );
+}
+
+interface InfoFieldProps {
+  label: string;
+  value: string;
+  mono?: boolean;
+}
+
+function InfoField({ label, value, mono }: InfoFieldProps) {
+  return (
+    <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+      <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>{label}</p>
+      <p className={`font-semibold ${mono ? 'font-mono break-all' : ''}`} style={{ color: 'var(--brand-text-primary)' }}>
+        {value}
+      </p>
     </div>
   );
 }
@@ -200,32 +218,38 @@ export default function OrderConfirmationPage() {
   const DeliveryIcon = deliveryIcons[order.deliveryMethod as keyof typeof deliveryIcons];
   const isBankTransfer = order.paymentMethod === 'bank_transfer';
 
-  const handleSendWhatsApp = () => {
-    const deliveryLabel = deliveryNames[order.deliveryMethod as keyof typeof deliveryNames] || order.deliveryMethod;
-    const itemsText = order.items
-      .map((item) => `- ${item.productName} x${item.quantity}${item.sliced ? ' (Reb.)' : ''} = ${formatCurrency(item.subtotal)}`)
-      .join('\n');
-    const date = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt));
-    const confirmUrl = `${origin}/pedido/${order.id}/confirmacion`;
-    const message = [
-      '🧾 *Comprobante Tiempo Masa Madre*',
-      '',
-      `Pedido: #${order.orderNumber}`,
-      `Fecha: ${date}`,
-      `Cliente: ${order.customerName}`,
-      '',
-      'Productos:',
-      itemsText,
-      '',
-      `Total: *${formatCurrency(order.total)}*`,
-      '',
-      `📍 Entrega: ${deliveryLabel}`,
-      '',
-      `📄 Ver comprobante: ${confirmUrl}`,
-    ].join('\n');
-    const encoded = encodeURIComponent(message);
-    const phone = whatsappNumber || '';
-    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+  const handleShareTicket = async () => {
+    const ticketEl = document.querySelector('.print-ticket') as HTMLElement;
+    if (!ticketEl) return;
+
+    try {
+      const dataUrl = await toPng(ticketEl, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+      });
+
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], `comprobante-${order.orderNumber}.png`, { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Comprobante ${order.orderNumber}`,
+        });
+      } else {
+        // Desktop fallback: download + open WhatsApp
+        const link = document.createElement('a');
+        link.download = `comprobante-${order.orderNumber}.png`;
+        link.href = dataUrl;
+        link.click();
+        const phone = whatsappNumber || '';
+        window.open(`https://wa.me/${phone}`, '_blank');
+      }
+    } catch (err) {
+      console.error('Error generating ticket image:', err);
+    }
   };
 
   const handleCopyField = async (label: string, value: string) => {
@@ -309,10 +333,10 @@ export default function OrderConfirmationPage() {
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {bankTransfer.bankName && (
-                  <CopyField label="Banco" value={bankTransfer.bankName} copiedField={copiedField} onCopy={handleCopyField} />
+                  <InfoField label="Banco" value={bankTransfer.bankName} />
                 )}
                 {bankTransfer.accountHolder && (
-                  <CopyField label="Titular" value={bankTransfer.accountHolder} copiedField={copiedField} onCopy={handleCopyField} />
+                  <InfoField label="Titular" value={bankTransfer.accountHolder} />
                 )}
                 {bankTransfer.alias && (
                   <CopyField label="Alias" value={bankTransfer.alias} copiedField={copiedField} onCopy={handleCopyField} gold />
@@ -321,7 +345,7 @@ export default function OrderConfirmationPage() {
                   <CopyField label="CBU" value={bankTransfer.cbu} copiedField={copiedField} onCopy={handleCopyField} gold mono />
                 )}
                 {bankTransfer.cuit && (
-                  <CopyField label="CUIT" value={bankTransfer.cuit} copiedField={copiedField} onCopy={handleCopyField} mono />
+                  <InfoField label="CUIT" value={bankTransfer.cuit} mono />
                 )}
               </div>
               {bankTransfer.notes && (
@@ -344,7 +368,7 @@ export default function OrderConfirmationPage() {
             <Printer className="h-4 w-4" />
             Descargar comprobante
           </Button>
-          <Button onClick={handleSendWhatsApp} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
+          <Button onClick={handleShareTicket} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
             <MessageCircle className="h-4 w-4" />
             Enviar comprobante por WhatsApp
           </Button>
