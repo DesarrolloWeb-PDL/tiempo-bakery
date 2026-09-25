@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams } from 'next/navigation';
-import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer, MessageCircle } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer, MessageCircle, Clock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -109,10 +109,10 @@ export default function OrderConfirmationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--brand-bg)' }}>
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-brand-gold mx-auto mb-4" />
-          <p className="text-gray-600">{t.confirmLoading}</p>
+          <p style={{ color: 'var(--brand-text-muted)' }}>{t.confirmLoading}</p>
         </div>
       </div>
     );
@@ -120,14 +120,14 @@ export default function OrderConfirmationPage() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--brand-bg)' }}>
+        <Card className="max-w-md" style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
-              <AlertCircle className="h-8 w-8 text-red-600" />
-              <CardTitle>Error</CardTitle>
+              <AlertCircle className="h-8 w-8 text-red-400" />
+              <CardTitle style={{ color: 'var(--brand-text-primary)' }}>Error</CardTitle>
             </div>
-            <CardDescription>
+            <CardDescription style={{ color: 'var(--brand-text-muted)' }}>
               {error || t.confirmNotFound}
             </CardDescription>
           </CardHeader>
@@ -190,42 +190,104 @@ export default function OrderConfirmationPage() {
           .no-print { display: none !important; }
         }
       `}</style>
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen py-12" style={{ backgroundColor: 'var(--brand-bg)' }}>
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header according to payment status */}
         {mpProvider === 'mercadopago' && mpStatus === 'failure' ? (
           <div className="text-center mb-8 no-print">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-4">
-              <AlertCircle className="h-10 w-10 text-yellow-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-900/30 mb-4">
+              <AlertCircle className="h-10 w-10 text-yellow-400" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--brand-text-primary)' }}>
               {t.confirmPaymentPending}
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg" style={{ color: 'var(--brand-text-muted)' }}>
               {t.confirmPaymentPendingDesc}
             </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Pedido: <strong>{order.orderNumber}</strong> — {t.confirmPaymentRetry}
+            <p className="text-sm mt-2" style={{ color: 'var(--brand-text-muted)' }}>
+              Pedido: <strong style={{ color: 'var(--brand-text-primary)' }}>{order.orderNumber}</strong> — {t.confirmPaymentRetry}
             </p>
           </div>
         ) : (
           <div className="text-center mb-8 no-print">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-              <CheckCircle className="h-10 w-10 text-green-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-900/30 mb-4">
+              <CheckCircle className="h-10 w-10 text-green-400" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--brand-text-primary)' }}>
               {t.confirmTitle}
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg" style={{ color: 'var(--brand-text-muted)' }}>
               {t.confirmThanks}, {order.customerName}
             </p>
-            <p className="text-sm text-gray-500 mt-2">
-              {t.confirmOrderNumber}: <strong>{order.orderNumber}</strong>
+            <p className="text-sm mt-2" style={{ color: 'var(--brand-text-muted)' }}>
+              {t.confirmOrderNumber}: <strong style={{ color: 'var(--brand-text-primary)' }}>{order.orderNumber}</strong>
             </p>
           </div>
         )}
 
-        {/* Print Button */}
+        {/* === BANK TRANSFER DATA — PRIMARY INFO === */}
+        {isBankTransfer && bankTransfer?.enabled && (
+          <Card className="mb-8 no-print" style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-gold)' }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-brand-gold-dark">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                  <line x1="1" y1="10" x2="23" y2="10" />
+                </svg>
+                Datos para transferir
+              </CardTitle>
+              <CardDescription style={{ color: 'var(--brand-text-muted)' }}>
+                Realizá la transferencia con estos datos y enviá el comprobante para agilizar la confirmación.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {bankTransfer.bankName && (
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Banco</p>
+                    <p className="font-semibold" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.bankName}</p>
+                  </div>
+                )}
+                {bankTransfer.accountHolder && (
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Titular</p>
+                    <p className="font-semibold" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.accountHolder}</p>
+                  </div>
+                )}
+                {bankTransfer.alias && (
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Alias</p>
+                    <p className="font-semibold text-brand-gold-dark">{bankTransfer.alias}</p>
+                  </div>
+                )}
+                {bankTransfer.cbu && (
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>CBU</p>
+                    <p className="font-semibold font-mono text-brand-gold-dark break-all">{bankTransfer.cbu}</p>
+                  </div>
+                )}
+                {bankTransfer.cuit && (
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>CUIT</p>
+                    <p className="font-semibold font-mono" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.cuit}</p>
+                  </div>
+                )}
+              </div>
+              {bankTransfer.notes && (
+                <div className="mt-4 rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                  <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Instrucciones</p>
+                  <p className="text-sm whitespace-pre-line" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.notes}</p>
+                </div>
+              )}
+              <div className="mt-4 flex items-start gap-2 rounded-lg p-3 border border-brand-gold/20 bg-brand-gold/5">
+                <Clock className="h-4 w-4 text-brand-gold-dark shrink-0 mt-0.5" />
+                <p className="text-sm text-brand-gold-dark">Subí o enviá el comprobante por WhatsApp para agilizar la confirmación de tu pedido.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Print & WhatsApp Buttons */}
         <div className="flex justify-center mb-6 gap-4 no-print">
           <Button onClick={() => window.print()} className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
@@ -237,73 +299,165 @@ export default function OrderConfirmationPage() {
           </Button>
         </div>
 
-        {/* Printable Ticket */}
-        <div className="print-ticket bg-white border-2 border-gray-300 rounded-lg p-6 mb-6 max-w-sm mx-auto">
-          <div className="text-center border-b-2 border-dashed pb-3 mb-3">
-            <p className="text-lg font-bold">Tiempo Masa Madre</p>
-            <p className="text-xs text-gray-600">Micropanadería artesanal</p>
-          </div>
-          <div className="text-center mb-3">
-            <p className="text-[10px] text-gray-500">{order.orderNumber}</p>
-            <p className="text-2xl font-bold tracking-widest">{order.orderNumber}</p>
-            <div className="flex justify-center mt-2">
-              <img
-                src={`https://quickchart.io/qr?text=${encodeURIComponent(`${origin}/pedido/${order.id}/confirmacion`)}&size=150&margin=2`}
-                alt="QR del pedido"
-                className="w-24 h-24"
-              />
-            </div>
-          </div>
-          <div className="border-t border-dashed pt-3 mb-3 space-y-1">
-            <p className="text-xs"><span className="font-semibold">Cliente:</span> {order.customerName}</p>
-            <p className="text-xs"><span className="font-semibold">Fecha:</span> {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}</p>
-          </div>
-          <div className="border-t border-dashed pt-3 mb-3">
-            {order.items.map((item) => (
-              <div key={item.id} className="flex justify-between text-xs mb-1">
-                <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
-                <span className="font-semibold">{formatCurrency(item.subtotal)}</span>
+        {/* Ticket + Order Status side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+          {/* Printable Ticket — center */}
+          <div className="lg:col-span-3 flex justify-center">
+            <div className="print-ticket bg-white border-2 border-gray-300 rounded-lg p-6 w-full max-w-sm">
+              <div className="text-center border-b-2 border-dashed pb-3 mb-3">
+                <p className="text-lg font-bold text-gray-900">Tiempo Masa Madre</p>
+                <p className="text-xs text-gray-600">Micropanadería artesanal</p>
               </div>
-            ))}
-            <div className="flex justify-between text-xs border-t pt-1 mt-1">
-              <span className="font-semibold">Total</span>
-              <span className="font-semibold">{formatCurrency(order.total)}</span>
+              <div className="text-center mb-3">
+                <p className="text-[10px] text-gray-500">{order.orderNumber}</p>
+                <p className="text-2xl font-bold tracking-widest text-gray-900">{order.orderNumber}</p>
+                <div className="flex justify-center mt-2">
+                  <img
+                    src={`https://quickchart.io/qr?text=${encodeURIComponent(`${origin}/pedido/${order.id}/confirmacion`)}&size=150&margin=2`}
+                    alt="QR del pedido"
+                    className="w-24 h-24"
+                  />
+                </div>
+              </div>
+              <div className="border-t border-dashed pt-3 mb-3 space-y-1">
+                <p className="text-xs text-gray-900"><span className="font-semibold">Cliente:</span> {order.customerName}</p>
+                <p className="text-xs text-gray-900"><span className="font-semibold">Fecha:</span> {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}</p>
+              </div>
+              <div className="border-t border-dashed pt-3 mb-3">
+                {order.items.map((item) => (
+                  <div key={item.id} className="flex justify-between text-xs mb-1 text-gray-900">
+                    <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
+                    <span className="font-semibold">{formatCurrency(item.subtotal)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-xs border-t border-gray-300 pt-1 mt-1 text-gray-900">
+                  <span className="font-semibold">Total</span>
+                  <span className="font-semibold">{formatCurrency(order.total)}</span>
+                </div>
+              </div>
+              <div className="border-t border-dashed pt-3 text-center">
+                {order.deliveryMethod === 'PICKUP_POINT' && (
+                  <>
+                    <p className="font-semibold text-sm text-gray-900">{order.pickupLocation}</p>
+                    <p className="text-xs text-gray-600">{order.pickupAddress}</p>
+                    <p className="text-xs text-gray-600">{order.pickupSchedule}</p>
+                  </>
+                )}
+                {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && (
+                  <p className="text-xs text-gray-900">Envío a: {order.shippingAddress}, {order.shippingCity}</p>
+                )}
+              </div>
+              <div className="border-t-2 border-dashed mt-3 pt-2 text-center">
+                <p className="text-[10px] text-gray-400">{t.confirmShowAtPickup}</p>
+              </div>
             </div>
           </div>
-          <div className="border-t border-dashed pt-3 text-center">
-            {order.deliveryMethod === 'PICKUP_POINT' && (
-              <>
-                <p className="font-semibold text-sm">{order.pickupLocation}</p>
-                <p className="text-xs text-gray-600">{order.pickupAddress}</p>
-                <p className="text-xs text-gray-600">{order.pickupSchedule}</p>
-              </>
-            )}
-            {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && (
-              <p className="text-xs">Envío a: {order.shippingAddress}, {order.shippingCity}</p>
-            )}
-          </div>
-          <div className="border-t-2 border-dashed mt-3 pt-2 text-center">
-            <p className="text-[10px] text-gray-400">{t.confirmShowAtPickup}</p>
+
+          {/* Order Status — right side, next to ticket */}
+          <div className="lg:col-span-2 no-print">
+            <Card style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
+              <CardHeader>
+                <CardTitle style={{ color: 'var(--brand-text-primary)' }}>Estado del pedido</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Payment status */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>Pago</span>
+                  <Badge
+                    className={
+                      order.paymentStatus === 'PAID'
+                        ? 'bg-green-900/40 text-green-300 border-green-700/50'
+                        : 'bg-yellow-900/40 text-yellow-300 border-yellow-700/50'
+                    }
+                  >
+                    {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
+                  </Badge>
+                </div>
+
+                {/* Order status */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>Estado</span>
+                  <Badge className="bg-brand-gold/20 text-brand-gold-dark border-brand-gold/30">
+                    {order.status === 'PENDING' ? 'Pendiente' : order.status === 'CONFIRMED' ? 'Confirmado' : order.status === 'DELIVERED' ? 'Entregado' : order.status}
+                  </Badge>
+                </div>
+
+                {/* Delivery method */}
+                <div className="pt-3 border-t" style={{ borderColor: 'var(--brand-border)' }}>
+                  <p className="text-xs mb-1" style={{ color: 'var(--brand-text-muted)' }}>Entrega</p>
+                  <div className="flex items-center gap-2">
+                    {DeliveryIcon && <DeliveryIcon className="h-4 w-4" style={{ color: 'var(--brand-text-muted)' }} />}
+                    <span className="text-sm font-medium" style={{ color: 'var(--brand-text-primary)' }}>
+                      {deliveryNames[order.deliveryMethod as keyof typeof deliveryNames]}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Pickup point details */}
+                {order.deliveryMethod === 'PICKUP_POINT' && order.pickupLocation && (
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                    <p className="font-medium text-sm" style={{ color: 'var(--brand-text-primary)' }}>{order.pickupLocation}</p>
+                    <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>{order.pickupAddress}</p>
+                    <p className="text-xs text-brand-gold-dark mt-1">{order.pickupSchedule}</p>
+                  </div>
+                )}
+
+                {/* Shipping address details */}
+                {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && order.shippingAddress && (
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                    <p className="text-sm" style={{ color: 'var(--brand-text-primary)' }}>{order.shippingAddress}</p>
+                    <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>{order.shippingCity}, {order.shippingPostal}</p>
+                  </div>
+                )}
+
+                {/* Cost summary */}
+                <div className="pt-3 border-t space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: 'var(--brand-text-muted)' }}>Subtotal</span>
+                    <span style={{ color: 'var(--brand-text-primary)' }}>{formatCurrency(order.subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: 'var(--brand-text-muted)' }}>Envío</span>
+                    <span style={{ color: 'var(--brand-text-primary)' }}>
+                      {order.shippingCost === 0 ? 'Gratis' : formatCurrency(order.shippingCost)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold border-t pt-2" style={{ borderColor: 'var(--brand-border)' }}>
+                    <span style={{ color: 'var(--brand-text-primary)' }}>Total</span>
+                    <span className="text-brand-gold-dark">{formatCurrency(order.total)}</span>
+                  </div>
+                </div>
+
+                {/* Help */}
+                <div className="pt-3 border-t" style={{ borderColor: 'var(--brand-border)' }}>
+                  <p className="text-xs" style={{ color: 'var(--brand-text-muted)' }}>
+                    <strong>📞 {t.confirmNeedHelp}</strong>
+                    <br />
+                    contacto@tiempobakery.com
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
         {/* Email Confirmation Notice */}
-        <Card className="mb-6 bg-blue-50 border-blue-200 no-print">
+        <Card className="mb-6 no-print" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
           <CardContent className="p-4">
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-blue-300">
               📧 {t.confirmEmailNotice}{' '}
-              <strong>{order.customerEmail}</strong>
+              <strong className="text-blue-200">{order.customerEmail}</strong>
             </p>
           </CardContent>
         </Card>
 
+        {/* Products & Delivery Details */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Detalles principales */}
           <div className="lg:col-span-2 space-y-6">
             {/* Productos */}
-            <Card>
+            <Card style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
               <CardHeader>
-                <CardTitle>Productos</CardTitle>
+                <CardTitle style={{ color: 'var(--brand-text-primary)' }}>Productos</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -311,8 +465,9 @@ export default function OrderConfirmationPage() {
                     <div
                       key={item.id}
                       className="flex gap-4 pb-4 border-b last:border-0 last:pb-0"
+                      style={{ borderColor: 'var(--brand-border)' }}
                     >
-                      <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden bg-gray-100">
+                      <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
                         <Image
                           src={normalizePublicAssetUrl(item.product.imageUrl) || '/img/espiga.png'}
                           alt={item.productName}
@@ -321,9 +476,9 @@ export default function OrderConfirmationPage() {
                         />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium">{item.productName}</h3>
+                        <h3 className="font-medium" style={{ color: 'var(--brand-text-primary)' }}>{item.productName}</h3>
                         {item.product.weight && (
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
                             {item.product.weight}g
                           </p>
                         )}
@@ -339,8 +494,8 @@ export default function OrderConfirmationPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">{formatCurrency(item.subtotal)}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-semibold" style={{ color: 'var(--brand-text-primary)' }}>{formatCurrency(item.subtotal)}</p>
+                        <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
                           {formatCurrency(item.unitPrice)}/ud
                         </p>
                       </div>
@@ -350,154 +505,30 @@ export default function OrderConfirmationPage() {
               </CardContent>
             </Card>
 
-            {/* Método de entrega */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  {DeliveryIcon && <DeliveryIcon className="h-5 w-5" />}
-                  Método de entrega
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <p className="font-medium text-sm text-gray-700">Tipo</p>
-                    <p className="text-gray-900">
-                      {deliveryNames[order.deliveryMethod as keyof typeof deliveryNames]}
-                    </p>
-                  </div>
-
-                  {order.deliveryMethod === 'PICKUP_POINT' && (
-                    <div>
-                      <p className="font-medium text-sm text-gray-700 mb-1">
-                        Punto de recogida
-                      </p>
-                      <div className="bg-brand-gold/5 rounded-lg p-3">
-                        <p className="font-medium">{order.pickupLocation}</p>
-                        <p className="text-sm text-gray-600">{order.pickupAddress}</p>
-                        <p className="text-sm text-brand-gold-dark mt-1">
-                          {order.pickupSchedule}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {(order.deliveryMethod === 'LOCAL_DELIVERY' ||
-                    order.deliveryMethod === 'NATIONAL_COURIER') && (
-                    <div>
-                      <p className="font-medium text-sm text-gray-700 mb-1">
-                        Dirección de envío
-                      </p>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p>{order.shippingAddress}</p>
-                        <p>
-                          {order.shippingCity}, {order.shippingPostal}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
+            {/* Notas del pedido */}
             {order.customerNotes && (
-              <Card>
+              <Card style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
                 <CardHeader>
-                  <CardTitle>Notas del pedido</CardTitle>
+                  <CardTitle style={{ color: 'var(--brand-text-primary)' }}>Notas del pedido</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-700">{order.customerNotes}</p>
+                  <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>{order.customerNotes}</p>
                 </CardContent>
               </Card>
             )}
           </div>
 
-          {/* Resumen */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-8">
-              <CardHeader>
-                <CardTitle>Resumen</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span>{formatCurrency(order.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Envío</span>
-                    <span>
-                      {order.shippingCost === 0
-                        ? 'Gratis'
-                        : formatCurrency(order.shippingCost)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-lg font-bold border-t pt-2">
-                    <span>Total</span>
-                    <span className="text-brand-gold-dark">{formatCurrency(order.total)}</span>
-                  </div>
-                </div>
+          {/* Empty spacer for layout balance on large screens */}
+          <div className="hidden lg:block lg:col-span-1" />
+        </div>
 
-                <div className="pt-4 border-t space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Estado del pago</span>
-                    <Badge
-                      variant={
-                        order.paymentStatus === 'PAID' ? 'success' : 'secondary'
-                      }
-                    >
-                      {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Estado del pedido</span>
-                    <Badge variant="default">{order.status}</Badge>
-                  </div>
-                </div>
-
-                {isBankTransfer && bankTransfer?.enabled && (
-                  <div className="rounded-lg border border-brand-gold/20 bg-brand-gold/5 p-4 space-y-2">
-                    <p className="text-sm font-semibold text-brand-gold-dark">Datos para transferir</p>
-                    {bankTransfer.bankName && (
-                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">Banco:</span> {bankTransfer.bankName}</p>
-                    )}
-                    {bankTransfer.accountHolder && (
-                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">Titular:</span> {bankTransfer.accountHolder}</p>
-                    )}
-                    {bankTransfer.alias && (
-                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">Alias:</span> {bankTransfer.alias}</p>
-                    )}
-                    {bankTransfer.cbu && (
-                      <p className="text-sm text-brand-gold-dark break-all"><span className="font-medium">CBU:</span> {bankTransfer.cbu}</p>
-                    )}
-                    {bankTransfer.cuit && (
-                      <p className="text-sm text-brand-gold-dark"><span className="font-medium">CUIT:</span> {bankTransfer.cuit}</p>
-                    )}
-                    {bankTransfer.notes && (
-                      <p className="text-sm text-brand-gold-dark whitespace-pre-line">{bankTransfer.notes}</p>
-                    )}
-                    <p className="text-xs text-brand-gold-dark">Subí o enviá el comprobante para agilizar la confirmación.</p>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t">
-                  <Link href="/">
-                    <Button variant="outline" className="w-full">
-                      {t.checkoutBack}
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="bg-brand-gold/5 rounded-lg p-4">
-                  <p className="text-xs text-brand-gold-dark">
-                    <strong>📞 {t.confirmNeedHelp}</strong>
-                    <br />
-                    Contáctanos en contacto@tiempobakery.com
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Back to home */}
+        <div className="mt-8 text-center no-print">
+          <Link href="/">
+            <Button variant="outline" className="px-8">
+              {t.checkoutBack}
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
