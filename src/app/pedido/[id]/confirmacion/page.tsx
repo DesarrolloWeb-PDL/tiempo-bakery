@@ -121,7 +121,7 @@ export default function OrderConfirmationPage() {
   if (error || !order) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--brand-bg)' }}>
-        <Card className="max-w-md" style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
+        <Card className="max-w-md backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-border)' }}>
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
               <AlertCircle className="h-8 w-8 text-red-400" />
@@ -227,7 +227,7 @@ export default function OrderConfirmationPage() {
 
         {/* === BANK TRANSFER DATA — PRIMARY INFO === */}
         {isBankTransfer && bankTransfer?.enabled && (
-          <Card className="mb-8 no-print" style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-gold)' }}>
+          <Card className="mb-8 no-print backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-gold)' }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-brand-gold-dark">
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -355,7 +355,7 @@ export default function OrderConfirmationPage() {
 
           {/* Order Status — right side, next to ticket */}
           <div className="lg:col-span-2 no-print">
-            <Card style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
+            <Card className="backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-border)' }}>
               <CardHeader>
                 <CardTitle style={{ color: 'var(--brand-text-primary)' }}>Estado del pedido</CardTitle>
               </CardHeader>
@@ -442,7 +442,7 @@ export default function OrderConfirmationPage() {
         </div>
 
         {/* Email Confirmation Notice */}
-        <Card className="mb-6 no-print" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+        <Card className="mb-6 no-print backdrop-blur-xl" style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
           <CardContent className="p-4">
             <p className="text-sm text-blue-300">
               📧 {t.confirmEmailNotice}{' '}
@@ -455,7 +455,7 @@ export default function OrderConfirmationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {/* Productos */}
-            <Card style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
+            <Card className="backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-border)' }}>
               <CardHeader>
                 <CardTitle style={{ color: 'var(--brand-text-primary)' }}>Productos</CardTitle>
               </CardHeader>
@@ -507,7 +507,7 @@ export default function OrderConfirmationPage() {
 
             {/* Notas del pedido */}
             {order.customerNotes && (
-              <Card style={{ backgroundColor: 'var(--brand-bg-card)', borderColor: 'var(--brand-border)' }}>
+            <Card style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)' }} className="backdrop-blur-xl">
                 <CardHeader>
                   <CardTitle style={{ color: 'var(--brand-text-primary)' }}>Notas del pedido</CardTitle>
                 </CardHeader>
