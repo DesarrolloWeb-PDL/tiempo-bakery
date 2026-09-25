@@ -206,8 +206,9 @@ export default function OrderConfirmationPage() {
       .map((item) => `- ${item.productName} x${item.quantity}${item.sliced ? ' (Reb.)' : ''} = ${formatCurrency(item.subtotal)}`)
       .join('\n');
     const date = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt));
+    const confirmUrl = `${origin}/pedido/${order.id}/confirmacion`;
     const message = [
-      '🧾 Comprobante Tiempo Masa Madre',
+      '🧾 *Comprobante Tiempo Masa Madre*',
       '',
       `Pedido: #${order.orderNumber}`,
       `Fecha: ${date}`,
@@ -216,9 +217,11 @@ export default function OrderConfirmationPage() {
       'Productos:',
       itemsText,
       '',
-      `Total: ${formatCurrency(order.total)}`,
+      `Total: *${formatCurrency(order.total)}*`,
       '',
       `📍 Entrega: ${deliveryLabel}`,
+      '',
+      `📄 Ver comprobante: ${confirmUrl}`,
     ].join('\n');
     const encoded = encodeURIComponent(message);
     const phone = whatsappNumber || '';
@@ -339,7 +342,7 @@ export default function OrderConfirmationPage() {
         <div className="flex justify-center mb-6 gap-4 no-print">
           <Button onClick={() => window.print()} className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
-            {t.confirmPrint}
+            Descargar comprobante
           </Button>
           <Button onClick={handleSendWhatsApp} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
             <MessageCircle className="h-4 w-4" />
