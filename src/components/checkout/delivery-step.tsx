@@ -351,7 +351,7 @@ export function DeliveryStep({
                 >
                   {t.deliveryZoneLabel}
                 </label>
-                <Select value={zoneId} onValueChange={handleZoneChange}>
+                <Select value={zoneId ?? ''} onValueChange={handleZoneChange}>
                   <SelectTrigger aria-label={t.deliveryZoneLabel}>
                     <SelectValue placeholder={t.deliveryZonePlaceholder} />
                   </SelectTrigger>
@@ -374,7 +374,7 @@ export function DeliveryStep({
                   >
                     {t.deliveryDayLabel}
                   </label>
-                  <Select value={selectedDayValue} onValueChange={handleDayChange}>
+                  <Select value={selectedDayValue ?? ''} onValueChange={handleDayChange}>
                     <SelectTrigger aria-label={t.deliveryDayLabel}>
                       <SelectValue placeholder={t.deliveryDayPlaceholder} />
                     </SelectTrigger>
