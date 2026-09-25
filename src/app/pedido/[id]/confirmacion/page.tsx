@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams } from 'next/navigation';
-import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer, MessageCircle, Clock } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer, MessageCircle, Clock, Copy, Check } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,6 +61,41 @@ interface BankTransferSettings {
   notes: string;
 }
 
+interface CopyFieldProps {
+  label: string;
+  value: string;
+  copiedField: string | null;
+  onCopy: (label: string, value: string) => void;
+  gold?: boolean;
+  mono?: boolean;
+}
+
+function CopyField({ label, value, copiedField, onCopy, gold, mono }: CopyFieldProps) {
+  const isCopied = copiedField === label;
+  return (
+    <div className="rounded-lg p-3 group" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+      <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>{label}</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className={`font-semibold truncate ${gold ? 'text-brand-gold-dark' : ''} ${mono ? 'font-mono break-all' : ''}`} style={gold ? undefined : { color: 'var(--brand-text-primary)' }}>
+          {value}
+        </p>
+        <button
+          type="button"
+          onClick={() => onCopy(label, value)}
+          className="shrink-0 p-1 rounded transition-colors hover:bg-brand-gold/10"
+          title={`Copiar ${label}`}
+        >
+          {isCopied ? (
+            <Check className="h-3.5 w-3.5 text-green-400" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" style={{ color: 'var(--brand-text-muted)' }} />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function OrderConfirmationPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -74,6 +109,8 @@ export default function OrderConfirmationPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [origin, setOrigin] = React.useState('');
+  const [whatsappNumber, setWhatsappNumber] = React.useState('');
+  const [copiedField, setCopiedField] = React.useState<string | null>(null);
   const { t } = useLanguage();
 
   React.useEffect(() => {
@@ -95,10 +132,17 @@ export default function OrderConfirmationPage() {
         if (!res.ok) throw new Error('No se pudieron cargar los medios de pago');
         return res.json();
       }),
+      fetch('/api/site-content').then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      }).catch(() => null),
     ])
-      .then(([orderData, paymentData]) => {
+      .then(([orderData, paymentData, siteData]) => {
         setOrder(orderData);
         setBankTransfer(paymentData.bankTransfer ?? null);
+        if (siteData?.contactWhatsapp) {
+          setWhatsappNumber(siteData.contactWhatsapp.replace(/[^0-9]/g, ''));
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -177,7 +221,26 @@ export default function OrderConfirmationPage() {
       `📍 Entrega: ${deliveryLabel}`,
     ].join('\n');
     const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+    const phone = whatsappNumber || '';
+    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+  };
+
+  const handleCopyField = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
   };
 
   return (
@@ -243,34 +306,19 @@ export default function OrderConfirmationPage() {
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {bankTransfer.bankName && (
-                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
-                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Banco</p>
-                    <p className="font-semibold" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.bankName}</p>
-                  </div>
+                  <CopyField label="Banco" value={bankTransfer.bankName} copiedField={copiedField} onCopy={handleCopyField} />
                 )}
                 {bankTransfer.accountHolder && (
-                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
-                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Titular</p>
-                    <p className="font-semibold" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.accountHolder}</p>
-                  </div>
+                  <CopyField label="Titular" value={bankTransfer.accountHolder} copiedField={copiedField} onCopy={handleCopyField} />
                 )}
                 {bankTransfer.alias && (
-                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
-                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Alias</p>
-                    <p className="font-semibold text-brand-gold-dark">{bankTransfer.alias}</p>
-                  </div>
+                  <CopyField label="Alias" value={bankTransfer.alias} copiedField={copiedField} onCopy={handleCopyField} gold />
                 )}
                 {bankTransfer.cbu && (
-                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
-                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>CBU</p>
-                    <p className="font-semibold font-mono text-brand-gold-dark break-all">{bankTransfer.cbu}</p>
-                  </div>
+                  <CopyField label="CBU" value={bankTransfer.cbu} copiedField={copiedField} onCopy={handleCopyField} gold mono />
                 )}
                 {bankTransfer.cuit && (
-                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
-                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>CUIT</p>
-                    <p className="font-semibold font-mono" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.cuit}</p>
-                  </div>
+                  <CopyField label="CUIT" value={bankTransfer.cuit} copiedField={copiedField} onCopy={handleCopyField} mono />
                 )}
               </div>
               {bankTransfer.notes && (
@@ -295,7 +343,7 @@ export default function OrderConfirmationPage() {
           </Button>
           <Button onClick={handleSendWhatsApp} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
             <MessageCircle className="h-4 w-4" />
-            {t.confirmSendWhatsApp}
+            Enviar comprobante por WhatsApp
           </Button>
         </div>
 
