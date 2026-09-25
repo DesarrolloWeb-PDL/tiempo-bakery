@@ -12,7 +12,7 @@ export interface TimeGatingConfig {
 }
 
 export const DEFAULT_CONFIG: TimeGatingConfig = {
-  timezone: 'Europe/Madrid',
+  timezone: 'America/Argentina/Buenos_Aires',
   openingDay: 3, // Miércoles
   openingHour: 18,
   openingMinute: 0,
@@ -191,6 +191,7 @@ export async function getTimeGatingRuntime(): Promise<{
         key: {
           in: [
             'time_gating_enabled',
+            'time_gating_timezone',
             'opening_day',
             'opening_hour',
             'opening_minute',
@@ -205,7 +206,7 @@ export async function getTimeGatingRuntime(): Promise<{
     const map = new Map(configs.map((cfg) => [cfg.key, cfg.value]));
 
     const config: TimeGatingConfig = {
-      timezone: DEFAULT_CONFIG.timezone,
+      timezone: map.get('time_gating_timezone') || DEFAULT_CONFIG.timezone,
       openingDay: parseIntOr(map.get('opening_day'), DEFAULT_CONFIG.openingDay),
       openingHour: parseIntOr(map.get('opening_hour'), DEFAULT_CONFIG.openingHour),
       openingMinute: parseIntOr(map.get('opening_minute'), DEFAULT_CONFIG.openingMinute),
