@@ -292,7 +292,7 @@ export function DeliveryStep({
                   type="text"
                   value={address || ''}
                   onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
-                  placeholder="Calle, número, piso..."
+                  placeholder="Casa N° - Manzana - Barrio - Calle N°"
                   required
                 />
                 {errors.address && (
@@ -409,7 +409,7 @@ export function DeliveryStep({
                   type="text"
                   value={address || ''}
                   onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
-                  placeholder="Calle, número, piso..."
+                  placeholder="Casa N° - Manzana - Barrio - Calle N°"
                   required
                 />
                 {errors.address && (
