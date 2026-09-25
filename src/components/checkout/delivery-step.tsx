@@ -359,7 +359,7 @@ export function DeliveryStep({
                     <SelectItem value="__none__">{t.deliveryZonePlaceholder}</SelectItem>
                     {zones.map((zone) => (
                       <SelectItem key={zone.id} value={zone.id}>
-                        {zone.name} — {formatCurrency(zone.shippingCost)}
+                        {zone.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

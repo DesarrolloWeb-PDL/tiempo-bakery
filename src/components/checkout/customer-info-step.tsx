@@ -15,28 +15,7 @@ interface CustomerInfoStepProps {
 
 export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepProps) {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const [autoAdvance, setAutoAdvance] = React.useState(false);
   const { t } = useLanguage();
-
-  const isValid =
-    data.customerEmail.includes('@') &&
-    data.customerName.length >= 2 &&
-    data.customerPhone.length >= 9;
-
-  React.useEffect(() => {
-    if (!isValid) {
-      setAutoAdvance(false);
-      return;
-    }
-    const timer = setTimeout(() => setAutoAdvance(true), 1200);
-    return () => clearTimeout(timer);
-  }, [data.customerEmail, data.customerName, data.customerPhone, isValid]);
-
-  React.useEffect(() => {
-    if (autoAdvance && Object.keys(errors).length === 0) {
-      onNext();
-    }
-  }, [autoAdvance, errors, onNext]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
