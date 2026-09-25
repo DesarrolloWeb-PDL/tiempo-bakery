@@ -385,7 +385,7 @@ export default function OrderConfirmationPage() {
             <div className="print-ticket bg-white border-2 border-gray-300 rounded-lg p-6 w-full max-w-sm relative overflow-hidden">
               {/* Watermark */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                <Image src="/img/espiga.png" alt="" width={180} height={180} className="object-contain opacity-[0.06]" unoptimized />
+                <Image src="/favicon.png" alt="" width={180} height={180} className="object-contain opacity-[0.08]" unoptimized />
               </div>
               <div className="text-center border-b-2 border-dashed pb-3 mb-3 relative">
                 <p className="text-lg font-bold text-gray-900">Tiempo Masa Madre</p>
