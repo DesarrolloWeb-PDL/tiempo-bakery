@@ -21,7 +21,6 @@ const SelectTrigger = React.forwardRef<
     )}
     style={{
       borderColor: 'var(--brand-border)',
-      backgroundColor: 'var(--brand-bg-card)',
       color: 'var(--brand-text-primary)',
     }}
     {...props}
