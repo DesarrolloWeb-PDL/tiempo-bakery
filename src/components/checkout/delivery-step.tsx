@@ -292,56 +292,12 @@ export function DeliveryStep({
                   type="text"
                   value={address || ''}
                   onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
-                  placeholder="Casa N° - Manzana - Barrio - Calle N°"
+                  placeholder="Calle - N° - Barrio - Manzana - Casa N°"
                   required
                 />
                 {errors.address && (
                   <p className="text-sm text-red-600 mt-1">{errors.address}</p>
                 )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="city"
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: 'var(--brand-text-primary)' }}
-                  >
-                    {t.deliveryCity}
-                  </label>
-                  <Input
-                    id="city"
-                    type="text"
-                    value={city || ''}
-                    onChange={(e) => onUpdate({ shippingCity: e.target.value })}
-                    placeholder="Ciudad"
-                    required
-                  />
-                  {errors.city && (
-                    <p className="text-sm text-red-600 mt-1">{errors.city}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="postalCode"
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: 'var(--brand-text-primary)' }}
-                  >
-                    {t.deliveryPostal}
-                  </label>
-                  <Input
-                    id="postalCode"
-                    type="text"
-                    value={postalCode || ''}
-                    onChange={(e) => onUpdate({ shippingPostal: e.target.value })}
-                    placeholder="41710"
-                    required
-                  />
-                  {errors.postalCode && (
-                    <p className="text-sm text-red-600 mt-1">{errors.postalCode}</p>
-                  )}
-                </div>
               </div>
 
               <div>
@@ -409,56 +365,12 @@ export function DeliveryStep({
                   type="text"
                   value={address || ''}
                   onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
-                  placeholder="Casa N° - Manzana - Barrio - Calle N°"
+                  placeholder="Calle - N° - Barrio - Manzana - Casa N°"
                   required
                 />
                 {errors.address && (
                   <p className="text-sm text-red-600 mt-1">{errors.address}</p>
                 )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="city"
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: 'var(--brand-text-primary)' }}
-                  >
-                    {t.deliveryCity}
-                  </label>
-                  <Input
-                    id="city"
-                    type="text"
-                    value={city || ''}
-                    onChange={(e) => onUpdate({ shippingCity: e.target.value })}
-                    placeholder="Ciudad"
-                    required
-                  />
-                  {errors.city && (
-                    <p className="text-sm text-red-600 mt-1">{errors.city}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="postalCode"
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: 'var(--brand-text-primary)' }}
-                  >
-                    {t.deliveryPostal}
-                  </label>
-                  <Input
-                    id="postalCode"
-                    type="text"
-                    value={postalCode || ''}
-                    onChange={(e) => onUpdate({ shippingPostal: e.target.value })}
-                    placeholder="41710"
-                    required
-                  />
-                  {errors.postalCode && (
-                    <p className="text-sm text-red-600 mt-1">{errors.postalCode}</p>
-                  )}
-                </div>
               </div>
             </div>
           )}
