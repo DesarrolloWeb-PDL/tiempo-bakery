@@ -240,7 +240,23 @@ export default function AdminOrderDetailPage() {
 
   const handleWhatsAppTicket = () => {
     if (!order) return
-    const phone = order.customerPhone?.replace(/[^0-9]/g, '') || ''
+    const raw = order.customerPhone?.replace(/[^0-9]/g, '') || ''
+    // Ensure Argentine format: if starts with 9, prepend 54; if local (8 digits), prepend 549
+    let phone = raw
+    if (phone.startsWith('549')) {
+      // already correct
+    } else if (phone.startsWith('54')) {
+      phone = phone.replace(/^54/, '549')
+    } else if (phone.startsWith('9') && phone.length >= 10) {
+      phone = '54' + phone
+    } else if (phone.length <= 10) {
+      phone = '549' + phone
+    }
+
+    if (!phone || phone.length < 10) {
+      alert('No hay número de teléfono válido para este cliente')
+      return
+    }
 
     let msg = `Hola ${order.customerName}, tu pedido *#${order.orderNumber}* está confirmado.\n\n`
     msg += `*Productos:*\n`
