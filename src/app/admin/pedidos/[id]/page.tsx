@@ -275,8 +275,9 @@ export default function AdminOrderDetailPage() {
       msg += '\n'
     }
 
-    // Open WhatsApp directly with pre-filled message
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
+    // Open WhatsApp directly with pre-filled message and customer phone
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+    window.location.href = whatsappUrl
   }
 
   const handleDelete = async () => {
