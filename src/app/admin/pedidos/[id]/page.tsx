@@ -54,6 +54,7 @@ interface OrderDetail {
   shippingAddress: string | null
   shippingCity: string | null
   shippingPostal: string | null
+  deliveryDate: string | null
   subtotal: number
   shippingCost: number
   total: number
@@ -693,23 +694,33 @@ export default function AdminOrderDetailPage() {
           opacity: '1',
         }}
       >
-        <div style={{ textAlign: 'center', borderBottom: '2px dashed #d1d5db', paddingBottom: '12px', marginBottom: '12px' }}>
+        {/* Watermark */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', userSelect: 'none' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/favicon.png" alt="" width={400} height={400} style={{ objectFit: 'contain', opacity: 0.12 }} />
+        </div>
+        <div style={{ textAlign: 'center', borderBottom: '2px dashed #d1d5db', paddingBottom: '12px', marginBottom: '12px', position: 'relative' }}>
           <p style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: 0 }}>Tiempo Masa Madre</p>
           <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>Micropanadería artesanal</p>
         </div>
-        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-          <p style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '0.1em', color: '#111827', margin: 0 }}>{order.orderNumber}</p>
-          <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
-            {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}
-          </p>
+        <div style={{ textAlign: 'center', marginBottom: '12px', position: 'relative' }}>
+          <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>{order.orderNumber}</p>
+          <p style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '0.1em', color: '#111827', margin: '2px 0 0' }}>{order.orderNumber}</p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://quickchart.io/qr?text=${encodeURIComponent(order.orderNumber)}&size=150&margin=2`}
+              alt="QR del pedido"
+              width={96}
+              height={96}
+            />
+          </div>
         </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px' }}>
+        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px', position: 'relative' }}>
           <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Cliente:</strong> {order.customerName}</p>
-          {order.customerPhone && (
-            <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Tel:</strong> {order.customerPhone}</p>
-          )}
+          <p style={{ fontSize: '12px', color: '#111827', margin: 0 }}><strong>Fecha:</strong> {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}</p>
         </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px' }}>
+        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px', position: 'relative' }}>
           {order.items.map((item) => (
             <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#111827', marginBottom: '4px' }}>
               <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
@@ -721,11 +732,16 @@ export default function AdminOrderDetailPage() {
             <span>{formatCurrency(order.total)}</span>
           </div>
         </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', textAlign: 'center' }}>
+        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', textAlign: 'center', position: 'relative' }}>
           {order.deliveryMethod === 'PICKUP_POINT' ? (
             <>
               <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', margin: 0 }}>{order.pickupLocation}</p>
               {order.pickupAddress && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>{order.pickupAddress}</p>}
+              {order.deliveryDate && (
+                <p style={{ fontSize: '11px', color: '#111827', margin: '4px 0 0' }}>
+                  📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+                </p>
+              )}
               {order.pickupSchedule && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>🕐 {order.pickupSchedule}</p>}
             </>
           ) : (
@@ -734,8 +750,8 @@ export default function AdminOrderDetailPage() {
             </p>
           )}
         </div>
-        <div style={{ borderTop: '2px dashed #d1d5db', marginTop: '12px', paddingTop: '8px', textAlign: 'center' }}>
-          <p style={{ fontSize: '9px', color: '#9ca3af' }}>Mostrá este comprobante al retirar tu pedido</p>
+        <div style={{ borderTop: '2px dashed #d1d5db', marginTop: '12px', paddingTop: '8px', textAlign: 'center', position: 'relative' }}>
+          <p style={{ fontSize: '9px', color: '#9ca3af' }}>Presentá este comprobante al retirar tu pedido</p>
         </div>
       </div>
     </div>
