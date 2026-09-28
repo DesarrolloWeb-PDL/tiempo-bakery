@@ -718,6 +718,7 @@ export default function AdminOrderDetailPage() {
             <div className="border-t border-dashed pt-3 text-center relative">
               {order.deliveryMethod === 'PICKUP_POINT' ? (
                 <>
+                  <p className="font-semibold text-xs text-gray-900">Retira en:</p>
                   <p className="font-semibold text-sm text-gray-900">{order.pickupLocation}</p>
                   {order.pickupAddress && <p className="text-xs text-gray-600">{order.pickupAddress}</p>}
                   {order.deliveryDate && (
@@ -728,9 +729,17 @@ export default function AdminOrderDetailPage() {
                   {order.pickupSchedule && <p className="text-xs text-gray-600">🕐 {order.pickupSchedule}</p>}
                 </>
               ) : (
-                <p className="text-xs text-gray-900">
-                  📍 {order.shippingAddress}{order.shippingCity ? `, ${order.shippingCity}` : ''}
-                </p>
+                <>
+                  <p className="font-semibold text-xs text-gray-900">Delivery</p>
+                  <p className="text-xs text-gray-900">
+                    📍 {order.shippingAddress}{order.shippingCity ? `, ${order.shippingCity}` : ''}
+                  </p>
+                  {order.deliveryDate && (
+                    <p className="text-xs text-gray-900 mt-1">
+                      📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+                    </p>
+                  )}
+                </>
               )}
             </div>
             <div className="border-t-2 border-dashed mt-3 pt-2 text-center relative">

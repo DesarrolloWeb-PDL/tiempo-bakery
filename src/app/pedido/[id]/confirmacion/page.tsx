@@ -394,6 +394,7 @@ export default function OrderConfirmationPage() {
               <div className="border-t border-dashed pt-3 text-center">
                 {order.deliveryMethod === 'PICKUP_POINT' && (
                   <>
+                    <p className="font-semibold text-xs text-gray-900">Retira en:</p>
                     <p className="font-semibold text-sm text-gray-900">{order.pickupLocation}</p>
                     <p className="text-xs text-gray-600">{order.pickupAddress}</p>
                     {order.deliveryDate && (
@@ -408,8 +409,9 @@ export default function OrderConfirmationPage() {
                 )}
                 {(order.deliveryMethod === 'LOCAL_DELIVERY' || order.deliveryMethod === 'NATIONAL_COURIER') && (
                   <>
+                    <p className="font-semibold text-xs text-gray-900">Delivery</p>
                     <p className="text-xs text-gray-900">
-                      📍 {order.shippingAddress}, {order.shippingCity}
+                      📍 {order.shippingAddress}{order.shippingCity ? `, ${order.shippingCity}` : ''}
                     </p>
                     {order.deliveryDate && (
                       <p className="text-xs text-gray-900 mt-1">
