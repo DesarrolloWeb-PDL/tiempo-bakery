@@ -277,9 +277,9 @@ export default function AdminOrderDetailPage() {
       msg += '\n'
     }
 
-    // Try to generate ticket image and share via native share (mobile → WhatsApp with image)
+    // Always generate ticket image
     const ticketEl = document.getElementById('admin-ticket-image')
-    if (ticketEl && navigator.share) {
+    if (ticketEl) {
       try {
         // Temporarily make visible for capture
         const prev = ticketEl.style.cssText
@@ -300,6 +300,7 @@ export default function AdminOrderDetailPage() {
         // Restore hidden state
         ticketEl.style.cssText = prev
 
+        // Convert to blob (CSP-safe, no fetch)
         const [header, base64] = dataUrl.split(',')
         const mimeMatch = header.match(/data:(.*?);/)
         const mime = mimeMatch ? mimeMatch[1] : 'image/png'
@@ -309,16 +310,25 @@ export default function AdminOrderDetailPage() {
         const blob = new Blob([bytes], { type: mime })
         const file = new File([blob], `ticket-${order.orderNumber}.png`, { type: mime })
 
-        if (navigator.canShare?.({ files: [file] })) {
+        // Mobile: share image directly to WhatsApp
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
           await navigator.share({ files: [file], title: `Ticket ${order.orderNumber}` })
           return
         }
-      } catch {
-        // Fall through to text-only
+
+        // Desktop: download image + open WhatsApp with text
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.download = `ticket-${order.orderNumber}.png`
+        link.href = url
+        link.click()
+        URL.revokeObjectURL(url)
+      } catch (err) {
+        console.error('Error generating ticket image:', err)
       }
     }
 
-    // Fallback: text only via wa.me
+    // Open WhatsApp with text message
     window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
   }
 
