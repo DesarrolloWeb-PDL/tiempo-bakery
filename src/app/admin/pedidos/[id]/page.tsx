@@ -23,7 +23,6 @@ import {
 import { cn } from '@/lib/utils'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { formatCurrency } from '@/lib/format'
-import { toPng } from 'html-to-image'
 import {
   FLOW_BY_METHOD,
   getNextStatuses,
@@ -258,47 +257,26 @@ export default function AdminOrderDetailPage() {
       return
     }
 
-    const ticketEl = document.getElementById('admin-ticket-image')
-    if (!ticketEl) return
-
-    try {
-      const dataUrl = await toPng(ticketEl, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        fetchRequestInit: { mode: 'no-cors' },
-        skipFonts: true,
-      })
-
-      // Convert data URL to Blob without fetch (CSP-safe)
-      const [header, base64] = dataUrl.split(',')
-      const mimeMatch = header.match(/data:(.*?);/)
-      const mime = mimeMatch ? mimeMatch[1] : 'image/png'
-      const binary = atob(base64)
-      const bytes = new Uint8Array(binary.length)
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-      const blob = new Blob([bytes], { type: mime })
-      const file = new File([blob], `ticket-${order.orderNumber}.png`, { type: mime })
-
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `Ticket ${order.orderNumber}`,
-        })
-      } else {
-        // Desktop: download image + open WhatsApp app directly
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.download = `ticket-${order.orderNumber}.png`
-        link.href = url
-        link.click()
-        URL.revokeObjectURL(url)
-        // Use whatsapp:// protocol to open the native app, not WhatsApp Web
-        window.location.href = `whatsapp://send?phone=${phone}`
-      }
-    } catch (err) {
-      console.error('Error generating ticket image:', err)
+    // Build text message like bank transfer confirmation
+    let msg = `Hola ${order.customerName}, tu pedido *#${order.orderNumber}* está confirmado.\n\n`
+    msg += `*Productos:*\n`
+    order.items.forEach((item) => {
+      msg += `• ${item.productName} x${item.quantity}${item.sliced ? ' (Reb.)' : ''} — ${formatCurrency(item.subtotal)}\n`
+    })
+    msg += `\n*Total:* ${formatCurrency(order.total)}\n`
+    if (order.deliveryMethod === 'PICKUP_POINT') {
+      msg += `\n*Recogida:* ${order.pickupLocation ?? ''}`
+      if (order.pickupAddress) msg += ` — ${order.pickupAddress}`
+      msg += '\n'
+      if (order.pickupSchedule) msg += `🕐 ${order.pickupSchedule}\n`
+    } else {
+      msg += `\n*Envío:* ${order.shippingAddress ?? ''}`
+      if (order.shippingCity) msg += `, ${order.shippingCity}`
+      msg += '\n'
     }
+
+    // Open WhatsApp directly with pre-filled message
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   const handleDelete = async () => {
@@ -656,67 +634,6 @@ export default function AdminOrderDetailPage() {
               )}
             </div>
           </Section>
-        </div>
-      </div>
-
-      {/* Hidden ticket for WhatsApp image capture */}
-      <div
-        id="admin-ticket-image"
-        style={{
-          position: 'fixed',
-          left: '-9999px',
-          top: 0,
-          width: '360px',
-          background: '#ffffff',
-          padding: '24px',
-          fontFamily: 'system-ui, sans-serif',
-        }}
-      >
-        <div style={{ textAlign: 'center', borderBottom: '2px dashed #d1d5db', paddingBottom: '12px', marginBottom: '12px' }}>
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: 0 }}>Tiempo Masa Madre</p>
-          <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>Micropanadería artesanal</p>
-        </div>
-        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-          <p style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '0.1em', color: '#111827', margin: 0 }}>{order.orderNumber}</p>
-          <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
-            {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}
-          </p>
-        </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px' }}>
-          <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Cliente:</strong> {order.customerName}</p>
-          {order.customerPhone && (
-            <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Tel:</strong> {order.customerPhone}</p>
-          )}
-        </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px' }}>
-          {order.items.map((item) => (
-            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#111827', marginBottom: '4px' }}>
-              <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
-              <span style={{ fontWeight: 600 }}>{formatCurrency(item.subtotal)}</span>
-            </div>
-          ))}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#111827', borderTop: '1px solid #d1d5db', paddingTop: '6px', marginTop: '6px', fontWeight: 700 }}>
-            <span>Total</span>
-            <span>{formatCurrency(order.total)}</span>
-          </div>
-        </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', textAlign: 'center' }}>
-          {order.deliveryMethod === 'PICKUP_POINT' ? (
-            <>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', margin: 0 }}>{order.pickupLocation}</p>
-              {order.pickupAddress && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>{order.pickupAddress}</p>}
-              {order.pickupSchedule && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>🕐 {order.pickupSchedule}</p>}
-            </>
-          ) : (
-            <>
-              <p style={{ fontSize: '11px', color: '#111827', margin: 0 }}>
-                📍 {order.shippingAddress}{order.shippingCity ? `, ${order.shippingCity}` : ''}
-              </p>
-            </>
-          )}
-        </div>
-        <div style={{ borderTop: '2px dashed #d1d5db', marginTop: '12px', paddingTop: '8px', textAlign: 'center' }}>
-          <p style={{ fontSize: '9px', color: '#9ca3af' }}>Mostrá este comprobante al retirar tu pedido</p>
         </div>
       </div>
     </div>
