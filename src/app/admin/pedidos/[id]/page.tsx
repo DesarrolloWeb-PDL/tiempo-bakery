@@ -277,22 +277,10 @@ export default function AdminOrderDetailPage() {
       msg += '\n'
     }
 
-    // Always generate ticket image
+    // Generate ticket image from visible preview
     const ticketEl = document.getElementById('admin-ticket-image')
     if (ticketEl) {
       try {
-        // Temporarily make visible for capture
-        const prev = ticketEl.style.cssText
-        ticketEl.style.position = 'absolute'
-        ticketEl.style.left = '0'
-        ticketEl.style.top = '0'
-        ticketEl.style.zIndex = '-1'
-        ticketEl.style.opacity = '1'
-        ticketEl.style.width = '360px'
-
-        // Wait a frame for rendering
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
-
         const dataUrl = await toPng(ticketEl, {
           quality: 0.95,
           pixelRatio: 2,
@@ -300,9 +288,6 @@ export default function AdminOrderDetailPage() {
           skipFonts: true,
           cacheBust: true,
         })
-
-        // Restore hidden state
-        ticketEl.style.cssText = prev
 
         // Convert to blob (CSP-safe, no fetch)
         const [header, base64] = dataUrl.split(',')
@@ -694,71 +679,66 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {/* Hidden ticket for image capture */}
-      <div
-        id="admin-ticket-image"
-        style={{
-          position: 'fixed',
-          left: '-9999px',
-          top: '-9999px',
-          width: '360px',
-          background: '#ffffff',
-          padding: '24px',
-          fontFamily: 'system-ui, sans-serif',
-          opacity: '1',
-        }}
-      >
-        {/* Watermark */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', userSelect: 'none' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/favicon.png" alt="" width={400} height={400} style={{ objectFit: 'contain', opacity: 0.12 }} />
-        </div>
-        <div style={{ textAlign: 'center', borderBottom: '2px dashed #d1d5db', paddingBottom: '12px', marginBottom: '12px', position: 'relative' }}>
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: 0 }}>Tiempo Masa Madre</p>
-          <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>Micropanadería artesanal</p>
-        </div>
-        <div style={{ textAlign: 'center', marginBottom: '12px', position: 'relative' }}>
-          <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>{order.orderNumber}</p>
-          <p style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '0.1em', color: '#111827', margin: '2px 0 0' }}>{order.orderNumber}</p>
-        </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px', position: 'relative' }}>
-          <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Cliente:</strong> {order.customerName}</p>
-          <p style={{ fontSize: '12px', color: '#111827', margin: 0 }}><strong>Fecha:</strong> {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}</p>
-        </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px', position: 'relative' }}>
-          {order.items.map((item) => (
-            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#111827', marginBottom: '4px' }}>
-              <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
-              <span style={{ fontWeight: 600 }}>{formatCurrency(item.subtotal)}</span>
+      {/* Ticket preview — visible so html-to-image can capture it */}
+      <Section title="Vista previa del ticket" icon={Package}>
+        <div className="flex justify-center">
+          <div
+            id="admin-ticket-image"
+            className="bg-white border-2 border-gray-300 rounded-lg p-6 w-full max-w-sm relative overflow-hidden"
+          >
+            {/* Watermark */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/favicon.png" alt="" width={400} height={400} className="object-contain opacity-[0.12]" />
             </div>
-          ))}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#111827', borderTop: '1px solid #d1d5db', paddingTop: '6px', marginTop: '6px', fontWeight: 700 }}>
-            <span>Total</span>
-            <span>{formatCurrency(order.total)}</span>
-          </div>
-        </div>
-        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', textAlign: 'center', position: 'relative' }}>
-          {order.deliveryMethod === 'PICKUP_POINT' ? (
-            <>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', margin: 0 }}>{order.pickupLocation}</p>
-              {order.pickupAddress && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>{order.pickupAddress}</p>}
-              {order.deliveryDate && (
-                <p style={{ fontSize: '11px', color: '#111827', margin: '4px 0 0' }}>
-                  📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+            <div className="text-center border-b-2 border-dashed pb-3 mb-3 relative">
+              <p className="text-lg font-bold text-gray-900">Tiempo Masa Madre</p>
+              <p className="text-xs text-gray-600">Micropanadería artesanal</p>
+            </div>
+            <div className="text-center mb-3 relative">
+              <p className="text-[10px] text-gray-500">{order.orderNumber}</p>
+              <p className="text-2xl font-bold tracking-widest text-gray-900">{order.orderNumber}</p>
+            </div>
+            <div className="border-t border-dashed pt-3 mb-3 relative">
+              <p className="text-xs text-gray-900"><span className="font-semibold">Cliente:</span> {order.customerName}</p>
+              <p className="text-xs text-gray-900"><span className="font-semibold">Fecha:</span> {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}</p>
+            </div>
+            <div className="border-t border-dashed pt-3 mb-3 relative">
+              {order.items.map((item) => (
+                <div key={item.id} className="flex justify-between text-xs mb-1 text-gray-900">
+                  <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
+                  <span className="font-semibold">{formatCurrency(item.subtotal)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between text-xs border-t border-gray-300 pt-1 mt-1 text-gray-900">
+                <span className="font-semibold">Total</span>
+                <span className="font-semibold">{formatCurrency(order.total)}</span>
+              </div>
+            </div>
+            <div className="border-t border-dashed pt-3 text-center relative">
+              {order.deliveryMethod === 'PICKUP_POINT' ? (
+                <>
+                  <p className="font-semibold text-sm text-gray-900">{order.pickupLocation}</p>
+                  {order.pickupAddress && <p className="text-xs text-gray-600">{order.pickupAddress}</p>}
+                  {order.deliveryDate && (
+                    <p className="text-xs text-gray-900 mt-1">
+                      📅 {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(order.deliveryDate))}
+                    </p>
+                  )}
+                  {order.pickupSchedule && <p className="text-xs text-gray-600">🕐 {order.pickupSchedule}</p>}
+                </>
+              ) : (
+                <p className="text-xs text-gray-900">
+                  📍 {order.shippingAddress}{order.shippingCity ? `, ${order.shippingCity}` : ''}
                 </p>
               )}
-              {order.pickupSchedule && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>🕐 {order.pickupSchedule}</p>}
-            </>
-          ) : (
-            <p style={{ fontSize: '11px', color: '#111827', margin: 0 }}>
-              📍 {order.shippingAddress}{order.shippingCity ? `, ${order.shippingCity}` : ''}
-            </p>
-          )}
+            </div>
+            <div className="border-t-2 border-dashed mt-3 pt-2 text-center relative">
+              <p className="text-[10px] text-gray-400">Presentá este comprobante al retirar tu pedido</p>
+            </div>
+          </div>
         </div>
-        <div style={{ borderTop: '2px dashed #d1d5db', marginTop: '12px', paddingTop: '8px', textAlign: 'center', position: 'relative' }}>
-          <p style={{ fontSize: '9px', color: '#9ca3af' }}>Presentá este comprobante al retirar tu pedido</p>
-        </div>
-      </div>
+      </Section>
     </div>
   )
 }
