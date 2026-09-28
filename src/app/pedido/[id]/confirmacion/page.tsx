@@ -4,8 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams } from 'next/navigation';
-import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, Printer, MessageCircle, Clock, Copy, Check } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { CheckCircle, Loader2, AlertCircle, MapPin, Truck, Package, MessageCircle, Clock, Copy, Check } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -222,38 +221,25 @@ export default function OrderConfirmationPage() {
   const DeliveryIcon = deliveryIcons[order.deliveryMethod as keyof typeof deliveryIcons];
   const isBankTransfer = order.paymentMethod === 'bank_transfer';
 
-  const handleShareTicket = async () => {
-    const ticketEl = document.querySelector('.print-ticket') as HTMLElement;
-    if (!ticketEl) return;
+  const handleWhatsAppTransfer = () => {
+    const phone = whatsappNumber || '';
+    let message = `Hola, te envío los datos del pedido *#${order.orderNumber}*.\n\n`;
+    message += `El pedido está siendo procesado, a la espera del comprobante de transferencia para confirmar la compra.\n\n`;
 
-    try {
-      const dataUrl = await toPng(ticketEl, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-      });
-
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const file = new File([blob], `comprobante-${order.orderNumber}.png`, { type: 'image/png' });
-
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `Comprobante ${order.orderNumber}`,
-        });
-      } else {
-        // Desktop fallback: download + open WhatsApp
-        const link = document.createElement('a');
-        link.download = `comprobante-${order.orderNumber}.png`;
-        link.href = dataUrl;
-        link.click();
-        const phone = whatsappNumber || '';
-        window.open(`https://wa.me/${phone}`, '_blank');
+    if (bankTransfer) {
+      const lines: string[] = [];
+      if (bankTransfer.bankName) lines.push(`Banco: ${bankTransfer.bankName}`);
+      if (bankTransfer.accountHolder) lines.push(`Titular: ${bankTransfer.accountHolder}`);
+      if (bankTransfer.alias) lines.push(`Alias: ${bankTransfer.alias}`);
+      if (bankTransfer.cbu) lines.push(`CBU: ${bankTransfer.cbu}`);
+      if (lines.length) {
+        message += `*Datos para transferir:*\n${lines.join('\n')}\n\n`;
       }
-    } catch (err) {
-      console.error('Error generating ticket image:', err);
     }
+
+    message += `Total: ${formatCurrency(order.total)}`;
+
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleCopyField = async (label: string, value: string) => {
@@ -348,16 +334,7 @@ export default function OrderConfirmationPage() {
                 {bankTransfer.cbu && (
                   <CopyField label="CBU" value={bankTransfer.cbu} copiedField={copiedField} onCopy={handleCopyField} gold mono />
                 )}
-                {bankTransfer.cuit && (
-                  <InfoField label="CUIT" value={bankTransfer.cuit} mono />
-                )}
               </div>
-              {bankTransfer.notes && (
-                <div className="mt-4 rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
-                  <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-text-muted)' }}>Instrucciones</p>
-                  <p className="text-sm whitespace-pre-line" style={{ color: 'var(--brand-text-primary)' }}>{bankTransfer.notes}</p>
-                </div>
-              )}
               <div className="mt-4 flex items-start gap-2 rounded-lg p-3 border border-brand-gold/20 bg-brand-gold/5">
                 <Clock className="h-4 w-4 text-brand-gold-dark shrink-0 mt-0.5" />
                 <p className="text-sm text-brand-gold-dark">Subí o enviá el comprobante por WhatsApp para agilizar la confirmación de tu pedido.</p>
@@ -366,15 +343,11 @@ export default function OrderConfirmationPage() {
           </Card>
         )}
 
-        {/* Print & WhatsApp Buttons */}
+        {/* WhatsApp Button */}
         <div className="flex justify-center mb-6 gap-4 no-print">
-          <Button onClick={() => window.print()} className="flex items-center gap-2">
-            <Printer className="h-4 w-4" />
-            Descargar comprobante
-          </Button>
-          <Button onClick={handleShareTicket} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
+          <Button onClick={handleWhatsAppTransfer} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
             <MessageCircle className="h-4 w-4" />
-            Enviar comprobante por WhatsApp
+            Enviar pedido por WhatsApp
           </Button>
         </div>
 
