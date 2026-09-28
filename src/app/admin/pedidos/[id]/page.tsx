@@ -280,6 +280,14 @@ export default function AdminOrderDetailPage() {
     const ticketEl = document.getElementById('admin-ticket-image')
     if (ticketEl && navigator.share) {
       try {
+        // Temporarily make visible for capture
+        const prev = ticketEl.style.cssText
+        ticketEl.style.position = 'absolute'
+        ticketEl.style.left = '0'
+        ticketEl.style.top = '0'
+        ticketEl.style.zIndex = '-1'
+        ticketEl.style.opacity = '1'
+
         const dataUrl = await toPng(ticketEl, {
           quality: 0.95,
           pixelRatio: 2,
@@ -287,6 +295,10 @@ export default function AdminOrderDetailPage() {
           fetchRequestInit: { mode: 'no-cors' },
           skipFonts: true,
         })
+
+        // Restore hidden state
+        ticketEl.style.cssText = prev
+
         const [header, base64] = dataUrl.split(',')
         const mimeMatch = header.match(/data:(.*?);/)
         const mime = mimeMatch ? mimeMatch[1] : 'image/png'
@@ -673,11 +685,12 @@ export default function AdminOrderDetailPage() {
         style={{
           position: 'fixed',
           left: '-9999px',
-          top: 0,
+          top: '-9999px',
           width: '360px',
           background: '#ffffff',
           padding: '24px',
           fontFamily: 'system-ui, sans-serif',
+          opacity: '1',
         }}
       >
         <div style={{ textAlign: 'center', borderBottom: '2px dashed #d1d5db', paddingBottom: '12px', marginBottom: '12px' }}>
