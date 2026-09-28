@@ -18,6 +18,7 @@ import {
   Truck,
   Trash2,
   RotateCcw,
+  MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
@@ -235,6 +236,30 @@ export default function AdminOrderDetailPage() {
       setSaving(false)
       setTimeout(() => setSaveMessage(null), 3000)
     }
+  }
+
+  const handleWhatsAppTicket = () => {
+    if (!order) return
+    const phone = order.customerPhone?.replace(/[^0-9]/g, '') || ''
+
+    let msg = `Hola ${order.customerName}, tu pedido *#${order.orderNumber}* está confirmado.\n\n`
+    msg += `*Productos:*\n`
+    order.items.forEach((item) => {
+      msg += `• ${item.productName} x${item.quantity}${item.sliced ? ' (Reb.)' : ''} — ${formatCurrency(item.subtotal)}\n`
+    })
+    msg += `\n*Total:* ${formatCurrency(order.total)}\n`
+
+    if (order.deliveryMethod === 'PICKUP_POINT') {
+      msg += `\n*Recogida:* ${order.pickupLocation ?? ''}\n`
+      if (order.pickupAddress) msg += `📍 ${order.pickupAddress}\n`
+      if (order.pickupSchedule) msg += `🕐 ${order.pickupSchedule}\n`
+    } else {
+      msg += `\n*Envío:* ${order.shippingAddress ?? ''}`
+      if (order.shippingCity) msg += `, ${order.shippingCity}`
+      msg += '\n'
+    }
+
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   const handleDelete = async () => {
@@ -577,6 +602,16 @@ export default function AdminOrderDetailPage() {
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                   Marcar como pagado
+                </button>
+              )}
+              {order.paymentStatus === 'PAID' && order.paymentMethod === 'bank_transfer' && order.status !== 'CANCELLED' && (
+                <button
+                  onClick={handleWhatsAppTicket}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white text-sm font-medium rounded-lg transition-colors mt-1"
+                  style={{ backgroundColor: '#25D366' }}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Enviar ticket por WhatsApp
                 </button>
               )}
             </div>
