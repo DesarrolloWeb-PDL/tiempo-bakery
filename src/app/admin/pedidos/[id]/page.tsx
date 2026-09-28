@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils'
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer'
 import { formatCurrency } from '@/lib/format'
+import { toPng } from 'html-to-image'
 import {
   FLOW_BY_METHOD,
   getNextStatuses,
@@ -238,10 +239,9 @@ export default function AdminOrderDetailPage() {
     }
   }
 
-  const handleWhatsAppTicket = () => {
+  const handleWhatsAppTicket = async () => {
     if (!order) return
     const raw = order.customerPhone?.replace(/[^0-9]/g, '') || ''
-    // Ensure Argentine format: if starts with 9, prepend 54; if local (8 digits), prepend 549
     let phone = raw
     if (phone.startsWith('549')) {
       // already correct
@@ -258,24 +258,35 @@ export default function AdminOrderDetailPage() {
       return
     }
 
-    let msg = `Hola ${order.customerName}, tu pedido *#${order.orderNumber}* está confirmado.\n\n`
-    msg += `*Productos:*\n`
-    order.items.forEach((item) => {
-      msg += `• ${item.productName} x${item.quantity}${item.sliced ? ' (Reb.)' : ''} — ${formatCurrency(item.subtotal)}\n`
-    })
-    msg += `\n*Total:* ${formatCurrency(order.total)}\n`
+    const ticketEl = document.getElementById('admin-ticket-image')
+    if (!ticketEl) return
 
-    if (order.deliveryMethod === 'PICKUP_POINT') {
-      msg += `\n*Recogida:* ${order.pickupLocation ?? ''}\n`
-      if (order.pickupAddress) msg += `📍 ${order.pickupAddress}\n`
-      if (order.pickupSchedule) msg += `🕐 ${order.pickupSchedule}\n`
-    } else {
-      msg += `\n*Envío:* ${order.shippingAddress ?? ''}`
-      if (order.shippingCity) msg += `, ${order.shippingCity}`
-      msg += '\n'
+    try {
+      const dataUrl = await toPng(ticketEl, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+      })
+
+      const res = await fetch(dataUrl)
+      const blob = await res.blob()
+      const file = new File([blob], `ticket-${order.orderNumber}.png`, { type: 'image/png' })
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Ticket ${order.orderNumber}`,
+        })
+      } else {
+        const link = document.createElement('a')
+        link.download = `ticket-${order.orderNumber}.png`
+        link.href = dataUrl
+        link.click()
+        window.open(`https://wa.me/${phone}`, '_blank')
+      }
+    } catch (err) {
+      console.error('Error generating ticket image:', err)
     }
-
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   const handleDelete = async () => {
@@ -632,6 +643,67 @@ export default function AdminOrderDetailPage() {
               )}
             </div>
           </Section>
+        </div>
+      </div>
+
+      {/* Hidden ticket for WhatsApp image capture */}
+      <div
+        id="admin-ticket-image"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: 0,
+          width: '360px',
+          background: '#ffffff',
+          padding: '24px',
+          fontFamily: 'system-ui, sans-serif',
+        }}
+      >
+        <div style={{ textAlign: 'center', borderBottom: '2px dashed #d1d5db', paddingBottom: '12px', marginBottom: '12px' }}>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: 0 }}>Tiempo Masa Madre</p>
+          <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>Micropanadería artesanal</p>
+        </div>
+        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+          <p style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '0.1em', color: '#111827', margin: 0 }}>{order.orderNumber}</p>
+          <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+            {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}
+          </p>
+        </div>
+        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px' }}>
+          <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Cliente:</strong> {order.customerName}</p>
+          {order.customerPhone && (
+            <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Tel:</strong> {order.customerPhone}</p>
+          )}
+        </div>
+        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px' }}>
+          {order.items.map((item) => (
+            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#111827', marginBottom: '4px' }}>
+              <span>{item.productName} x{item.quantity}{item.sliced ? ' (Reb.)' : ''}</span>
+              <span style={{ fontWeight: 600 }}>{formatCurrency(item.subtotal)}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#111827', borderTop: '1px solid #d1d5db', paddingTop: '6px', marginTop: '6px', fontWeight: 700 }}>
+            <span>Total</span>
+            <span>{formatCurrency(order.total)}</span>
+          </div>
+        </div>
+        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', textAlign: 'center' }}>
+          {order.deliveryMethod === 'PICKUP_POINT' ? (
+            <>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', margin: 0 }}>{order.pickupLocation}</p>
+              {order.pickupAddress && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>{order.pickupAddress}</p>}
+              {order.pickupSchedule && <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0' }}>🕐 {order.pickupSchedule}</p>}
+            </>
+          ) : (
+            <>
+              <p style={{ fontSize: '11px', color: '#111827', margin: 0 }}>
+                📍 {order.shippingAddress}{order.shippingCity ? `, ${order.shippingCity}` : ''}
+              </p>
+            </>
+          )}
+        </div>
+        <div style={{ borderTop: '2px dashed #d1d5db', marginTop: '12px', paddingTop: '8px', textAlign: 'center' }}>
+          <p style={{ fontSize: '9px', color: '#9ca3af' }}>Mostrá este comprobante al retirar tu pedido</p>
         </div>
       </div>
     </div>
