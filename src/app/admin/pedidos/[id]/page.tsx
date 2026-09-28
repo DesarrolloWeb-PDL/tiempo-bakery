@@ -298,7 +298,6 @@ export default function AdminOrderDetailPage() {
           pixelRatio: 2,
           backgroundColor: '#ffffff',
           skipFonts: true,
-          skipImages: false,
           cacheBust: true,
         })
 
