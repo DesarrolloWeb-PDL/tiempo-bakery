@@ -288,13 +288,18 @@ export default function AdminOrderDetailPage() {
         ticketEl.style.top = '0'
         ticketEl.style.zIndex = '-1'
         ticketEl.style.opacity = '1'
+        ticketEl.style.width = '360px'
+
+        // Wait a frame for rendering
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
 
         const dataUrl = await toPng(ticketEl, {
           quality: 0.95,
           pixelRatio: 2,
           backgroundColor: '#ffffff',
-          fetchRequestInit: { mode: 'no-cors' },
           skipFonts: true,
+          skipImages: false,
+          cacheBust: true,
         })
 
         // Restore hidden state
@@ -716,15 +721,6 @@ export default function AdminOrderDetailPage() {
         <div style={{ textAlign: 'center', marginBottom: '12px', position: 'relative' }}>
           <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>{order.orderNumber}</p>
           <p style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '0.1em', color: '#111827', margin: '2px 0 0' }}>{order.orderNumber}</p>
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`https://quickchart.io/qr?text=${encodeURIComponent(order.orderNumber)}&size=150&margin=2`}
-              alt="QR del pedido"
-              width={96}
-              height={96}
-            />
-          </div>
         </div>
         <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '12px', marginBottom: '12px', position: 'relative' }}>
           <p style={{ fontSize: '12px', color: '#111827', margin: '0 0 2px' }}><strong>Cliente:</strong> {order.customerName}</p>
