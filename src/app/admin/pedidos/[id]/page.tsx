@@ -254,7 +254,7 @@ export default function AdminOrderDetailPage() {
     }
 
     if (!phone || phone.length < 10) {
-      alert('No hay número de teléfono válido para este cliente')
+      alert('No hay número de teléfono válido para este cliente.\n\nTeléfono registrado: ' + (order.customerPhone || '(vacío)'))
       return
     }
 
@@ -286,13 +286,15 @@ export default function AdminOrderDetailPage() {
           title: `Ticket ${order.orderNumber}`,
         })
       } else {
+        // Desktop: download image + open WhatsApp app directly
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.download = `ticket-${order.orderNumber}.png`
         link.href = url
         link.click()
         URL.revokeObjectURL(url)
-        window.open(`https://wa.me/${phone}`, '_blank')
+        // Use whatsapp:// protocol to open the native app, not WhatsApp Web
+        window.location.href = `whatsapp://send?phone=${phone}`
       }
     } catch (err) {
       console.error('Error generating ticket image:', err)
@@ -631,6 +633,7 @@ export default function AdminOrderDetailPage() {
                 <Field label="ID de Mercado Pago" value={order.mercadopagoPaymentId} mono />
               )}
               <Field label="Semana de producción" value={order.weekId} mono />
+              <Field label="Teléfono cliente" value={order.customerPhone || '(no registrado)'} />
               {order.paymentStatus !== 'PAID' && order.status !== 'CANCELLED' && (
                 <button
                   onClick={handleMarkAsPaid}
