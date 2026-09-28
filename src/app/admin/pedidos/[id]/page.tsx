@@ -266,11 +266,19 @@ export default function AdminOrderDetailPage() {
         quality: 0.95,
         pixelRatio: 2,
         backgroundColor: '#ffffff',
+        fetchRequestInit: { mode: 'no-cors' },
+        skipFonts: true,
       })
 
-      const res = await fetch(dataUrl)
-      const blob = await res.blob()
-      const file = new File([blob], `ticket-${order.orderNumber}.png`, { type: 'image/png' })
+      // Convert data URL to Blob without fetch (CSP-safe)
+      const [header, base64] = dataUrl.split(',')
+      const mimeMatch = header.match(/data:(.*?);/)
+      const mime = mimeMatch ? mimeMatch[1] : 'image/png'
+      const binary = atob(base64)
+      const bytes = new Uint8Array(binary.length)
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+      const blob = new Blob([bytes], { type: mime })
+      const file = new File([blob], `ticket-${order.orderNumber}.png`, { type: mime })
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
@@ -278,10 +286,12 @@ export default function AdminOrderDetailPage() {
           title: `Ticket ${order.orderNumber}`,
         })
       } else {
+        const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.download = `ticket-${order.orderNumber}.png`
-        link.href = dataUrl
+        link.href = url
         link.click()
+        URL.revokeObjectURL(url)
         window.open(`https://wa.me/${phone}`, '_blank')
       }
     } catch (err) {
