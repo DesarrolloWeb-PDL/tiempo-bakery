@@ -317,8 +317,8 @@ export default function AdminOrderDetailPage() {
       }
     }
 
-    // Open WhatsApp with text message
-    window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+    // Open WhatsApp in new tab
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   const handleDelete = async () => {
