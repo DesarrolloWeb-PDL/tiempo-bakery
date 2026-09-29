@@ -25,7 +25,7 @@ export function getMercadoPagoClient(accessToken?: string) {
   if (!mercadopagoClient || mercadopagoClient.accessToken !== token) {
     mercadopagoClient = new MercadoPagoConfig({
       accessToken: token,
-      options: { timeout: 5000 },
+      options: { timeout: 10000 },
     });
   }
 
@@ -63,6 +63,7 @@ export async function createMercadoPagoPreference(input: {
     id: item.productId,
     title: item.productName,
     description: item.sliced ? 'Rebanado' : 'Sin rebanar',
+    category_id: 'food',
     quantity: item.quantity,
     unit_price: Number(item.unitPrice),
     currency_id: 'ARS',
@@ -73,6 +74,7 @@ export async function createMercadoPagoPreference(input: {
       id: `shipping-${input.deliveryMethod}`,
       title: 'Gastos de envío',
       description: input.deliveryMethod === 'NATIONAL_COURIER' ? 'Mensajería nacional' : 'Envío local',
+      category_id: 'shipping',
       quantity: 1,
       unit_price: Number(input.shippingCost),
       currency_id: 'ARS',
@@ -99,17 +101,15 @@ export async function createMercadoPagoPreference(input: {
             }
           : undefined,
       },
-      payment_methods: {
-        installments: 1,
-      },
       back_urls: {
         success: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=success`,
         failure: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=failure`,
         pending: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=pending`,
       },
+      auto_return: 'approved',
       notification_url: `${baseUrl}/api/webhooks/mercadopago`,
       external_reference: input.orderId,
-      statement_descriptor: 'TIEMPO BAKERY',
+      statement_descriptor: 'TIEMPOBAKERY',
       metadata: {
         orderId: input.orderId,
         orderNumber: input.orderNumber,
