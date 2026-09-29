@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check, Timer } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { useCartStore } from '@/stores/cart-store';
 import { CustomerInfoStep } from '@/components/checkout/customer-info-step';
 import { DeliveryStep } from '@/components/checkout/delivery-step';
@@ -130,33 +130,13 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, customerNotes: notes }));
   };
 
-  const [elapsed, setElapsed] = React.useState(0);
   const [processingMessage, setProcessingMessage] = React.useState('');
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    setElapsed(0);
-
-    const timerStart = Date.now();
-    const timerInterval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - timerStart) / 1000));
-    }, 1000);
-
-    const clearTimer = () => {
-      clearInterval(timerInterval);
-      setElapsed(0);
-    };
 
     try {
-      if (selectedPaymentProvider === PaymentProvider.MERCADO_PAGO) {
-        setProcessingMessage(t.checkoutPreparingMp);
-      } else if (selectedPaymentProvider === PaymentProvider.STRIPE) {
-        setProcessingMessage(t.checkoutPreparingStripe);
-      } else {
-        setProcessingMessage(t.checkoutProcessing);
-      }
-
-      await new Promise((r) => setTimeout(r, 600));
+      setProcessingMessage(t.checkoutProcessing);
 
       const orderData = {
         customerEmail: formData.customerEmail,
@@ -198,28 +178,12 @@ export default function CheckoutPage() {
       const redirectUrl = result.checkoutUrl || `/pedido/${result.orderId}/confirmacion`;
 
       if (result.paymentProvider === 'BANK_TRANSFER' || !result.checkoutUrl) {
-        clearTimer();
         window.location.href = redirectUrl;
         setTimeout(() => clearCart(), 500);
         return;
       }
 
-      setProcessingMessage(
-        result.paymentProvider === 'MERCADO_PAGO'
-          ? t.checkoutRedirectMp
-          : t.checkoutRedirectStripe
-      );
-
-      await new Promise((r) => setTimeout(r, 800));
-
-      window.open(redirectUrl, '_blank');
-      setProcessingMessage(
-        result.paymentProvider === 'MERCADO_PAGO'
-          ? t.checkoutMpOpened
-          : t.checkoutStripeOpened
-      );
-
-      clearTimer();
+      window.location.href = redirectUrl;
       setTimeout(() => clearCart(), 500);
     } catch (error) {
       console.error('Checkout error:', error);
@@ -229,19 +193,9 @@ export default function CheckoutPage() {
         variant: 'destructive',
       });
       setIsSubmitting(false);
-      clearTimer();
     }
   };
 
-  const handleCloseOverlay = () => {
-    setIsSubmitting(false);
-  };
-
-  React.useEffect(() => {
-    if (isSubmitting && selectedPaymentProvider === PaymentProvider.BANK_TRANSFER) {
-      setProcessingMessage(t.checkoutProcessing);
-    }
-  }, [isSubmitting, selectedPaymentProvider]);
 
   if (!mounted) {
     return <div className="min-h-screen" />;
@@ -496,41 +450,9 @@ export default function CheckoutPage() {
             <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--brand-text-primary)' }}>
               {t.checkoutProcessing}
             </h3>
-            <p className="text-sm mb-4" style={{ color: 'var(--brand-text-muted)' }}>
+            <p className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
               {processingMessage}
             </p>
-
-            {elapsed > 0 && (
-              <div className="flex items-center justify-center gap-2 text-sm mb-4" style={{ color: 'var(--brand-text-muted)' }}>
-                <Timer className="w-4 h-4" />
-                <span>{elapsed}s</span>
-              </div>
-            )}
-
-            <div className="flex justify-center gap-1">
-              <span
-                className="w-2 h-2 rounded-full bg-brand-gold animate-bounce"
-                style={{ animationDelay: '0ms' }}
-              />
-              <span
-                className="w-2 h-2 rounded-full bg-brand-gold animate-bounce"
-                style={{ animationDelay: '150ms' }}
-              />
-              <span
-                className="w-2 h-2 rounded-full bg-brand-gold animate-bounce"
-                style={{ animationDelay: '300ms' }}
-              />
-            </div>
-
-            {selectedPaymentProvider !== PaymentProvider.BANK_TRANSFER && (
-              <button
-                onClick={handleCloseOverlay}
-                className="mt-6 text-sm hover:underline underline-offset-2"
-                style={{ color: 'var(--brand-text-muted)' }}
-              >
-                {t.checkoutClose}
-              </button>
-            )}
           </div>
         </div>
       )}
