@@ -15,6 +15,39 @@ function splitCustomerName(fullName: string) {
   };
 }
 
+/** Parse Argentine phone: strip country code 54, extract area_code (2 digits) and number */
+function parseArgentinePhone(phone: string): { area_code: string; number: string } | undefined {
+  if (!phone) return undefined;
+
+  let digits = phone.replace(/\D/g, '');
+  if (!digits) return undefined;
+
+  // Strip leading 0 or 15 (mobile prefix)
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  if (digits.startsWith('15') && digits.length > 10) digits = digits.slice(2);
+
+  // Strip country code 54
+  if (digits.startsWith('54') && digits.length > 10) digits = digits.slice(2);
+
+  // Argentine phones: 2-digit area code + 8-digit number (landline) or 4+6 (mobile)
+  if (digits.length >= 10) {
+    return {
+      area_code: digits.slice(0, 2),
+      number: digits.slice(2),
+    };
+  }
+
+  // Fallback: 2 + rest
+  if (digits.length >= 8) {
+    return {
+      area_code: digits.slice(0, 2),
+      number: digits.slice(2),
+    };
+  }
+
+  return undefined;
+}
+
 export function getMercadoPagoClient(accessToken?: string) {
   const token = accessToken || process.env.MERCADOPAGO_ACCESS_TOKEN;
 
@@ -58,12 +91,12 @@ export async function createMercadoPagoPreference(input: {
   const client = getMercadoPagoClient(input.accessToken);
   const preference = new Preference(client);
   const { name, surname } = splitCustomerName(input.customerName);
-  const phone = sanitizePhone(input.customerPhone);
+  const phone = parseArgentinePhone(input.customerPhone);
+
   const lineItems = input.items.map((item) => ({
     id: item.productId,
     title: item.productName,
     description: item.sliced ? 'Rebanado' : 'Sin rebanar',
-    category_id: 'food',
     quantity: item.quantity,
     unit_price: Number(item.unitPrice),
     currency_id: 'ARS',
@@ -74,48 +107,63 @@ export async function createMercadoPagoPreference(input: {
       id: `shipping-${input.deliveryMethod}`,
       title: 'Gastos de envío',
       description: input.deliveryMethod === 'NATIONAL_COURIER' ? 'Mensajería nacional' : 'Envío local',
-      category_id: 'shipping',
       quantity: 1,
       unit_price: Number(input.shippingCost),
       currency_id: 'ARS',
     });
   }
 
-  const response = await preference.create({
-    body: {
-      items: lineItems,
-      payer: {
-        name,
-        surname,
-        email: input.customerEmail,
-        phone: phone
-          ? {
-              area_code: phone.length > 10 ? phone.slice(0, 3) : phone.slice(0, 2),
-              number: phone.length > 10 ? phone.slice(3) : phone.slice(2),
-            }
-          : undefined,
-        address: input.shippingPostal || input.shippingAddress
-          ? {
+  const preferenceBody: Record<string, unknown> = {
+    items: lineItems,
+    back_urls: {
+      success: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=success`,
+      failure: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=failure`,
+      pending: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=pending`,
+    },
+    auto_return: 'approved',
+    external_reference: input.orderId,
+    statement_descriptor: 'TIEMPOBAKERY',
+    metadata: {
+      orderId: input.orderId,
+      orderNumber: input.orderNumber,
+    },
+  };
+
+  // Only add payer if we have valid data
+  if (input.customerEmail) {
+    (preferenceBody as any).payer = {
+      name: name || undefined,
+      surname: surname || undefined,
+      email: input.customerEmail,
+      ...(phone ? { phone } : {}),
+      ...(input.shippingPostal || input.shippingAddress
+        ? {
+            address: {
               zip_code: input.shippingPostal ?? undefined,
               street_name: input.shippingAddress ?? undefined,
-            }
-          : undefined,
-      },
-      back_urls: {
-        success: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=success`,
-        failure: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=failure`,
-        pending: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=pending`,
-      },
-      auto_return: 'approved',
-      notification_url: `${baseUrl}/api/webhooks/mercadopago`,
-      external_reference: input.orderId,
-      statement_descriptor: 'TIEMPOBAKERY',
-      metadata: {
-        orderId: input.orderId,
-        orderNumber: input.orderNumber,
-      },
-    },
+            },
+          }
+        : {}),
+    };
+  }
+
+  // Add notification_url only if we have a real URL (not localhost)
+  if (baseUrl.startsWith('https://')) {
+    preferenceBody.notification_url = `${baseUrl}/api/webhooks/mercadopago`;
+  }
+
+  console.log('[MP] Creating preference:', JSON.stringify({
+    items: lineItems.length,
+    payer_email: input.customerEmail,
+    total: lineItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0),
+    baseUrl,
+  }));
+
+  const response = await preference.create({
+    body: preferenceBody as any,
   });
+
+  console.log('[MP] Preference created:', response.id, 'init_point:', !!response.init_point, 'sandbox_init_point:', !!response.sandbox_init_point);
 
   return response;
 }
