@@ -347,7 +347,7 @@ export default function OrderConfirmationPage() {
         <div className="flex justify-center mb-6 gap-4 no-print">
           <Button onClick={handleWhatsAppTransfer} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
             <MessageCircle className="h-4 w-4" />
-            Enviar pedido por WhatsApp
+            Enviarme datos por WhatsApp
           </Button>
         </div>
 
