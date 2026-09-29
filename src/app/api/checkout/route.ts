@@ -323,6 +323,11 @@ export async function POST(request: NextRequest) {
 
         checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
 
+        if (!checkoutUrl) {
+          console.error('MP preference created but no init_point returned:', JSON.stringify(preference));
+          throw new Error('Mercado Pago no devolvió URL de checkout');
+        }
+
         await prisma.order.update({
           where: { id: order.id },
           data: { mercadopagoPaymentId: preference.id },

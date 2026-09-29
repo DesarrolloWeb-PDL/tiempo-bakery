@@ -134,6 +134,8 @@ export default function CheckoutPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    // Yield to browser so the overlay actually renders before the API call
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     try {
       setProcessingMessage(t.checkoutProcessing);

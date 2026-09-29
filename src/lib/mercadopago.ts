@@ -99,6 +99,9 @@ export async function createMercadoPagoPreference(input: {
             }
           : undefined,
       },
+      payment_methods: {
+        installments: 1,
+      },
       back_urls: {
         success: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=success`,
         failure: `${baseUrl}/pedido/${input.orderId}/confirmacion?provider=mercadopago&status=failure`,
@@ -106,7 +109,7 @@ export async function createMercadoPagoPreference(input: {
       },
       notification_url: `${baseUrl}/api/webhooks/mercadopago`,
       external_reference: input.orderId,
-      statement_descriptor: 'TIEMPOBAKERY',
+      statement_descriptor: 'TIEMPO BAKERY',
       metadata: {
         orderId: input.orderId,
         orderNumber: input.orderNumber,
