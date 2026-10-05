@@ -133,9 +133,17 @@ export async function getEnabledPaymentProviders(): Promise<PaymentProvider[]> {
 }
 
 export function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_URL
-    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined)
-    ?? 'http://localhost:3000'
+  // Prefer explicit app URL, then Vercel production domain (stable), then
+  // per-deployment VERCEL_URL (changes every deploy — breaks back_urls).
+  const explicit = process.env.NEXT_PUBLIC_URL?.trim()
+  if (explicit) return explicit.replace(/\/$/, '')
+
+  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
+  if (productionHost) return `https://${productionHost}`
+
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+
+  return 'http://localhost:3000'
 }
 
 export async function getBankTransferSettings(): Promise<BankTransferSettings> {

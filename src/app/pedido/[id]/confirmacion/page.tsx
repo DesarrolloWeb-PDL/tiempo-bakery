@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 import { formatCurrency } from '@/lib/format';
 import { useLanguage } from '@/components/language-provider';
+import { useCartStore } from '@/stores/cart-store';
 
 interface OrderItem {
   id: string;
@@ -133,6 +134,7 @@ export default function OrderConfirmationPage() {
   const [whatsappNumber, setWhatsappNumber] = React.useState('');
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
   const [mpSyncing, setMpSyncing] = React.useState(false);
+  const clearCart = useCartStore((state) => state.clearCart);
   const { t } = useLanguage();
 
   React.useEffect(() => {
@@ -164,6 +166,18 @@ export default function OrderConfirmationPage() {
         setBankTransfer(paymentData.bankTransfer ?? null);
         if (siteData?.contactWhatsapp) {
           setWhatsappNumber(siteData.contactWhatsapp.replace(/[^0-9]/g, ''));
+        }
+        // Clear cart only once the order is secured:
+        // - online payment confirmed (PAID), or
+        // - offline method accepted (transfer / cash — order placed, pay later/at pickup)
+        // If MP payment is still pending/failed, keep the buyer's cart.
+        const method = orderData.paymentMethod as string | undefined;
+        const secured =
+          orderData.paymentStatus === 'PAID' ||
+          method === 'bank_transfer' ||
+          method === 'efectivo';
+        if (secured) {
+          clearCart();
         }
         setLoading(false);
       })
@@ -198,6 +212,9 @@ export default function OrderConfirmationPage() {
             }
           : prev
       );
+      if (data.paymentStatus === 'PAID') {
+        clearCart();
+      }
     };
 
     const pollOrder = async () => {

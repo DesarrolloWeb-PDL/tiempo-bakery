@@ -94,9 +94,15 @@ export async function createMercadoPagoPreference(input: {
   shippingCost: number;
   accessToken?: string;
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_URL
-    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined)
-    ?? 'http://localhost:3000'
+  // Stable base URL for back_urls / notification_url:
+  // explicit → Vercel production domain → deployment URL → localhost.
+  const baseUrl = (process.env.NEXT_PUBLIC_URL?.trim() || '')
+    .replace(/\/$/, '') ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.trim()}`
+      : undefined) ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ||
+    'http://localhost:3000'
 
   const client = getMercadoPagoClient(input.accessToken);
   const preference = new Preference(client);

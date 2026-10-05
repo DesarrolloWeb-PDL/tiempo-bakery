@@ -30,7 +30,6 @@ interface PickupPoint {
 export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((state) => state.items);
-  const clearCart = useCartStore((state) => state.clearCart);
   const { t } = useLanguage();
 
   const [currentStep, setCurrentStep] = React.useState(1);
@@ -179,14 +178,11 @@ export default function CheckoutPage() {
 
       const redirectUrl = result.checkoutUrl || `/pedido/${result.orderId}/confirmacion`;
 
-      if (result.paymentProvider === 'BANK_TRANSFER' || !result.checkoutUrl) {
-        window.location.href = redirectUrl;
-        setTimeout(() => clearCart(), 500);
-        return;
-      }
-
+      // Keep the opaque overlay up until the browser navigates.
+      // Do NOT clear the cart here — only confirmation clears it once payment
+      // is done (or order accepted for transfer/cash). If MP payment is
+      // abandoned, the buyer still has their cart.
       window.location.href = redirectUrl;
-      setTimeout(() => clearCart(), 500);
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
@@ -400,11 +396,11 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Processing Overlay */}
+      {/* Processing Overlay — opaque so no checkout flash before MP opens */}
       {isSubmitting && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+          style={{ backgroundColor: '#111111' }}
         >
           <div
             className="relative rounded-2xl shadow-2xl p-8 mx-4 text-center max-w-sm w-full backdrop-blur-xl"
