@@ -25,6 +25,9 @@ function mapMercadoPagoStatus(status: string | undefined) {
   }
 }
 
+/** Statuses that represent a real fulfillment already in progress — never downgrade them. */
+const FULFILLING_STATUSES = new Set(['BAKING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED'])
+
 /**
  * Apply a known Mercado Pago payment to an order.
  * Shared by the webhook route and syncOrderFromMercadoPago.
@@ -43,9 +46,12 @@ export async function applyMercadoPagoPaymentToOrder(
   const mappedStatus = mapMercadoPagoStatus(payment.status);
 
   if (mappedStatus === 'PAID') {
-    if (order.paymentStatus === 'PAID') {
+    // Already paid and not wrongly cancelled — nothing to recover.
+    if (order.paymentStatus === 'PAID' && order.status !== 'CANCELLED') {
       return 'already-paid';
     }
+
+    const recoveredFromCancel = order.status === 'CANCELLED' || order.paymentStatus === 'FAILED'
 
     const result = await prisma.$transaction(async (tx) => {
       const freshOrder = await tx.order.findUnique({
@@ -53,23 +59,56 @@ export async function applyMercadoPagoPaymentToOrder(
         include: { items: true },
       });
 
-      if (!freshOrder || freshOrder.paymentStatus === 'PAID') {
+      if (!freshOrder) {
+        return { status: 'not-found' as const };
+      }
+
+      if (freshOrder.paymentStatus === 'PAID' && freshOrder.status !== 'CANCELLED') {
         return { status: 'already-paid' as const };
       }
 
-      const confirmed = await stockManager.confirmItems(freshOrder.items, freshOrder.weekId, tx);
-      if (!confirmed) {
-        throw new Error('No se pudo confirmar stock para ' + freshOrder.orderNumber);
+      // Stock path: normal PENDING orders still hold their reservation.
+      // Orders wrongly cancelled by expiry had reservation released — re-reserve first.
+      let stockOk = await stockManager.confirmItems(freshOrder.items, freshOrder.weekId, tx);
+      if (!stockOk && (freshOrder.status === 'CANCELLED' || freshOrder.paymentStatus === 'FAILED')) {
+        const reReserved = await stockManager.reserveItems(freshOrder.items, freshOrder.weekId, tx);
+        if (reReserved.success) {
+          stockOk = await stockManager.confirmItems(freshOrder.items, freshOrder.weekId, tx);
+        }
       }
+
+      if (!stockOk) {
+        console.error(
+          `MP sync: stock confirm failed for ${freshOrder.orderNumber} — marking PAID anyway (payment is authoritative)`
+        );
+      }
+
+      // Never leave a wrongly-expired paid order as CANCELLED.
+      const nextStatus = FULFILLING_STATUSES.has(freshOrder.status)
+        ? freshOrder.status
+        : freshOrder.status === 'CANCELLED' || freshOrder.status === 'PENDING'
+          ? 'PAID'
+          : freshOrder.status
+
+      const recoveryNote = recoveredFromCancel
+        ? 'Pago recuperado desde Mercado Pago tras auto-cancelación por expiry'
+        : null
 
       const updatedOrder = await tx.order.update({
         where: { id: freshOrder.id },
         data: {
           paymentStatus: 'PAID',
-          status: freshOrder.status === 'PENDING' ? 'PAID' : freshOrder.status,
+          status: nextStatus,
           paymentMethod: 'mercadopago',
           mercadopagoPaymentId: String(payment.id),
           paidAt: freshOrder.paidAt ?? new Date(),
+          ...(recoveryNote
+            ? {
+                adminNotes: freshOrder.adminNotes
+                  ? `${freshOrder.adminNotes}\n${recoveryNote}`
+                  : recoveryNote,
+              }
+            : {}),
         },
       });
 
