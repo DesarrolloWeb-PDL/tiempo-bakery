@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 const getMercadoPagoPaymentMock = vi.fn()
+const searchMercadoPagoMock = vi.fn()
 const confirmItemsMock = vi.fn()
 const releaseItemsMock = vi.fn()
 const sendOrderPaidEmailsMock = vi.fn()
@@ -29,6 +30,7 @@ vi.mock('@/lib/db', () => ({
 
 vi.mock('@/lib/mercadopago', () => ({
   getMercadoPagoPayment: getMercadoPagoPaymentMock,
+  searchMercadoPagoPaymentByExternalReference: searchMercadoPagoMock,
 }))
 
 vi.mock('@/lib/stock-manager', () => ({
@@ -47,6 +49,7 @@ const routeModulePromise = import('@/app/api/webhooks/mercadopago/route')
 describe('mercadopago webhook route', () => {
   beforeEach(() => {
     getMercadoPagoPaymentMock.mockReset()
+    searchMercadoPagoMock.mockReset()
     confirmItemsMock.mockReset()
     releaseItemsMock.mockReset()
     sendOrderPaidEmailsMock.mockReset()

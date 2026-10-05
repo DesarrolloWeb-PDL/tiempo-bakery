@@ -132,6 +132,7 @@ export default function OrderConfirmationPage() {
   const [origin, setOrigin] = React.useState('');
   const [whatsappNumber, setWhatsappNumber] = React.useState('');
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
+  const [mpSyncing, setMpSyncing] = React.useState(false);
   const { t } = useLanguage();
 
   React.useEffect(() => {
@@ -171,6 +172,89 @@ export default function OrderConfirmationPage() {
         setLoading(false);
       });
   }, [orderId]);
+
+  // Mercado Pago: sync payment once, then poll until PAID or attempts exhausted
+  React.useEffect(() => {
+    if (!order || !orderId) return;
+    if (mpProvider !== 'mercadopago') return;
+    if (order.paymentMethod !== 'mercadopago') return;
+    if (order.paymentStatus === 'PAID') return;
+
+    const email = localStorage.getItem('tbk_checkout_email') || '';
+    const emailParam = email ? `?email=${encodeURIComponent(email)}` : '';
+
+    let cancelled = false;
+    let attempts = 0;
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const applyOrderUpdate = (data: { paymentStatus: string; status: string; paidAt?: string | null }) => {
+      setOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              paymentStatus: data.paymentStatus,
+              status: data.status,
+              paidAt: data.paidAt ?? prev.paidAt,
+            }
+          : prev
+      );
+    };
+
+    const pollOrder = async () => {
+      if (cancelled) return;
+      attempts += 1;
+      try {
+        const res = await fetch(`/api/pedidos/${orderId}${emailParam}`);
+        if (!res.ok) throw new Error('No se pudo actualizar el pedido');
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.paymentStatus === 'PAID') {
+          applyOrderUpdate(data);
+          setMpSyncing(false);
+          return;
+        }
+        if (attempts < 12) {
+          pollTimer = setTimeout(pollOrder, 4000);
+        } else {
+          setMpSyncing(false);
+        }
+      } catch {
+        if (cancelled) return;
+        if (attempts < 12) {
+          pollTimer = setTimeout(pollOrder, 4000);
+        } else {
+          setMpSyncing(false);
+        }
+      }
+    };
+
+    const runSync = async () => {
+      setMpSyncing(true);
+      try {
+        const res = await fetch(`/api/pedidos/${orderId}/mp-sync${emailParam}`);
+        if (!res.ok) throw new Error('No se pudo sincronizar el pago');
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.paymentStatus === 'PAID') {
+          applyOrderUpdate(data);
+          setMpSyncing(false);
+          return;
+        }
+      } catch {
+        // fall through to polling
+      }
+      if (!cancelled) {
+        pollTimer = setTimeout(pollOrder, 4000);
+      }
+    };
+
+    void runSync();
+
+    return () => {
+      cancelled = true;
+      if (pollTimer) clearTimeout(pollTimer);
+    };
+  }, [orderId, order?.id, mpProvider]);
 
   if (loading) {
     return (
@@ -450,6 +534,12 @@ export default function OrderConfirmationPage() {
                     {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
                   </Badge>
                 </div>
+                {mpSyncing && order.paymentStatus !== 'PAID' && (
+                  <p className="text-xs flex items-center gap-1.5" style={{ color: 'var(--brand-text-muted)' }}>
+                    <Loader2 className="h-3 w-3 animate-spin text-brand-gold-dark" />
+                    Confirmando tu pago…
+                  </p>
+                )}
 
                 {/* Order status */}
                 <div className="flex items-center justify-between">

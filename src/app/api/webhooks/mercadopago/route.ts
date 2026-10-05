@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { getMercadoPagoPayment } from '@/lib/mercadopago';
-import { sendOrderPaidEmails } from '@/lib/order-email';
-import { stockManager } from '@/lib/stock-manager';
+import { applyMercadoPagoPaymentToOrder } from '@/lib/mp-payment-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,20 +50,6 @@ async function verifyMercadoPagoSignature(
   return expectedSignature === receivedSignature;
 }
 
-function mapMercadoPagoStatus(status: string | undefined) {
-  switch (status) {
-    case 'approved':
-      return 'PAID';
-    case 'rejected':
-    case 'cancelled':
-    case 'refunded':
-    case 'charged_back':
-      return 'FAILED';
-    default:
-      return 'PENDING';
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -95,108 +79,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, ignored: true });
     }
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: { items: true },
+    await applyMercadoPagoPaymentToOrder(orderId, {
+      id: payment.id ?? resourceId,
+      status: payment.status,
     });
-
-    if (!order) {
-      return NextResponse.json({ received: true, ignored: true });
-    }
-
-    const mappedStatus = mapMercadoPagoStatus(payment.status);
-
-    if (mappedStatus === 'PAID' && order.paymentStatus !== 'PAID') {
-      const result = await prisma.$transaction(async (tx) => {
-        const freshOrder = await tx.order.findUnique({
-          where: { id: order.id },
-          include: { items: true },
-        })
-
-        if (!freshOrder || freshOrder.paymentStatus === 'PAID') {
-          return { status: 'already-paid' as const }
-        }
-
-        const confirmed = await stockManager.confirmItems(freshOrder.items, freshOrder.weekId, tx)
-        if (!confirmed) {
-          throw new Error('No se pudo confirmar stock para ' + freshOrder.orderNumber)
-        }
-
-        const updatedOrder = await tx.order.update({
-          where: { id: freshOrder.id },
-          data: {
-            paymentStatus: 'PAID',
-            status: freshOrder.status === 'PENDING' ? 'PAID' : freshOrder.status,
-            paymentMethod: 'mercadopago',
-            mercadopagoPaymentId: String(payment.id),
-            paidAt: freshOrder.paidAt ?? new Date(),
-          },
-        })
-
-        return {
-          status: 'paid' as const,
-          order: {
-            ...freshOrder,
-            paymentStatus: updatedOrder.paymentStatus,
-            status: updatedOrder.status,
-            paymentMethod: updatedOrder.paymentMethod,
-            mercadopagoPaymentId: updatedOrder.mercadopagoPaymentId,
-            paidAt: updatedOrder.paidAt,
-          },
-        }
-      })
-
-      if (result.status === 'paid') {
-        const emailResult = await sendOrderPaidEmails(result.order)
-        if (emailResult.skipped) {
-          console.log('Order email skipped: RESEND_API_KEY no configurada')
-        }
-      }
-    }
-
-    if (mappedStatus === 'FAILED' && order.paymentStatus !== 'FAILED' && order.paymentStatus !== 'PAID') {
-      await prisma.$transaction(async (tx) => {
-        const freshOrder = await tx.order.findUnique({
-          where: { id: order.id },
-          include: { items: true },
-        })
-
-        if (
-          !freshOrder ||
-          freshOrder.paymentStatus === 'FAILED' ||
-          freshOrder.status === 'CANCELLED' ||
-          freshOrder.paymentStatus === 'PAID'
-        ) {
-          return
-        }
-
-        const released = await stockManager.releaseItems(freshOrder.items, freshOrder.weekId, tx)
-        if (!released) {
-          throw new Error('No se pudo liberar stock para ' + freshOrder.orderNumber)
-        }
-
-        await tx.order.update({
-          where: { id: freshOrder.id },
-          data: {
-            paymentStatus: 'FAILED',
-            status: 'CANCELLED',
-            paymentMethod: 'mercadopago',
-            mercadopagoPaymentId: String(payment.id),
-          },
-        })
-      })
-    }
-
-    if (mappedStatus === 'PENDING') {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          paymentStatus: 'PENDING',
-          paymentMethod: 'mercadopago',
-          mercadopagoPaymentId: String(payment.id),
-        },
-      });
-    }
 
     return NextResponse.json({ received: true });
   } catch (error) {

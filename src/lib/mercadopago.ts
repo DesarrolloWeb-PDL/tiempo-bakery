@@ -1,6 +1,16 @@
 import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
+import { getMercadoPagoAccessToken } from '@/lib/payments';
 
 let mercadopagoClient: MercadoPagoConfig | null = null;
+
+/** Resolve the MP access token: explicit arg > DB (siteConfig) > env fallback. */
+async function resolveMercadoPagoAccessToken(accessToken?: string): Promise<string> {
+  const token = accessToken ?? (await getMercadoPagoAccessToken());
+  if (!token) {
+    throw new Error('Falta MERCADOPAGO_ACCESS_TOKEN');
+  }
+  return token;
+}
 
 function sanitizePhone(phone: string) {
   return phone.replace(/\D/g, '');
@@ -169,8 +179,36 @@ export async function createMercadoPagoPreference(input: {
 }
 
 export async function getMercadoPagoPayment(id: string | number, accessToken?: string) {
-  const client = getMercadoPagoClient(accessToken);
+  const token = await resolveMercadoPagoAccessToken(accessToken);
+  const client = getMercadoPagoClient(token);
   const payment = new Payment(client);
 
   return payment.get({ id: Number(id) });
+}
+
+/**
+ * Search MP payments by external_reference (order id).
+ * Returns the latest approved payment, else the latest one, or null if none found.
+ */
+export async function searchMercadoPagoPaymentByExternalReference(
+  externalReference: string,
+  accessToken?: string
+) {
+  const token = await resolveMercadoPagoAccessToken(accessToken);
+  const client = getMercadoPagoClient(token);
+  const payment = new Payment(client);
+
+  const searchResult = await payment.search({
+    options: {
+      external_reference: externalReference,
+      sort: 'date_created',
+      criteria: 'desc',
+    },
+  });
+
+  const results = searchResult?.results ?? [];
+  if (results.length === 0) return null;
+
+  const approved = results.find((r) => r.status === 'approved');
+  return approved ?? results[0];
 }
