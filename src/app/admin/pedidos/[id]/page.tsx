@@ -714,6 +714,22 @@ export default function AdminOrderDetailPage() {
                 <span className="font-semibold">Total</span>
                 <span className="font-semibold">{formatCurrency(order.total)}</span>
               </div>
+              {order.paymentMethod === 'efectivo' && order.paymentStatus !== 'PAID' && (
+                <div className="mt-2 rounded border-2 border-gray-800 px-2 py-1 text-center">
+                  <p className="text-[11px] font-bold tracking-wide text-gray-900">
+                    💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
+                  </p>
+                </div>
+              )}
+              {order.paymentMethod === 'efectivo' && order.paymentStatus === 'PAID' && (
+                <p className="mt-1 text-center text-[10px] font-semibold text-gray-600">Efectivo — ya cobrado</p>
+              )}
+              {order.paymentMethod === 'bank_transfer' && order.paymentStatus !== 'PAID' && (
+                <p className="mt-1 text-center text-[10px] text-gray-600">Transferencia — esperando comprobante</p>
+              )}
+              {order.paymentMethod === 'mercadopago' && order.paymentStatus !== 'PAID' && (
+                <p className="mt-1 text-center text-[10px] text-gray-600">Mercado Pago — pendiente</p>
+              )}
             </div>
             <div className="border-t border-dashed pt-3 text-center relative">
               {order.deliveryMethod === 'PICKUP_POINT' ? (

@@ -321,6 +321,8 @@ export default function OrderConfirmationPage() {
 
   const DeliveryIcon = deliveryIcons[order.deliveryMethod as keyof typeof deliveryIcons];
   const isBankTransfer = order.paymentMethod === 'bank_transfer';
+  const isEfectivo = order.paymentMethod === 'efectivo';
+  const isUnpaid = order.paymentStatus !== 'PAID';
 
   const handleWhatsAppTransfer = () => {
     const phone = whatsappNumber || '';
@@ -444,8 +446,8 @@ export default function OrderConfirmationPage() {
           </Card>
         )}
 
-        {/* Cash on pickup note */}
-        {order.paymentMethod === 'efectivo' && (
+        {/* Cash on pickup/delivery — pay when order is handed over */}
+        {isEfectivo && (
           <Card className="mb-8 no-print backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-gold)' }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-brand-gold-dark">
@@ -453,19 +455,33 @@ export default function OrderConfirmationPage() {
                 Pago en efectivo
               </CardTitle>
               <CardDescription style={{ color: 'var(--brand-text-muted)' }}>
-                Pagás en efectivo cuando retirás el pedido. Guardá el número {order.orderNumber}.
+                {isUnpaid
+                  ? `Pagás ${formatCurrency(order.total)} en efectivo cuando ${order.deliveryMethod === 'PICKUP_POINT' ? 'retirás' : 'recibís'} el pedido. No hace falta transferir ni enviar comprobante.`
+                  : `Pedido abonado en efectivo. Total: ${formatCurrency(order.total)}.`}
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between rounded-lg p-3" style={{ backgroundColor: 'var(--brand-muted-bg)' }}>
+                <span className="text-sm" style={{ color: 'var(--brand-text-muted)' }}>
+                  {order.deliveryMethod === 'PICKUP_POINT' ? 'A cobrar al retirar' : 'A cobrar al entregar'}
+                </span>
+                <span className="text-lg font-bold" style={{ color: 'var(--brand-text-primary)' }}>
+                  {formatCurrency(order.total)}
+                </span>
+              </div>
+            </CardContent>
           </Card>
         )}
 
-        {/* WhatsApp Button */}
-        <div className="flex justify-center mb-6 gap-4 no-print">
-          <Button onClick={handleWhatsAppTransfer} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
-            <MessageCircle className="h-4 w-4" />
-            Enviarme datos por WhatsApp
-          </Button>
-        </div>
+        {/* WhatsApp — bank data only for transferencia */}
+        {isBankTransfer && (
+          <div className="flex justify-center mb-6 gap-4 no-print">
+            <Button onClick={handleWhatsAppTransfer} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>
+              <MessageCircle className="h-4 w-4" />
+              Enviarme datos por WhatsApp
+            </Button>
+          </div>
+        )}
 
         {/* Ticket + Order Status side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
@@ -506,6 +522,22 @@ export default function OrderConfirmationPage() {
                   <span className="font-semibold">Total</span>
                   <span className="font-semibold">{formatCurrency(order.total)}</span>
                 </div>
+                {isEfectivo && isUnpaid && (
+                  <div className="mt-2 rounded border-2 border-gray-800 px-2 py-1 text-center">
+                    <p className="text-[11px] font-bold tracking-wide text-gray-900">
+                      💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
+                    </p>
+                  </div>
+                )}
+                {isEfectivo && !isUnpaid && (
+                  <p className="mt-1 text-center text-[10px] font-semibold text-gray-600">Efectivo — ya cobrado</p>
+                )}
+                {isBankTransfer && isUnpaid && (
+                  <p className="mt-1 text-center text-[10px] text-gray-600">Transferencia — esperando comprobante</p>
+                )}
+                {order.paymentMethod === 'mercadopago' && isUnpaid && (
+                  <p className="mt-1 text-center text-[10px] text-gray-600">Mercado Pago — pendiente de confirmación</p>
+                )}
               </div>
               <div className="border-t border-dashed pt-3 text-center">
                 {order.deliveryMethod === 'PICKUP_POINT' && (
@@ -563,7 +595,11 @@ export default function OrderConfirmationPage() {
                         : 'bg-yellow-900/40 text-yellow-300 border-yellow-700/50'
                     }
                   >
-                    {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
+                    {order.paymentStatus === 'PAID'
+                      ? 'Pagado'
+                      : isEfectivo
+                        ? 'Cobrar al entregar'
+                        : 'Pendiente'}
                   </Badge>
                 </div>
                 {mpSyncing && order.paymentStatus !== 'PAID' && (
