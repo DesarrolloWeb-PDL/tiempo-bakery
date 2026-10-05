@@ -106,6 +106,7 @@ function formatOrderPaymentMethod(value: string) {
     stripe: 'Tarjeta con Stripe',
     mercadopago: 'Mercado Pago',
     bank_transfer: 'Transferencia bancaria',
+    efectivo: 'Efectivo',
   }
 
   return labels[value] ?? value
@@ -261,6 +262,15 @@ export default function AdminOrderDetailPage() {
 
     // Build text message
     let msg = `Hola ${order.customerName}, tu pedido *#${order.orderNumber}* está confirmado.\n\n`
+    msg += `*Pago:* ${formatOrderPaymentMethod(order.paymentMethod)}`
+    if (order.paymentMethod === 'efectivo' && order.paymentStatus !== 'PAID') {
+      msg += ` — cobrar ${formatCurrency(order.total)} al ${order.deliveryMethod === 'PICKUP_POINT' ? 'retirar' : 'entregar'}`
+    } else if (order.paymentStatus === 'PAID') {
+      msg += ' — pagado'
+    } else {
+      msg += ' — pendiente'
+    }
+    msg += '\n\n'
     msg += `*Productos:*\n`
     order.items.forEach((item) => {
       msg += `• ${item.productName} x${item.quantity}${item.sliced ? ' (Reb.)' : ''} — ${formatCurrency(item.subtotal)}\n`
@@ -703,6 +713,39 @@ export default function AdminOrderDetailPage() {
               <p className="text-xs text-gray-900"><span className="font-semibold">Cliente:</span> {order.customerName}</p>
               <p className="text-xs text-gray-900"><span className="font-semibold">Fecha:</span> {new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(order.createdAt))}</p>
             </div>
+            {/* Payment — always printed on the ticket image (WhatsApp share / print) */}
+            <div className="border-t border-dashed pt-3 mb-3 relative">
+              <p className="text-[10px] text-gray-500 uppercase tracking-wide">Pago</p>
+              <p className="text-sm font-bold text-gray-900">{formatOrderPaymentMethod(order.paymentMethod)}</p>
+              {order.paymentMethod === 'efectivo' && order.paymentStatus !== 'PAID' && (
+                <div className="mt-2 rounded border-2 border-gray-800 px-2 py-1.5 text-center">
+                  <p className="text-[12px] font-bold tracking-wide text-gray-900">
+                    💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
+                  </p>
+                  <p className="text-[10px] text-gray-700 mt-0.5">
+                    {order.deliveryMethod === 'PICKUP_POINT' ? 'Al retirar' : 'Al entregar'}
+                  </p>
+                </div>
+              )}
+              {order.paymentMethod === 'efectivo' && order.paymentStatus === 'PAID' && (
+                <p className="mt-1 text-[11px] font-semibold text-gray-700">✓ Efectivo — ya cobrado</p>
+              )}
+              {order.paymentMethod === 'bank_transfer' && (
+                <p className="mt-1 text-[11px] text-gray-700">
+                  {order.paymentStatus !== 'PAID' ? '⏳ Esperando comprobante de transferencia' : '✓ Transferencia — pagado'}
+                </p>
+              )}
+              {order.paymentMethod === 'mercadopago' && (
+                <p className="mt-1 text-[11px] text-gray-700">
+                  {order.paymentStatus !== 'PAID' ? '⏳ Mercado Pago — pendiente' : '✓ Mercado Pago — pagado'}
+                </p>
+              )}
+              {order.paymentMethod === 'stripe' && (
+                <p className="mt-1 text-[11px] text-gray-700">
+                  {order.paymentStatus !== 'PAID' ? '⏳ Tarjeta — pendiente' : '✓ Tarjeta — pagado'}
+                </p>
+              )}
+            </div>
             <div className="border-t border-dashed pt-3 mb-3 relative">
               {order.items.map((item) => (
                 <div key={item.id} className="flex justify-between text-xs mb-1 text-gray-900">
@@ -720,15 +763,6 @@ export default function AdminOrderDetailPage() {
                     💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
                   </p>
                 </div>
-              )}
-              {order.paymentMethod === 'efectivo' && order.paymentStatus === 'PAID' && (
-                <p className="mt-1 text-center text-[10px] font-semibold text-gray-600">Efectivo — ya cobrado</p>
-              )}
-              {order.paymentMethod === 'bank_transfer' && order.paymentStatus !== 'PAID' && (
-                <p className="mt-1 text-center text-[10px] text-gray-600">Transferencia — esperando comprobante</p>
-              )}
-              {order.paymentMethod === 'mercadopago' && order.paymentStatus !== 'PAID' && (
-                <p className="mt-1 text-center text-[10px] text-gray-600">Mercado Pago — pendiente</p>
               )}
             </div>
             <div className="border-t border-dashed pt-3 text-center relative">
