@@ -674,14 +674,16 @@ export default function AdminOrderDetailPage() {
                   Marcar como pagado
                 </button>
               )}
-              {order.paymentStatus === 'PAID' && order.paymentMethod === 'bank_transfer' && order.status !== 'CANCELLED' && (
+              {order.paymentStatus === 'PAID' && order.status !== 'CANCELLED' && (
                 <button
                   onClick={handleWhatsAppTicket}
                   className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white text-sm font-medium rounded-lg transition-colors mt-1"
                   style={{ backgroundColor: '#25D366' }}
                 >
                   <MessageCircle className="w-4 h-4" />
-                  Enviar ticket por WhatsApp
+                  {order.paymentMethod === 'mercadopago' || order.paymentMethod === 'stripe'
+                    ? 'Descargar / enviar ticket'
+                    : 'Enviar ticket por WhatsApp'}
                 </button>
               )}
             </div>

@@ -12,6 +12,8 @@ import { normalizePublicAssetUrl } from '@/lib/url-normalizer';
 import { formatCurrency } from '@/lib/format';
 import { useLanguage } from '@/components/language-provider';
 import { useCartStore } from '@/stores/cart-store';
+import { toPng } from 'html-to-image';
+import { Download } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -134,6 +136,7 @@ export default function OrderConfirmationPage() {
   const [whatsappNumber, setWhatsappNumber] = React.useState('');
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
   const [mpSyncing, setMpSyncing] = React.useState(false);
+  const [downloadingTicket, setDownloadingTicket] = React.useState(false);
   const clearCart = useCartStore((state) => state.clearCart);
   const { t } = useLanguage();
 
@@ -363,6 +366,31 @@ export default function OrderConfirmationPage() {
     }
   };
 
+  const handleDownloadTicket = async () => {
+    const el = document.getElementById('customer-ticket-image');
+    if (!el || downloadingTicket) return;
+    setDownloadingTicket(true);
+    try {
+      const dataUrl = await toPng(el, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        skipFonts: true,
+        cacheBust: true,
+      });
+      const link = document.createElement('a');
+      link.download = `ticket-${order.orderNumber}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Error generating ticket image:', err);
+      // Fallback: browser print dialog
+      window.print();
+    } finally {
+      setDownloadingTicket(false);
+    }
+  };
+
   return (
     <>
       <style>{`
@@ -483,11 +511,30 @@ export default function OrderConfirmationPage() {
           </div>
         )}
 
+        {/* Ticket actions — download available once payment is secured */}
+        <div className="flex justify-center mb-6 gap-4 no-print">
+          {order.paymentStatus === 'PAID' && (
+            <Button
+              onClick={handleDownloadTicket}
+              disabled={downloadingTicket}
+              className="flex items-center gap-2"
+              style={{ backgroundColor: 'var(--brand-gold)', color: 'white' }}
+            >
+              {downloadingTicket ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Descargar ticket
+            </Button>
+          )}
+        </div>
+
         {/* Ticket + Order Status side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
           {/* Printable Ticket — center */}
           <div className="lg:col-span-3 flex justify-center">
-            <div className="print-ticket bg-white border-2 border-gray-300 rounded-lg p-6 w-full max-w-sm relative overflow-hidden">
+            <div id="customer-ticket-image" className="print-ticket bg-white border-2 border-gray-300 rounded-lg p-6 w-full max-w-sm relative overflow-hidden">
               {/* Watermark */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
                 <Image src="/favicon.png" alt="" width={400} height={400} className="object-contain opacity-[0.12]" unoptimized />
