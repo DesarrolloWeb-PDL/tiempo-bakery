@@ -390,7 +390,9 @@ export default function CheckoutPage() {
                   <strong>{t.checkoutNote}</strong>{' '}
                   {selectedPaymentProvider === PaymentProvider.BANK_TRANSFER
                     ? t.checkoutNoteBank
-                    : `${t.checkoutNoteRedirect} ${selectedPaymentProvider === PaymentProvider.MERCADO_PAGO ? 'Mercado Pago' : 'Stripe'} para completar el pago de forma segura.`}
+                    : selectedPaymentProvider === PaymentProvider.EFECTIVO
+                      ? 'Pagás en efectivo cuando retirás el pedido. Te lo vamos a estar esperando en el local.'
+                      : `${t.checkoutNoteRedirect} ${selectedPaymentProvider === PaymentProvider.MERCADO_PAGO ? 'Mercado Pago' : 'Stripe'} para completar el pago de forma segura.`}
                 </p>
               </div>
             </div>

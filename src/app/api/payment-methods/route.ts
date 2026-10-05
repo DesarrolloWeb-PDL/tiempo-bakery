@@ -18,7 +18,9 @@ export async function GET() {
           ? 'Transferencia manual con los datos configurados en el panel.'
           : provider === 'MERCADO_PAGO'
             ? 'Checkout Pro con billetera, tarjetas y medios locales.'
-            : 'Pago con tarjeta redirigido a Stripe Checkout.',
+            : provider === 'EFECTIVO'
+              ? 'Pagás en efectivo cuando retirás el pedido en el local.'
+              : 'Pago con tarjeta redirigido a Stripe Checkout.',
     })),
   });
 }

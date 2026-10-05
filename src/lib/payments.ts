@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db'
 
-export const PAYMENT_PROVIDERS = ['STRIPE', 'MERCADO_PAGO', 'BANK_TRANSFER'] as const
+export const PAYMENT_PROVIDERS = ['STRIPE', 'MERCADO_PAGO', 'BANK_TRANSFER', 'EFECTIVO'] as const
 
 export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[number]
 
@@ -8,12 +8,14 @@ export const PAYMENT_PROVIDER_LABELS: Record<PaymentProvider, string> = {
   STRIPE: 'Tarjeta con Stripe',
   MERCADO_PAGO: 'Mercado Pago',
   BANK_TRANSFER: 'Transferencia bancaria',
+  EFECTIVO: 'Efectivo',
 }
 
 export const ORDER_PAYMENT_METHOD_LABELS: Record<string, string> = {
   stripe: 'Tarjeta con Stripe',
   mercadopago: 'Mercado Pago',
   bank_transfer: 'Transferencia bancaria',
+  efectivo: 'Efectivo',
 }
 
 export function formatOrderPaymentMethod(value: string) {
@@ -124,6 +126,9 @@ export async function getEnabledPaymentProviders(): Promise<PaymentProvider[]> {
     providers.push('MERCADO_PAGO')
   }
 
+  // Cash on pickup is always available alongside online methods
+  providers.push('EFECTIVO')
+
   return providers
 }
 
@@ -221,9 +226,16 @@ export async function getPaymentSettings(): Promise<PaymentSettings> {
     ? (configuredDefault as PaymentProvider)
     : null
 
-  const defaultProvider = configuredProvider && enabledProviders.includes(configuredProvider)
-    ? configuredProvider
-    : enabledProviders[0] ?? DEFAULT_PROVIDER
+  // Never default the checkout to cash — prefer an online method
+  const onlineProviders = enabledProviders.filter((p) => p !== 'EFECTIVO')
+  const configuredOk =
+    configuredProvider !== null &&
+    configuredProvider !== 'EFECTIVO' &&
+    onlineProviders.includes(configuredProvider)
+
+  const defaultProvider: PaymentProvider = configuredOk
+    ? (configuredProvider as PaymentProvider)
+    : onlineProviders[0] ?? enabledProviders[0] ?? DEFAULT_PROVIDER
 
   return {
     enabledProviders,

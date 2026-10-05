@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
     const paymentStatus = searchParams.get('paymentStatus')
+    const paymentMethod = searchParams.get('paymentMethod')
     const search = searchParams.get('search')
     const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '20')))
@@ -41,6 +42,7 @@ export async function GET(req: NextRequest) {
     type WhereClause = {
       status?: string
       paymentStatus?: string
+      paymentMethod?: string
       OR?: Array<{
         orderNumber?: { contains: string }
         customerName?: { contains: string }
@@ -51,6 +53,7 @@ export async function GET(req: NextRequest) {
     const where: Record<string, unknown> = { deletedAt: null }
     if (status && status !== 'ALL') where.status = status
     if (paymentStatus && paymentStatus !== 'ALL') where.paymentStatus = paymentStatus
+    if (paymentMethod && paymentMethod !== 'ALL') where.paymentMethod = paymentMethod
     if (search) {
       where.OR = [
         { orderNumber: { contains: search } },
@@ -76,6 +79,7 @@ export async function GET(req: NextRequest) {
           shippingCost: true,
           status: true,
           paymentStatus: true,
+          paymentMethod: true,
           deliveryMethod: true,
           pickupLocation: true,
           weekId: true,

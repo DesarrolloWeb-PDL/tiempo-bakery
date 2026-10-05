@@ -427,6 +427,21 @@ export default function OrderConfirmationPage() {
           </Card>
         )}
 
+        {/* Cash on pickup note */}
+        {order.paymentMethod === 'efectivo' && (
+          <Card className="mb-8 no-print backdrop-blur-xl" style={{ backgroundColor: 'rgba(44, 44, 44, 0.85)', borderColor: 'var(--brand-gold)' }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-brand-gold-dark">
+                <Clock className="h-5 w-5" />
+                Pago en efectivo
+              </CardTitle>
+              <CardDescription style={{ color: 'var(--brand-text-muted)' }}>
+                Pagás en efectivo cuando retirás el pedido. Guardá el número {order.orderNumber}.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
+
         {/* WhatsApp Button */}
         <div className="flex justify-center mb-6 gap-4 no-print">
           <Button onClick={handleWhatsAppTransfer} className="flex items-center gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}>

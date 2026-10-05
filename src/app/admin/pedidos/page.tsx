@@ -19,6 +19,7 @@ interface Order {
   total: number
   status: string
   paymentStatus: string
+  paymentMethod: string | null
   deliveryMethod: string
   pickupLocation: string | null
   weekId: string
@@ -58,6 +59,21 @@ const PAYMENT_OPTIONS = [
   { value: 'PAID', label: 'Pagado' },
   { value: 'FAILED', label: 'Fallido' },
 ]
+
+const PAYMENT_METHOD_OPTIONS = [
+  { value: 'ALL', label: 'Todos los métodos' },
+  { value: 'mercadopago', label: 'Mercado Pago' },
+  { value: 'bank_transfer', label: 'Transferencia' },
+  { value: 'efectivo', label: 'Efectivo' },
+  { value: 'stripe', label: 'Stripe' },
+]
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  mercadopago: 'MP',
+  bank_transfer: 'Transferencia',
+  efectivo: 'Efectivo',
+  stripe: 'Stripe',
+}
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING:            'bg-yellow-100 text-yellow-700',
@@ -112,6 +128,7 @@ function PedidosContent() {
   const [search, setSearch] = useState(searchParams.get('search') ?? '')
   const [status, setStatus] = useState(searchParams.get('status') ?? 'ALL')
   const [paymentStatus, setPaymentStatus] = useState(searchParams.get('paymentStatus') ?? 'ALL')
+  const [paymentMethod, setPaymentMethod] = useState(searchParams.get('paymentMethod') ?? 'ALL')
   const [page, setPage] = useState(parseInt(searchParams.get('page') ?? '1'))
 
   const fetchOrders = useCallback(async () => {
@@ -122,6 +139,7 @@ function PedidosContent() {
       if (search) params.set('search', search)
       if (status !== 'ALL') params.set('status', status)
       if (paymentStatus !== 'ALL') params.set('paymentStatus', paymentStatus)
+      if (paymentMethod !== 'ALL') params.set('paymentMethod', paymentMethod)
       params.set('page', String(page))
       params.set('limit', '20')
 
@@ -143,7 +161,7 @@ function PedidosContent() {
     } finally {
       setLoading(false)
     }
-  }, [search, status, paymentStatus, page])
+  }, [search, status, paymentStatus, paymentMethod, page])
 
   useEffect(() => {
     fetchOrders()
@@ -218,13 +236,24 @@ function PedidosContent() {
             </select>
           </div>
 
-          {/* Pago */}
+          {/* Pago (estado) */}
           <select
             value={paymentStatus}
             onChange={(e) => handleFilterChange(setPaymentStatus)(e.target.value)}
             className="text-sm border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-gray-900 text-white"
           >
             {PAYMENT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+
+          {/* Método de pago */}
+          <select
+            value={paymentMethod}
+            onChange={(e) => handleFilterChange(setPaymentMethod)(e.target.value)}
+            className="text-sm border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold bg-gray-900 text-white"
+          >
+            {PAYMENT_METHOD_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
@@ -327,6 +356,11 @@ function PedidosContent() {
                         >
                           {PAYMENT_LABELS[order.paymentStatus] ?? order.paymentStatus}
                         </span>
+                        {order.paymentMethod && (
+                          <p className="text-[11px] text-gray-400 mt-1">
+                            {PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod}
+                          </p>
+                        )}
                       </div>
 
                       {/* Entrega */}

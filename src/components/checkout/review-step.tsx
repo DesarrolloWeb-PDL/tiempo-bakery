@@ -192,7 +192,9 @@ export function ReviewStep({
                         ? 'Checkout Pro con billetera, tarjetas y medios locales.'
                         : option.value === PaymentProvider.BANK_TRANSFER
                           ? 'Transferencia manual con los datos configurados en el panel.'
-                          : 'Pago con tarjeta redirigido a Stripe Checkout.')}
+                          : option.value === PaymentProvider.EFECTIVO
+                            ? 'Pagás en efectivo cuando retirás el pedido en el local.'
+                            : 'Pago con tarjeta redirigido a Stripe Checkout.')}
                   </p>
                 </button>
               );
