@@ -80,6 +80,13 @@ export function DeliveryStep({
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const { t } = useLanguage();
 
+  const advanceTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
+  const scheduleAdvance = () => {
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
+    advanceTimer.current = setTimeout(() => onNext(), 400);
+  };
+
   const selectedZone = zones.find((z) => z.id === zoneId);
   const localDeliveryCost =
     selectedMethod === DeliveryMethod.LOCAL_DELIVERY && selectedZone
@@ -92,6 +99,7 @@ export function DeliveryStep({
       : !!(address);
 
   const handleMethodChange = (method: DeliveryMethod) => {
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
     onUpdate({
       deliveryMethod: method,
       pickupLocationId: undefined,
@@ -110,11 +118,17 @@ export function DeliveryStep({
       scheduleId: undefined,
       deliveryDate: undefined,
     });
+    if (value !== '__none__' && address && availableDays.length === 0) {
+      scheduleAdvance();
+    }
   };
 
   const handleDayChange = (value: string) => {
     const [scheduleId, date] = value.split(':');
     onUpdate({ scheduleId, deliveryDate: new Date(date) });
+    if (address) {
+      scheduleAdvance();
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -249,7 +263,10 @@ export function DeliveryStep({
                 <button
                   key={point.id}
                   type="button"
-                  onClick={() => onUpdate({ deliveryMethod: DeliveryMethod.PICKUP_POINT, pickupLocationId: point.id })}
+                  onClick={() => {
+                    onUpdate({ deliveryMethod: DeliveryMethod.PICKUP_POINT, pickupLocationId: point.id });
+                    scheduleAdvance();
+                  }}
                   className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                     pickupLocationId === point.id
                       ? 'border-brand-gold bg-brand-gold/5'
@@ -288,6 +305,11 @@ export function DeliveryStep({
                   type="text"
                   value={address || ''}
                   onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
+                  onBlur={() => {
+                    if (address && zones.length === 0) {
+                      scheduleAdvance();
+                    }
+                  }}
                   placeholder="Calle - N° - Barrio - Manzana - Casa N°"
                   required
                 />
@@ -361,6 +383,11 @@ export function DeliveryStep({
                   type="text"
                   value={address || ''}
                   onChange={(e) => onUpdate({ shippingAddress: e.target.value })}
+                  onBlur={() => {
+                    if (address) {
+                      scheduleAdvance();
+                    }
+                  }}
                   placeholder="Calle - N° - Barrio - Manzana - Casa N°"
                   required
                 />

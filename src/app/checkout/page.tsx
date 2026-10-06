@@ -42,6 +42,18 @@ export default function CheckoutPage() {
   const [paymentOptions, setPaymentOptions] = React.useState<PaymentMethodOption[]>([]);
   const [selectedPaymentProvider, setSelectedPaymentProvider] = React.useState<PaymentProvider>(PaymentProvider.STRIPE);
 
+  const stepsRef = React.useRef<HTMLDivElement>(null);
+  const isFirstStepRender = React.useRef(true);
+
+  // Smooth scroll to progress steps when the step changes (skip mount)
+  React.useEffect(() => {
+    if (isFirstStepRender.current) {
+      isFirstStepRender.current = false;
+      return;
+    }
+    stepsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [currentStep]);
+
   // Estado del formulario
   const [formData, setFormData] = React.useState<Partial<CheckoutFormData>>({
     customerEmail: '',
@@ -235,7 +247,7 @@ export default function CheckoutPage() {
           {/* Formulario - 2/3 */}
           <div className="lg:col-span-2 space-y-6">
             {/* Progress Steps */}
-            <div className="flex items-center justify-between">
+            <div ref={stepsRef} className="flex items-center justify-between scroll-mt-4">
               {steps.map((step, index) => (
                 <React.Fragment key={step.number}>
                   <div className="flex items-center">

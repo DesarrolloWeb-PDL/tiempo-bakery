@@ -17,6 +17,11 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const { t } = useLanguage();
 
+  const isFormValid = () =>
+    data.customerEmail.includes('@') &&
+    data.customerName.length >= 2 &&
+    data.customerPhone.length >= 9;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
@@ -57,6 +62,7 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
               type="email"
               value={data.customerEmail}
               onChange={(e) => onUpdate({ ...data, customerEmail: e.target.value })}
+              onBlur={() => { if (isFormValid()) onNext(); }}
               placeholder="tu@email.com"
               required
             />
@@ -74,6 +80,7 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
               type="text"
               value={data.customerName}
               onChange={(e) => onUpdate({ ...data, customerName: e.target.value })}
+              onBlur={() => { if (isFormValid()) onNext(); }}
               placeholder="Juan Pérez"
               required
             />
@@ -91,6 +98,7 @@ export function CustomerInfoStep({ data, onUpdate, onNext }: CustomerInfoStepPro
               type="tel"
               value={data.customerPhone}
               onChange={(e) => onUpdate({ ...data, customerPhone: e.target.value })}
+              onBlur={() => { if (isFormValid()) onNext(); }}
               placeholder="666 777 888"
               required
             />
