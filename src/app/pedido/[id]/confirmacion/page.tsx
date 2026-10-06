@@ -327,8 +327,27 @@ export default function OrderConfirmationPage() {
   const isEfectivo = order.paymentMethod === 'efectivo';
   const isUnpaid = order.paymentStatus !== 'PAID';
 
+  const normalizeCustomerPhone = (raw?: string | null): string => {
+    let phone = (raw || '').replace(/[^0-9]/g, '');
+    if (phone.startsWith('549')) {
+      // already correct
+    } else if (phone.startsWith('54')) {
+      phone = phone.replace(/^54/, '549');
+    } else if (phone.startsWith('9') && phone.length >= 10) {
+      phone = '54' + phone;
+    } else if (phone.length <= 10) {
+      phone = '549' + phone;
+    }
+    return phone;
+  };
+
   const handleWhatsAppTransfer = () => {
-    const phone = whatsappNumber || '';
+    // Send bank data to the CUSTOMER's own phone (chat with yourself on mobile)
+    const phone = normalizeCustomerPhone(order.customerPhone);
+    if (!phone || phone.length < 10) {
+      alert('No hay teléfono válido en tu pedido para enviarte los datos.\n\nTeléfono registrado: ' + (order.customerPhone || '(vacío)'));
+      return;
+    }
     let message = `Hola, te envío los datos del pedido *#${order.orderNumber}*.\n\n`;
     message += `El pedido está siendo procesado, a la espera del comprobante de transferencia para confirmar la compra.\n\n`;
 
