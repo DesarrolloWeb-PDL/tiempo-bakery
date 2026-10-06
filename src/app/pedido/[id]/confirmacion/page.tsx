@@ -366,26 +366,85 @@ export default function OrderConfirmationPage() {
     }
   };
 
-  const handleDownloadTicket = async () => {
+  const captureTicketPng = async (): Promise<File | null> => {
     const el = document.getElementById('customer-ticket-image');
-    if (!el || downloadingTicket) return;
+    if (!el) return null;
+    const dataUrl = await toPng(el, {
+      quality: 0.95,
+      pixelRatio: 2,
+      backgroundColor: '#ffffff',
+      skipFonts: true,
+      cacheBust: true,
+    });
+    const [header, base64] = dataUrl.split(',');
+    const mimeMatch = header.match(/data:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: mime });
+    return new File([blob], `ticket-${order.orderNumber}.png`, { type: mime });
+  };
+
+  const handleDownloadTicket = async () => {
+    if (downloadingTicket) return;
     setDownloadingTicket(true);
     try {
-      const dataUrl = await toPng(el, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        skipFonts: true,
-        cacheBust: true,
-      });
+      const file = await captureTicketPng();
+      if (!file) return;
+      const url = URL.createObjectURL(file);
       const link = document.createElement('a');
       link.download = `ticket-${order.orderNumber}.png`;
-      link.href = dataUrl;
+      link.href = url;
       link.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Error generating ticket image:', err);
       // Fallback: browser print dialog
       window.print();
+    } finally {
+      setDownloadingTicket(false);
+    }
+  };
+
+  const handleWhatsAppTicket = async () => {
+    if (downloadingTicket) return;
+    setDownloadingTicket(true);
+    try {
+      let message = `Hola, te envío el ticket de mi pedido *#${order.orderNumber}*.\n\n`;
+      if (isEfectivo && isUnpaid) {
+        message += `*Pago:* Efectivo — pendiente. Abonás ${formatCurrency(order.total)} en efectivo cuando ${order.deliveryMethod === 'PICKUP_POINT' ? 'retirás' : 'recibís'} el pedido.\n\n`;
+      } else if (order.paymentStatus === 'PAID') {
+        message += `*Pago:* ${isEfectivo ? 'Efectivo' : isBankTransfer ? 'Transferencia' : order.paymentMethod === 'mercadopago' ? 'Mercado Pago' : order.paymentMethod === 'stripe' ? 'Stripe' : order.paymentMethod || '—'} — pagado.\n\n`;
+      } else {
+        message += `*Pago:* pendiente.\n\n`;
+      }
+      message += `*Total:* ${formatCurrency(order.total)}`;
+
+      const file = await captureTicketPng();
+
+      // Mobile: share image directly to WhatsApp (or any app)
+      if (file && navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Ticket ${order.orderNumber}` });
+        return;
+      }
+
+      // Desktop: download image + open WhatsApp with text
+      if (file) {
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.download = `ticket-${order.orderNumber}.png`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      const phone = whatsappNumber || '';
+      if (phone) {
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+      }
+    } catch (err) {
+      console.error('Error generating ticket image:', err);
     } finally {
       setDownloadingTicket(false);
     }
@@ -511,9 +570,9 @@ export default function OrderConfirmationPage() {
           </div>
         )}
 
-        {/* Ticket actions — download available once payment is secured */}
-        <div className="flex justify-center mb-6 gap-4 no-print">
-          {order.paymentStatus === 'PAID' && (
+        {/* Ticket actions — download/send once payment is secured OR cash order (ticket as pickup proof) */}
+        {(order.paymentStatus === 'PAID' || isEfectivo) && (
+          <div className="flex justify-center mb-6 gap-4 no-print flex-wrap">
             <Button
               onClick={handleDownloadTicket}
               disabled={downloadingTicket}
@@ -527,8 +586,21 @@ export default function OrderConfirmationPage() {
               )}
               Descargar ticket
             </Button>
-          )}
-        </div>
+            <Button
+              onClick={handleWhatsAppTicket}
+              disabled={downloadingTicket}
+              className="flex items-center gap-2"
+              style={{ backgroundColor: '#25D366', color: 'white' }}
+            >
+              {downloadingTicket ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MessageCircle className="h-4 w-4" />
+              )}
+              Enviar ticket
+            </Button>
+          </div>
+        )}
 
         {/* Ticket + Order Status side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
@@ -573,14 +645,19 @@ export default function OrderConfirmationPage() {
                           : order.paymentMethod || '—'}
                 </p>
                 {isEfectivo && isUnpaid && (
-                  <div className="mt-2 rounded border-2 border-gray-800 px-2 py-1.5 text-center">
-                    <p className="text-[12px] font-bold tracking-wide text-gray-900">
-                      💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
+                  <>
+                    <p className="mt-1 text-[11px] text-gray-700">
+                      ⏳ Pago pendiente — se abona {order.deliveryMethod === 'PICKUP_POINT' ? 'al retirar' : 'al entregar'}
                     </p>
-                    <p className="text-[10px] text-gray-700 mt-0.5">
-                      {order.deliveryMethod === 'PICKUP_POINT' ? 'Al retirar' : 'Al entregar'}
-                    </p>
-                  </div>
+                    <div className="mt-2 rounded border-2 border-gray-800 px-2 py-1.5 text-center">
+                      <p className="text-[12px] font-bold tracking-wide text-gray-900">
+                        💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
+                      </p>
+                      <p className="text-[10px] text-gray-700 mt-0.5">
+                        {order.deliveryMethod === 'PICKUP_POINT' ? 'Al retirar' : 'Al entregar'}
+                      </p>
+                    </div>
+                  </>
                 )}
                 {isEfectivo && !isUnpaid && (
                   <p className="mt-1 text-[11px] font-semibold text-gray-700">✓ Efectivo — ya cobrado</p>

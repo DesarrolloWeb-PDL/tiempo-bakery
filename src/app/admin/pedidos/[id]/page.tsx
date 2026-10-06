@@ -674,16 +674,18 @@ export default function AdminOrderDetailPage() {
                   Marcar como pagado
                 </button>
               )}
-              {order.paymentStatus === 'PAID' && order.status !== 'CANCELLED' && (
+              {order.status !== 'CANCELLED' && (order.paymentStatus === 'PAID' || order.paymentMethod === 'efectivo') && (
                 <button
                   onClick={handleWhatsAppTicket}
                   className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white text-sm font-medium rounded-lg transition-colors mt-1"
                   style={{ backgroundColor: '#25D366' }}
                 >
                   <MessageCircle className="w-4 h-4" />
-                  {order.paymentMethod === 'mercadopago' || order.paymentMethod === 'stripe'
-                    ? 'Descargar / enviar ticket'
-                    : 'Enviar ticket por WhatsApp'}
+                  {order.paymentMethod === 'efectivo' && order.paymentStatus !== 'PAID'
+                    ? 'Enviar ticket (cobro en efectivo)'
+                    : order.paymentMethod === 'mercadopago' || order.paymentMethod === 'stripe'
+                      ? 'Descargar / enviar ticket'
+                      : 'Enviar ticket por WhatsApp'}
                 </button>
               )}
             </div>
@@ -720,14 +722,19 @@ export default function AdminOrderDetailPage() {
               <p className="text-[10px] text-gray-500 uppercase tracking-wide">Pago</p>
               <p className="text-sm font-bold text-gray-900">{formatOrderPaymentMethod(order.paymentMethod)}</p>
               {order.paymentMethod === 'efectivo' && order.paymentStatus !== 'PAID' && (
-                <div className="mt-2 rounded border-2 border-gray-800 px-2 py-1.5 text-center">
-                  <p className="text-[12px] font-bold tracking-wide text-gray-900">
-                    💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
+                <>
+                  <p className="mt-1 text-[11px] text-gray-700">
+                    ⏳ Pago pendiente — se abona {order.deliveryMethod === 'PICKUP_POINT' ? 'al retirar' : 'al entregar'}
                   </p>
-                  <p className="text-[10px] text-gray-700 mt-0.5">
-                    {order.deliveryMethod === 'PICKUP_POINT' ? 'Al retirar' : 'Al entregar'}
-                  </p>
-                </div>
+                  <div className="mt-2 rounded border-2 border-gray-800 px-2 py-1.5 text-center">
+                    <p className="text-[12px] font-bold tracking-wide text-gray-900">
+                      💰 COBRAR EN EFECTIVO: {formatCurrency(order.total)}
+                    </p>
+                    <p className="text-[10px] text-gray-700 mt-0.5">
+                      {order.deliveryMethod === 'PICKUP_POINT' ? 'Al retirar' : 'Al entregar'}
+                    </p>
+                  </div>
+                </>
               )}
               {order.paymentMethod === 'efectivo' && order.paymentStatus === 'PAID' && (
                 <p className="mt-1 text-[11px] font-semibold text-gray-700">✓ Efectivo — ya cobrado</p>
