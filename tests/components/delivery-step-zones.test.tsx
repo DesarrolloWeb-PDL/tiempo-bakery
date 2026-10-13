@@ -84,6 +84,7 @@ describe('DeliveryStep zones and day picker', () => {
       PICKUP_POINT: 0,
       LOCAL_DELIVERY: 3500,
       NATIONAL_COURIER: 5950,
+      nationalCourierEnabled: false,
     },
     zones,
     availableDays,

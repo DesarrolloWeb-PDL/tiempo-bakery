@@ -217,6 +217,7 @@ describe('DeliveryConfigAdmin wrapper with schedule', () => {
       pickupPoint: 0,
       localDelivery: 3500,
       nationalCourier: 5950,
+      nationalCourierEnabled: false,
     },
     setShippingCosts: vi.fn(),
     loadingShipping: false,
