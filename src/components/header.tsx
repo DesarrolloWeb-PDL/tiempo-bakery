@@ -102,6 +102,13 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
               {t.navAboutLabel}
             </Link>
             <Link
+              href="/recetas"
+              className="text-sm font-medium transition-colors hover:opacity-75"
+              style={{ color: theme.primaryColor }}
+            >
+              {t.navRecipesLabel}
+            </Link>
+            <Link
               href="/contacto"
               className="text-sm font-medium transition-colors hover:opacity-75"
               style={{ color: theme.primaryColor }}
@@ -169,6 +176,14 @@ export function Header({ siteContent, showCart = true }: HeaderProps) {
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.navAboutLabel}
+          </Link>
+          <Link
+            href="/recetas"
+            className="text-sm font-medium px-1 py-1 transition-colors hover:opacity-75 block"
+            style={{ color: theme.primaryColor }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {t.navRecipesLabel}
           </Link>
           <Link
             href="/contacto"

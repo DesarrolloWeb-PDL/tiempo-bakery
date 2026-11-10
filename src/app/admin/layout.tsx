@@ -14,6 +14,7 @@ import {
   Users,
   Settings,
   Truck,
+  ChefHat,
   Menu,
   X,
   ArrowLeft,
@@ -42,6 +43,11 @@ const navItems = [
     label: 'Productos',
     href: '/admin/productos',
     icon: BarChart2,
+  },
+  {
+    label: 'Recetas',
+    href: '/admin/recetas',
+    icon: ChefHat,
   },
   {
     label: 'Base de datos',

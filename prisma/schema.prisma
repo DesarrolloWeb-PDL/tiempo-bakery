@@ -258,3 +258,22 @@ model DeliveryAttempt {
 
   @@index([assignmentId])
 }
+
+model Recipe {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  summary     String
+  content     String
+  ingredients String?
+  coverImage  String?
+  difficulty  String?
+  prepTime    Int?
+  isTip       Boolean   @default(false)
+  published   Boolean   @default(true)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, isTip, order])
+}

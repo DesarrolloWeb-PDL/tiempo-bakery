@@ -3,6 +3,7 @@
 export interface Translations {
   navProductsLabel: string;
   navAboutLabel: string;
+  navRecipesLabel: string;
   navContactLabel: string;
   footerDescription: string;
   footerScheduleTitle: string;
@@ -170,6 +171,7 @@ export interface Translations {
 const ES: Translations = {
   navProductsLabel: "Productos",
   navAboutLabel: "Sobre Nosotros",
+  navRecipesLabel: "Recetas",
   navContactLabel: "Contacto",
   footerDescription: "Micropanaderia artesanal por encargo semanal. Horneamos en tandas pequenas para priorizar fermentacion, sabor y producto real.",
   footerScheduleTitle: "Horario de Pedidos",
@@ -337,6 +339,7 @@ const ES: Translations = {
 const PT: Translations = {
   navProductsLabel: "Produtos",
   navAboutLabel: "Sobre Nos",
+  navRecipesLabel: "Receitas",
   navContactLabel: "Contato",
   footerDescription: "Micropanificacao artesanal por encomenda semanal. Assamos em tandas pequenas para priorizar fermentacao, sabor e produto real.",
   footerScheduleTitle: "Horario de Encomendas",
@@ -504,6 +507,7 @@ const PT: Translations = {
 const EN: Translations = {
   navProductsLabel: "Products",
   navAboutLabel: "About Us",
+  navRecipesLabel: "Recipes",
   navContactLabel: "Contact",
   footerDescription: "Artisanal microbakery with weekly pre-orders. We bake in small batches to prioritize fermentation, flavor, and real bread.",
   footerScheduleTitle: "Order Schedule",
